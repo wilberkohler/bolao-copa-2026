@@ -27,10 +27,12 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('ranking_geral') }}"><i class="bi bi-bar-chart"></i> Ranking</a></li>
          <li class="nav-item"><a class="nav-link" href="{{ url_for('regras') }}"><i class="bi bi-journal-text"></i> Regras</a></li>
         {% if user.eh_admin %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> Competidores</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Admin</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{{ url_for('listar_resultados') }}"><i class="bi bi-check2-circle"></i> Resultados</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> Competidores</a></li>
               <li><a class="dropdown-item" href="{{ url_for('listar_grupos') }}"><i class="bi bi-collection"></i> Grupos</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{{ url_for('simulacao') }}"><i class="bi bi-clock-history"></i> Simulação</a></li>
