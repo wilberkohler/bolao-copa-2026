@@ -2,10 +2,12 @@
 import random
 from datetime import datetime, date, timedelta
 from functools import wraps
+from pathlib import Path
 
 import pytz
 from flask import (Flask, render_template, redirect, url_for,
-                   request, flash, session, jsonify, g)
+                   request, flash, session, jsonify, g,
+                   send_from_directory, make_response)
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import seed_jogos
@@ -26,6 +28,9 @@ app.config["SESSION_PERMANENT"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
 db.init_app(app)
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 
 @app.before_request
@@ -63,6 +68,18 @@ def admin_required(f):
 @app.before_request
 def init_db():
     pass
+
+
+@app.route("/manifest.webmanifest")
+def manifest_webmanifest():
+    return send_from_directory(STATIC_DIR, "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@app.route("/service-worker.js")
+def service_worker():
+    response = make_response(send_from_directory(STATIC_DIR, "service-worker.js", mimetype="application/javascript"))
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 def agora_br():
