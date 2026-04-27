@@ -693,8 +693,14 @@ def palpites():
     for j in todos_jogos:
         p = palpites_map.get(j.id)
         aberto = prazo_aberto(j)
-        editavel = palpite_editavel(j)
-        st = status_palpite_para_jogo(j, p)
+        resultado_lancado = j.resultado is not None
+        editavel = palpite_editavel(j) and not resultado_lancado
+        if j.status == "Pontuado":
+            st = "Pontuado"
+        elif resultado_lancado:
+            st = "Resultado Lançado"
+        else:
+            st = status_palpite_para_jogo(j, p)
         pont = None
         if competidor:
             pont = Pontuacao.query.filter_by(competidor_id=competidor.id, jogo_id=j.id).first()
