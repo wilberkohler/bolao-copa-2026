@@ -845,6 +845,34 @@ def create_app():
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
+        # Cria admin automático via variáveis de ambiente (útil em cloud)
+        admin_email = os.environ.get("ADMIN_EMAIL")
+        admin_senha = os.environ.get("ADMIN_PASSWORD")
+        admin_nome = os.environ.get("ADMIN_NOME", "Administrador")
+        admin_apelido = os.environ.get("ADMIN_APELIDO", "admin")
+        if admin_email and admin_senha:
+            existe = User.query.filter_by(eh_admin=True).first()
+            if not existe:
+                user = User(
+                    nome=admin_nome,
+                    email=admin_email,
+                    apelido=admin_apelido,
+                    eh_admin=True,
+                    ativo=True,
+                )
+                user.set_password(admin_senha)
+                db.session.add(user)
+                db.session.flush()
+                comp = Competidor(
+                    nome=admin_nome,
+                    apelido=admin_apelido,
+                    email=admin_email,
+                    user_id=user.id,
+                    ativo=True,
+                )
+                db.session.add(comp)
+                db.session.commit()
+                print(f"[setup] Admin criado: {admin_email}")
     return app
 
 
