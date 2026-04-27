@@ -82,6 +82,25 @@ def service_worker():
     return response
 
 
+@app.route("/.well-known/assetlinks.json")
+def assetlinks_json():
+    package_name = os.environ.get("TWA_PACKAGE_ID", "br.com.kohler.bolao2026")
+    fingerprint = os.environ.get(
+        "TWA_SHA256_CERT_FINGERPRINT",
+        "2A:08:AC:0E:64:57:BE:4E:A9:A4:74:DC:E4:56:21:B8:C1:0B:F8:65:39:83:92:CA:40:50:CA:98:3C:2A:DB:2E",
+    )
+    return jsonify([
+        {
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "android_app",
+                "package_name": package_name,
+                "sha256_cert_fingerprints": [fingerprint],
+            },
+        }
+    ])
+
+
 def agora_br():
     return datetime.now(BR_TZ)
 
