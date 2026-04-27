@@ -116,6 +116,25 @@
     </div>
   </div>
 
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-info text-white">
+        <strong>Atualizacao de Resultados (Automatica)</strong>
+      </div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Os resultados podem ser sincronizados automaticamente por API externa confiavel.</li>
+          <li>A sincronizacao considera apenas jogos finalizados na fonte oficial.</li>
+          <li>Se o resultado recebido for igual ao atual, nada e alterado (processo idempotente).</li>
+          <li>Quando houver alteracao de placar/classificado, o sistema recalcula automaticamente a pontuacao do jogo.</li>
+          <li>Se algum jogo nao puder ser mapeado com seguranca, ele nao e alterado automaticamente.</li>
+          <li>Administradores podem executar a sincronizacao manual pelo botao <strong>Sincronizar API</strong> na tela de Resultados.</li>
+          <li>A manutencao manual de resultados continua disponivel para ajustes pontuais.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-header bg-secondary text-white">
