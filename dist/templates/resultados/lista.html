@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Resultados{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4><i class="bi bi-check2-circle text-success"></i> Lançamento de Resultados</h4>
+</div>
+
+<!-- Filtros -->
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="filtro" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="pendentes" {% if filtro == 'pendentes' %}selected{% endif %}>Pendentes de resultado</option>
+      <option value="encerrados" {% if filtro == 'encerrados' %}selected{% endif %}>Encerrados/Pontuados</option>
+      <option value="todos" {% if filtro == 'todos' %}selected{% endif %}>Todos</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="fase" class="form-select form-select-sm">
+      <option value="">Todas as fases</option>
+      {% for f in fases %}
+        <option value="{{ f }}" {% if f == fase_filtro %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-success btn-sm">Filtrar</button>
+    <a href="{{ url_for('listar_resultados') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th>Data</th>
+        <th>Hora BRT</th>
+        <th>Fase</th>
+        <th>Time A</th>
+        <th>Time B</th>
+        <th>Resultado</th>
+        <th>Clasf.</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in jogos %}
+      {% set res = j.resultado %}
+      <tr>
+        <td>{{ j.numero_partida }}</td>
+        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
+        <td>{{ j.hora_brasilia }}</td>
+        <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+        <td><strong>{{ j.time_a }}</strong></td>
+        <td><strong>{{ j.time_b }}</strong></td>
+        <td>
+          {% if res %}
+            <span class="badge bg-success">{{ res.gols_a }} x {{ res.gols_b }}</span>
+          {% else %}
+            <span class="text-muted">-</span>
+          {% endif %}
+        </td>
+        <td>{{ res.classificado if res else '-' }}</td>
+        <td>
+          {% set st = j.status %}
+          {% if st == 'Pontuado' %}<span class="badge badge-pontuado">Pontuado</span>
+          {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">Resultado</span>
+          {% else %}<span class="badge bg-secondary">{{ st }}</span>{% endif %}
+        </td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            <a href="{{ url_for('lancar_resultado', jid=j.id) }}" class="btn btn-outline-success">
+              <i class="bi bi-{{ 'pencil' if res else 'plus-lg' }}"></i>
+              {{ 'Editar' if res else 'Lançar' }}
+            </a>
+            {% if res %}
+            <form method="post" action="{{ url_for('recalcular_resultado', jid=j.id) }}" style="display:inline">
+              <button class="btn btn-outline-primary" title="Recalcular pontuação"><i class="bi bi-arrow-clockwise"></i></button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="text-center text-muted">Nenhum jogo encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

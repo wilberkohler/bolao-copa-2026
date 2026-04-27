@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Ranking por Fase{% endblock %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-bar-chart text-success"></i> Ranking por Fase</h4>
+
+<form class="row g-2 mb-4" method="get">
+  <div class="col-auto">
+    <select name="fase" class="form-select">
+      <option value="">-- Selecione uma fase --</option>
+      {% for f in fases %}
+        <option value="{{ f }}" {% if f == fase %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-success">Ver Ranking</button>
+  </div>
+</form>
+
+{% if fase %}
+<h5 class="mb-3">{{ fase }}</h5>
+<div class="table-responsive">
+  <table class="table table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th>Competidor</th>
+        <th>Pontos na Fase</th>
+        <th>Exatos</th>
+        <th>Vencedores</th>
+        <th>Classificados</th>
+        <th>Enviados</th>
+        <th>Aproveit. %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in ranking %}
+      <tr class="rank-{{ r.posicao if r.posicao <= 3 else '' }}">
+        <td class="fw-bold">
+          {% if r.posicao == 1 %}🥇
+          {% elif r.posicao == 2 %}🥈
+          {% elif r.posicao == 3 %}🥉
+          {% else %}{{ r.posicao }}{% endif %}
+        </td>
+        <td><a href="{{ url_for('historico_competidor', cid=r.competidor.id) }}">{{ r.competidor.apelido }}</a></td>
+        <td class="fw-bold">{{ r.pontos }}</td>
+        <td>{{ r.placares_exatos }}</td>
+        <td>{{ r.vencedores_corretos }}</td>
+        <td>{{ r.classificados_corretos }}</td>
+        <td>{{ r.palpites_enviados }}</td>
+        <td>{{ r.aproveitamento }}%</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="text-center text-muted">Nenhum dado para esta fase.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

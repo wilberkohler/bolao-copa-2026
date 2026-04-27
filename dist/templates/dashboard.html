@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h4 class="mb-3"><i class="bi bi-house-fill text-success"></i> Dashboard</h4>
+
+<!-- Cards de resumo -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Competidores</div>
+        <div class="display-6 text-success">{{ total_competidores }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Jogos</div>
+        <div class="display-6 text-success">{{ total_jogos }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Realizados</div>
+        <div class="display-6 text-primary">{{ jogos_realizados }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Pendentes</div>
+        <div class="display-6 text-warning">{{ jogos_pendentes }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Palpites Enviados</div>
+        <div class="display-6 text-info">{{ palpites_enviados }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Palpites Pendentes</div>
+        <div class="display-6 text-danger">{{ palpites_pendentes }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Líder, próximo jogo, próximo prazo -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm border-warning h-100">
+      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Líder Atual</div>
+      <div class="card-body">
+        {% if lider %}
+          <h5 class="card-title">{{ lider.competidor.apelido }}</h5>
+          <p class="card-text mb-0"><strong>{{ lider.pontos }}</strong> pontos &nbsp;|&nbsp; Posição #1</p>
+        {% else %}
+          <p class="text-muted">Nenhum resultado lançado ainda.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm border-success h-100">
+      <div class="card-header bg-success text-white fw-bold"><i class="bi bi-play-circle"></i> Próximo Jogo</div>
+      <div class="card-body">
+        {% if proximo_jogo %}
+          <h6>{{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</h6>
+          <p class="mb-0 text-muted">{{ proximo_jogo.data_jogo.strftime('%d/%m/%Y') }} &bull; {{ proximo_jogo.hora_brasilia }} BRT</p>
+          <small class="text-muted">{{ proximo_jogo.estadio }}, {{ proximo_jogo.cidade }}</small>
+        {% else %}
+          <p class="text-muted">Nenhum jogo agendado.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm border-danger h-100">
+      <div class="card-header bg-danger text-white fw-bold"><i class="bi bi-clock"></i> Próximo Prazo</div>
+      <div class="card-body">
+        {% if proximo_prazo %}
+          {% if proximo_prazo.tzinfo %}
+            <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
+          {% else %}
+            <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
+          {% endif %}
+          <p class="mb-0 text-muted">Prazo para: {{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</p>
+        {% else %}
+          <p class="text-muted">Sem prazo iminente.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Próximos Jogos -->
+<h5 class="mb-2"><i class="bi bi-calendar3"></i> Próximos Jogos</h5>
+<div class="table-responsive">
+  <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>Data</th>
+        <th>Hora (BRT)</th>
+        <th>Fase</th>
+        <th>Grupo</th>
+        <th>Time A</th>
+        <th>Time B</th>
+        <th>Local</th>
+        <th>Status Jogo</th>
+        {% if competidor_logado %}<th>Meu Palpite</th>{% endif %}
+        <th>Prazo Palpite</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in proximos_com_status %}
+      {% set j = item.jogo %}
+      <tr class="{% if not item.palpite and item.prazo_aberto %}row-sem-palpite{% endif %}">
+        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
+        <td>{{ j.hora_brasilia }}</td>
+        <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+        <td>{{ j.grupo or '-' }}</td>
+        <td><strong>{{ j.time_a }}</strong></td>
+        <td><strong>{{ j.time_b }}</strong></td>
+        <td>{{ j.cidade }}</td>
+        <td>
+          {% set st = j.status %}
+          {% if st == 'Pontuado' %}<span class="badge badge-pontuado">Pontuado</span>
+          {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">Resultado</span>
+          {% elif st == 'Em andamento' %}<span class="badge badge-andamento">Em andamento</span>
+          {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">Bloqueado</span>
+          {% else %}<span class="badge bg-success">Agendado</span>
+          {% endif %}
+        </td>
+        {% if competidor_logado %}
+        <td>
+          {% if item.palpite %}
+            <span class="badge badge-enviado">{{ item.palpite.palpite_gols_a }} x {{ item.palpite.palpite_gols_b }}</span>
+          {% elif item.prazo_aberto %}
+            <a href="{{ url_for('palpites') }}" class="badge badge-sem-palpite text-decoration-none">Sem palpite</a>
+          {% else %}
+            <span class="badge badge-bloqueado">Bloqueado</span>
+          {% endif %}
+        </td>
+        {% endif %}
+        <td>
+          {% if j.prazo_palpite %}
+            <small class="text-muted">
+              {% if j.prazo_palpite.tzinfo %}
+                {{ j.prazo_palpite.strftime('%d/%m %H:%M') }}
+              {% else %}
+                {{ j.prazo_palpite.strftime('%d/%m %H:%M') }}
+              {% endif %}
+            </small>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="text-center text-muted">Nenhum jogo próximo encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Editar Jogo #{{ jogo.numero_partida }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white fw-bold">
+        <i class="bi bi-pencil"></i> Editar Jogo #{{ jogo.numero_partida }} &mdash; {{ jogo.time_a }} x {{ jogo.time_b }}
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Data do Jogo</label>
+              <input type="date" name="data_jogo" class="form-control" required
+                     value="{{ jogo.data_jogo.strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Horário ET (HH:MM)</label>
+              <input type="text" name="hora_et" class="form-control" pattern="\d{2}:\d{2}" required
+                     value="{{ jogo.hora_et }}">
+              <small class="text-muted">Horário será convertido para BRT automaticamente</small>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Horário BRT (calculado)</label>
+              <input type="text" class="form-control" readonly value="{{ jogo.hora_brasilia }}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Time A</label>
+              <input type="text" name="time_a" class="form-control" value="{{ jogo.time_a }}">
+            </div>
+            <div class="col-md-2 mb-3">
+              <label class="form-label">Sigla A</label>
+              <input type="text" name="sigla_time_a" class="form-control" maxlength="5" value="{{ jogo.sigla_time_a }}">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Time B</label>
+              <input type="text" name="time_b" class="form-control" value="{{ jogo.time_b }}">
+            </div>
+            <div class="col-md-2 mb-3">
+              <label class="form-label">Sigla B</label>
+              <input type="text" name="sigla_time_b" class="form-control" maxlength="5" value="{{ jogo.sigla_time_b }}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-5 mb-3">
+              <label class="form-label">Estádio</label>
+              <input type="text" name="estadio" class="form-control" value="{{ jogo.estadio }}">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Cidade</label>
+              <input type="text" name="cidade" class="form-control" value="{{ jogo.cidade }}">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">País</label>
+              <input type="text" name="pais" class="form-control" value="{{ jogo.pais }}">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              {% for s in status_list %}
+                <option value="{{ s }}" {% if s == jogo.status %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salvar</button>
+            <a href="{{ url_for('listar_jogos') }}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

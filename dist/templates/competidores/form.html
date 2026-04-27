@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if competidor else 'Novo' }} Competidor{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white fw-bold">
+        <i class="bi bi-person-plus"></i>
+        {{ 'Editar Competidor' if competidor else 'Novo Competidor' }}
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Nome <span class="text-danger">*</span></label>
+            <input type="text" name="nome" class="form-control" required
+                   value="{{ competidor.nome if competidor else '' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Apelido <span class="text-danger">*</span></label>
+            <input type="text" name="apelido" class="form-control" required
+                   value="{{ competidor.apelido if competidor else '' }}">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">E-mail</label>
+              <input type="email" name="email" class="form-control"
+                     value="{{ competidor.email or '' if competidor else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Telefone</label>
+              <input type="text" name="telefone" class="form-control"
+                     value="{{ competidor.telefone or '' if competidor else '' }}">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Observações</label>
+            <textarea name="observacoes" class="form-control" rows="2">{{ competidor.observacoes or '' if competidor else '' }}</textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salvar</button>
+            <a href="{{ url_for('listar_competidores') }}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

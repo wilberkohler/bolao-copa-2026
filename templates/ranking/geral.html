@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Ranking Geral{% endblock %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-bar-chart-fill text-success"></i> Ranking Geral</h4>
+
+<!-- Cards destaques -->
+<div class="row g-3 mb-4">
+  {% if ranking %}
+  {% set lider = ranking[0] %}
+  <div class="col-md-4">
+    <div class="card shadow-sm border-warning">
+      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Líder Geral</div>
+      <div class="card-body">
+        <h5>{{ lider.competidor.apelido }}</h5>
+        <p class="mb-0"><strong>{{ lider.pontos }}</strong> pontos &bull; {{ lider.placares_exatos }} exatos</p>
+      </div>
+    </div>
+  </div>
+  {% set mais_exatos = ranking | sort(attribute='placares_exatos', reverse=true) | first %}
+  <div class="col-md-4">
+    <div class="card shadow-sm border-success">
+      <div class="card-header bg-success text-white fw-bold"><i class="bi bi-bullseye"></i> Mais Placares Exatos</div>
+      <div class="card-body">
+        <h5>{{ mais_exatos.competidor.apelido }}</h5>
+        <p class="mb-0"><strong>{{ mais_exatos.placares_exatos }}</strong> placares exatos</p>
+      </div>
+    </div>
+  </div>
+  {% set mais_aproveitamento = ranking | sort(attribute='aproveitamento', reverse=true) | first %}
+  <div class="col-md-4">
+    <div class="card shadow-sm border-info">
+      <div class="card-header bg-info text-white fw-bold"><i class="bi bi-percent"></i> Melhor Aproveitamento</div>
+      <div class="card-body">
+        <h5>{{ mais_aproveitamento.competidor.apelido }}</h5>
+        <p class="mb-0"><strong>{{ mais_aproveitamento.aproveitamento }}%</strong> de aproveitamento</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th>Competidor</th>
+        <th>Pontos</th>
+        <th>Exatos</th>
+        <th>Vencedores</th>
+        <th>Saldos</th>
+        <th>Classif.</th>
+        <th>Enviados</th>
+        <th>Não enviados</th>
+        <th>Aproveit. %</th>
+        <th>Últ. pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in ranking %}
+      <tr class="rank-{{ r.posicao if r.posicao <= 3 else '' }}">
+        <td class="fw-bold">
+          {% if r.posicao == 1 %}🥇
+          {% elif r.posicao == 2 %}🥈
+          {% elif r.posicao == 3 %}🥉
+          {% else %}{{ r.posicao }}{% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('historico_competidor', cid=r.competidor.id) }}">
+            {{ r.competidor.apelido }}
+          </a>
+          {% if not r.competidor.ativo %}<span class="badge bg-secondary ms-1">Inativo</span>{% endif %}
+        </td>
+        <td class="fw-bold {% if r.pontos >= 50 %}pts-alto{% elif r.pontos >= 20 %}pts-medio{% endif %}">
+          {{ r.pontos }}
+        </td>
+        <td>{{ r.placares_exatos }}</td>
+        <td>{{ r.vencedores_corretos }}</td>
+        <td>{{ r.saldos_corretos }}</td>
+        <td>{{ r.classificados_corretos }}</td>
+        <td>{{ r.palpites_enviados }}</td>
+        <td class="text-danger">{{ r.palpites_nao_enviados }}</td>
+        <td>{{ r.aproveitamento }}%</td>
+        <td>{{ r.ultima_pontuacao }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="11" class="text-center text-muted">Nenhum dado de ranking ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

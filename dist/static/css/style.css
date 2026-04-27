@@ -1,0 +1,37 @@
+:root { --bs-success: #1a7f3c; }
+body { background: #f4f6f9; }
+.card-stat { border-left: 5px solid #198754; }
+.card-stat .card-title { font-size: .85rem; text-transform: uppercase; color: #6c757d; }
+.card-stat .display-6 { font-size: 2rem; font-weight: 700; }
+
+/* Status badges */
+.badge-aberto { background-color: #198754; }
+.badge-enviado { background-color: #0d6efd; }
+.badge-sem-palpite { background-color: #ffc107; color: #212529; }
+.badge-bloqueado { background-color: #6c757d; }
+.badge-resultado { background-color: #6f42c1; }
+.badge-pontuado { background-color: #0f5132; }
+.badge-andamento { background-color: #fd7e14; }
+
+/* Tabelas */
+.table-jogos td, .table-jogos th { vertical-align: middle; font-size: .875rem; }
+
+/* Ranking top 3 */
+.rank-1 td:first-child { color: #d4af37; font-weight: 700; font-size: 1.2rem; }
+.rank-2 td:first-child { color: #a8a9ad; font-weight: 700; }
+.rank-3 td:first-child { color: #cd7f32; font-weight: 700; }
+
+/* Row sem palpite highlight */
+.row-sem-palpite { background-color: #fff9e6 !important; }
+.row-jogo-encerrado { background-color: #eceff1 !important; }
+.row-jogo-encerrado td { color: #5f6b76; }
+.row-jogo-encerrado input,
+.row-jogo-encerrado select {
+	background-color: #dee2e6 !important;
+	border-color: #ced4da !important;
+}
+
+/* Pontuação positiva */
+.pts-alto { color: #198754; font-weight: 700; }
+.pts-medio { color: #0d6efd; }
+.pts-baixo { color: #dc3545; }

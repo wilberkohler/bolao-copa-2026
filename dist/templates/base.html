@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bolão Copa 2026 - {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="{% if user %}{{ url_for('dashboard') }}{% else %}{{ url_for('login') }}{% endif %}">
+      <i class="bi bi-trophy-fill"></i> Bolão Copa 2026
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        {% if user %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-house"></i> Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_jogos') }}"><i class="bi bi-calendar3"></i> Jogos</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('palpites') }}"><i class="bi bi-pencil-square"></i> Palpites</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('ranking_geral') }}"><i class="bi bi-bar-chart"></i> Ranking</a></li>
+         <li class="nav-item"><a class="nav-link" href="{{ url_for('regras') }}"><i class="bi bi-journal-text"></i> Regras</a></li>
+        {% if user.eh_admin %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Admin</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ url_for('listar_resultados') }}"><i class="bi bi-check2-circle"></i> Resultados</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_grupos') }}"><i class="bi bi-collection"></i> Grupos</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('simulacao') }}"><i class="bi bi-clock-history"></i> Simulação</a></li>
+            </ul>
+          </li>
+        {% endif %}
+        {% endif %}
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        {% if user %}
+          <div class="dropdown">
+            <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> {{ user.apelido or user.nome }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ url_for('palpites') }}">Meus palpites</a></li>
+              {% if user.grupo %}
+              <li><hr class="dropdown-divider"></li>
+              <li><span class="dropdown-item text-muted"><small>Grupo: <strong>{{ user.grupo.nome }}</strong></small></span></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sair</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Login</a>
+          <a href="{{ url_for('registro') }}" class="btn btn-light btn-sm">Cadastro</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid mt-3 px-4">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+
+<footer class="text-center text-muted py-3 mt-5 border-top">
+  <small>Bolão Copa do Mundo FIFA 2026 &mdash; Todos os horários em Brasília (BRT/UTC-3)</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

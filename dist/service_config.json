@@ -1,0 +1,7 @@
+{
+  "bind_host": "0.0.0.0",
+  "public_host": "NAEST202502",
+  "port": 5055,
+  "threads": 8,
+  "debug": false
+}

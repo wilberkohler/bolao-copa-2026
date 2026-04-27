@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Histórico - {{ competidor.apelido }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4><i class="bi bi-person-lines-fill text-success"></i> {{ competidor.apelido }} &mdash; Histórico</h4>
+  <a href="{{ url_for('listar_competidores') }}" class="btn btn-outline-secondary btn-sm">Voltar</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Pontos Totais</div>
+        <div class="display-6 text-success">{{ dados_ranking.pontos if dados_ranking else 0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Posição</div>
+        <div class="display-6 text-warning">#{{ posicao or '-' }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Placares Exatos</div>
+        <div class="display-6">{{ dados_ranking.placares_exatos if dados_ranking else 0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Palpites Enviados</div>
+        <div class="display-6">{{ dados_ranking.palpites_enviados if dados_ranking else 0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat shadow-sm h-100">
+      <div class="card-body">
+        <div class="card-title">Aproveitamento</div>
+        <div class="display-6">{{ dados_ranking.aproveitamento if dados_ranking else 0 }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h5 class="mb-2">Histórico de Palpites</h5>
+<div class="table-responsive">
+  <table class="table table-hover table-bordered bg-white shadow-sm table-jogos">
+    <thead class="table-success">
+      <tr>
+        <th>Jogo</th>
+        <th>Data</th>
+        <th>Time A</th>
+        <th>Time B</th>
+        <th>Palpite</th>
+        <th>Classificado</th>
+        <th>Resultado Real</th>
+        <th>Pontos</th>
+        <th>Status</th>
+        <th>Enviado em</th>
+        <th>Últ. Alt.</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in historico %}
+      {% set p = item.palpite %}
+      {% set j = item.jogo %}
+      {% set res = item.resultado %}
+      {% set pont = item.pontuacao %}
+      <tr>
+        <td>#{{ j.numero_partida }}</td>
+        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
+        <td>{{ j.time_a }}</td>
+        <td>{{ j.time_b }}</td>
+        <td>
+          {% if p.palpite_gols_a is not none %}
+            <strong>{{ p.palpite_gols_a }} x {{ p.palpite_gols_b }}</strong>
+          {% else %}<span class="text-muted">-</span>{% endif %}
+        </td>
+        <td>{{ p.palpite_classificado or '-' }}</td>
+        <td>
+          {% if res %}
+            {{ res.gols_a }} x {{ res.gols_b }}
+            {% if res.classificado %} ({{ res.classificado }}){% endif %}
+          {% else %}<span class="text-muted">Pendente</span>{% endif %}
+        </td>
+        <td>
+          {% if pont %}
+            <span class="fw-bold {% if pont.pontos >= 7 %}pts-alto{% elif pont.pontos >= 3 %}pts-medio{% elif pont.pontos > 0 %}pts-baixo{% endif %}">
+              {{ pont.pontos }}
+            </span>
+            {% if pont.placar_exato %}<span class="badge badge-pontuado ms-1">Exato</span>{% endif %}
+            {% if pont.classificado_correto %}<span class="badge bg-info ms-1">Clasf.</span>{% endif %}
+          {% else %}-{% endif %}
+        </td>
+        <td>
+          {% if j.status == 'Pontuado' %}<span class="badge badge-pontuado">Pontuado</span>
+          {% elif j.status == 'Resultado Lançado' %}<span class="badge badge-resultado">Resultado</span>
+          {% elif not p.bloqueado %}<span class="badge badge-enviado">Enviado</span>
+          {% else %}<span class="badge badge-bloqueado">Bloqueado</span>{% endif %}
+        </td>
+        <td><small>{{ p.data_envio.strftime('%d/%m %H:%M') if p.data_envio else '-' }}</small></td>
+        <td><small>{{ p.data_ultima_alteracao.strftime('%d/%m %H:%M') if p.data_ultima_alteracao else '-' }}</small></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="11" class="text-center text-muted">Nenhum palpite registrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

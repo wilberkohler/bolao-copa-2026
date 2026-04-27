@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Resultado - Jogo #{{ jogo.numero_partida }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white fw-bold">
+        <i class="bi bi-check2-circle"></i>
+        Jogo #{{ jogo.numero_partida }} &mdash; {{ jogo.time_a }} x {{ jogo.time_b }}
+        <br><small class="fw-normal">{{ jogo.data_jogo.strftime('%d/%m/%Y') }} | {{ jogo.hora_brasilia }} BRT | {{ jogo.fase }}</small>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div class="row align-items-end">
+            <div class="col mb-3 text-center">
+              <label class="form-label fw-bold">{{ jogo.time_a }}</label>
+              <input type="number" name="gols_a" class="form-control form-control-lg text-center"
+                     min="0" max="30" required
+                     value="{{ resultado.gols_a if resultado else '' }}">
+            </div>
+            <div class="col-auto mb-3">
+              <div class="fs-2 fw-bold text-muted mt-3">x</div>
+            </div>
+            <div class="col mb-3 text-center">
+              <label class="form-label fw-bold">{{ jogo.time_b }}</label>
+              <input type="number" name="gols_b" class="form-control form-control-lg text-center"
+                     min="0" max="30" required
+                     value="{{ resultado.gols_b if resultado else '' }}">
+            </div>
+          </div>
+
+          {% if jogo.mata_mata %}
+          <div class="mb-3">
+            <label class="form-label fw-bold">Classificado <span class="text-danger">*</span></label>
+            <select name="classificado" class="form-select" required>
+              <option value="">-- Selecione o classificado --</option>
+              <option value="{{ jogo.time_a }}"
+                {% if resultado and resultado.classificado == jogo.time_a %}selected{% endif %}>
+                {{ jogo.time_a }}
+              </option>
+              <option value="{{ jogo.time_b }}"
+                {% if resultado and resultado.classificado == jogo.time_b %}selected{% endif %}>
+                {{ jogo.time_b }}
+              </option>
+            </select>
+          </div>
+          {% endif %}
+
+          {% if resultado %}
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Resultado já lançado em {{ resultado.data_lancamento.strftime('%d/%m/%Y %H:%M') if resultado.data_lancamento else '-' }}.
+            Salvar irá <strong>recalcular a pontuação</strong> de todos os palpites.
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="bi bi-check-lg"></i> Salvar Resultado
+            </button>
+            <a href="{{ url_for('listar_resultados') }}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Palpites dos competidores -->
+    {% set palpites = jogo.palpites | selectattr('valido') | list %}
+    {% if palpites %}
+    <div class="card mt-4 shadow-sm">
+      <div class="card-header bg-light fw-bold">Palpites dos Competidores</div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Competidor</th>
+              <th>Palpite</th>
+              <th>Classificado</th>
+              <th>Pontos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in palpites %}
+            {% set pont = p.competidor.pontuacoes | selectattr('jogo_id', 'equalto', jogo.id) | first %}
+            <tr>
+              <td>{{ p.competidor.apelido }}</td>
+              <td>{{ p.palpite_gols_a }} x {{ p.palpite_gols_b }}</td>
+              <td>{{ p.palpite_classificado or '-' }}</td>
+              <td>
+                {% if pont %}
+                  <strong class="{% if pont.pontos >= 7 %}pts-alto{% elif pont.pontos >= 3 %}pts-medio{% else %}pts-baixo{% endif %}">
+                    {{ pont.pontos }}
+                  </strong>
+                {% else %}-{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

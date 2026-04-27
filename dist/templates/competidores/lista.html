@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Competidores{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4><i class="bi bi-people-fill text-success"></i> Competidores</h4>
+  <a href="{{ url_for('novo_competidor') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo Competidor</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th>Apelido</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Telefone</th>
+        <th>Entrada</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in competidores %}
+      <tr class="{% if not c.ativo %}table-secondary text-muted{% endif %}">
+        <td>{{ c.id }}</td>
+        <td><a href="{{ url_for('historico_competidor', cid=c.id) }}">{{ c.apelido }}</a></td>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.email or '-' }}</td>
+        <td>{{ c.telefone or '-' }}</td>
+        <td>{{ c.data_entrada.strftime('%d/%m/%Y') if c.data_entrada else '-' }}</td>
+        <td>
+          {% if c.ativo %}
+            <span class="badge bg-success">Ativo</span>
+          {% else %}
+            <span class="badge bg-secondary">Inativo</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            <a href="{{ url_for('editar_competidor', cid=c.id) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            <a href="{{ url_for('selecionar_competidor', cid=c.id) }}" class="btn btn-outline-success" title="Entrar como este competidor"><i class="bi bi-box-arrow-in-right"></i></a>
+            {% if c.ativo %}
+            <form method="post" action="{{ url_for('inativar_competidor', cid=c.id) }}" style="display:inline">
+              <button class="btn btn-outline-warning" onclick="return confirm('Inativar {{ c.apelido }}?')"><i class="bi bi-pause-circle"></i></button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('reativar_competidor', cid=c.id) }}" style="display:inline">
+              <button class="btn btn-outline-success"><i class="bi bi-play-circle"></i></button>
+            </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('excluir_competidor', cid=c.id) }}" style="display:inline">
+              <button class="btn btn-outline-danger" onclick="return confirm('Excluir {{ c.apelido }}? Só é possível se não houver palpites.')"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="text-center text-muted">Nenhum competidor cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

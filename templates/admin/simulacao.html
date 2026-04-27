@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Simulação - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4"><i class="bi bi-calendar-event"></i> Modo Simulação</h3>
+  
+  <div class="row">
+    <!-- Formulário de data -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">Selecionar Data</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="mb-3">
+              <label class="form-label">Data Simulada</label>
+              <input type="date" name="data_simulada" class="form-control" required value="{{ info.data_simulada or '' }}">
+              <small class="form-text text-muted">Selecione uma data futura para simular</small>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" name="acao" value="definir_data" class="btn btn-primary">
+                <i class="bi bi-play-fill"></i> Simular Data
+              </button>
+              <button type="submit" name="acao" value="gerar_resultados" class="btn btn-warning text-dark">
+                <i class="bi bi-shuffle"></i> Gerar Resultados Aleatórios até a Data
+              </button>
+            </div>
+          </form>
+          
+          {% if info.data_simulada %}
+          <hr>
+          <h6>Data Simulada Atual:</h6>
+          <p class="alert alert-info">
+            <strong>{{ info.data_simulada }}</strong>
+          </p>
+          <a href="{{ url_for('simulacao') }}" class="btn btn-secondary btn-sm w-100">
+            <i class="bi bi-arrow-counterclockwise"></i> Limpar Simulação
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações de simulação -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="card-title mb-0">Informações</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Data Real:</strong> {{ info.data_real }}</p>
+          
+          {% if info.data_simulada %}
+            <hr>
+            <p><strong>Data Simulada:</strong> {{ info.data_simulada }}</p>
+            
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle"></i>
+              O sistema está em <strong>modo simulação</strong>. 
+              Todas as operações usarão a data {{ info.data_simulada }} como referência.
+            </div>
+            
+            {% if info.jogos_neste_dia %}
+              <h6>Jogos Neste Dia ({{ info.jogos_neste_dia|length }}):</h6>
+              <ul class="small">
+                {% for jogo in info.jogos_neste_dia %}
+                  <li>
+                    <strong>{{ jogo.hora_brasilia }}</strong> - 
+                    {{ jogo.time_a }} x {{ jogo.time_b }}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted small">Nenhum jogo neste dia.</p>
+            {% endif %}
+            
+            <hr>
+            <p class="small">
+              <strong>Jogos Realizados até essa data:</strong> {{ info.jogos_realizados }}/107
+            </p>
+            <p class="small mb-1">
+              <strong>Total de jogos até a data:</strong> {{ info.total_jogos_ate_data or 0 }}
+            </p>
+            <p class="small mb-1 text-success">
+              <strong>Com resultado:</strong> {{ info.jogos_com_resultado_ate_data or 0 }}
+            </p>
+            <p class="small text-danger">
+              <strong>Sem resultado:</strong> {{ info.jogos_sem_resultado_ate_data or 0 }}
+            </p>
+            
+            {% if info.proximo_jogo %}
+              <p class="small">
+                <strong>Próximo Jogo:</strong> 
+                {{ info.proximo_jogo.data_jogo }} às {{ info.proximo_jogo.hora_brasilia }}
+              </p>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">Nenhuma simulação ativa. Selecione uma data à esquerda.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instruções -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm bg-light">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Como Usar</h5>
+        </div>
+        <div class="card-body">
+          <ol>
+            <li><strong>Selecione uma data futura</strong> no formulário</li>
+            <li>O sistema <strong>simula como se estivesse naquela data</strong></li>
+            <li>Vá para <strong>Palpites → Resultados</strong> e teste as funcionalidades</li>
+            <li>Os <strong>prazos</strong> e <strong>disponibilidades</strong> mudam com a data simulada</li>
+            <li><strong>Clique "Limpar"</strong> para voltar à data real</li>
+          </ol>
+          <p class="alert alert-info mt-3 mb-0">
+            💡 <strong>Dica:</strong> Use datas progressivas para simular todo o torneio!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

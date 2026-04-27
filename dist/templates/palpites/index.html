@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Palpites - {{ competidor.apelido }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4><i class="bi bi-pencil-square text-success"></i> Palpites &mdash; {{ competidor.apelido }}</h4>
+</div>
+
+<!-- Filtros -->
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="filtro" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="todos" {% if filtro == 'todos' %}selected{% endif %}>Todos os jogos</option>
+      <option value="abertos" {% if filtro == 'abertos' %}selected{% endif %}>Abertos para palpite</option>
+      <option value="enviados" {% if filtro == 'enviados' %}selected{% endif %}>Palpite enviado</option>
+      <option value="sem_palpite" {% if filtro == 'sem_palpite' %}selected{% endif %}>Sem palpite</option>
+      <option value="bloqueados" {% if filtro == 'bloqueados' %}selected{% endif %}>Bloqueados</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="fase" class="form-select form-select-sm">
+      <option value="">Todas as fases</option>
+      {% for f in fases %}
+        <option value="{{ f }}" {% if f == fase_filtro %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="grupo" class="form-select form-select-sm">
+      <option value="">Todos os grupos</option>
+      {% for g in grupos %}
+        <option value="{{ g }}" {% if g == grupo_filtro %}selected{% endif %}>Grupo {{ g }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <input type="text" name="selecao" class="form-control form-control-sm" placeholder="Seleção..."
+           value="{{ selecao_filtro }}">
+  </div>
+  <div class="col-auto">
+    <input type="date" name="data" class="form-control form-control-sm" value="{{ data_filtro }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-success btn-sm">Filtrar</button>
+    <a href="{{ url_for('palpites') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
+  </div>
+</form>
+
+<form method="post" action="{{ url_for('palpites') }}">
+  <div class="table-responsive">
+    <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
+      <thead class="table-success">
+        <tr>
+          <th>Data</th>
+          <th>Hora BRT</th>
+          <th>Fase</th>
+          <th>Grp</th>
+          <th>Time A</th>
+          <th>Gols A</th>
+          <th>Gols B</th>
+          <th>Time B</th>
+          <th>Clasf. (mata-mata)</th>
+          <th>Resultado</th>
+          <th>Comparacao</th>
+          <th>Prazo</th>
+          <th>Status</th>
+          <th>Pontos</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in jogos_com_status %}
+        {% set j = item.jogo %}
+        {% set p = item.palpite %}
+        {% set pont = item.pontuacao %}
+        <tr class="{% if not item.editavel %}row-jogo-encerrado{% elif not p %}row-sem-palpite{% endif %}">
+          <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
+          <td>{{ j.hora_brasilia }}</td>
+          <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+          <td>{{ j.grupo or '-' }}</td>
+          <td><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
+          <td>
+            {% if item.editavel %}
+              <input type="hidden" name="jogo_id" value="{{ j.id }}">
+              <input type="number" name="gols_a_{{ j.id }}" class="form-control form-control-sm palpite-input"
+                     min="0" max="30" style="width:60px"
+                     value="{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '' }}">
+            {% else %}
+              <span>{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '-' }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if item.editavel %}
+              <input type="number" name="gols_b_{{ j.id }}" class="form-control form-control-sm palpite-input"
+                     min="0" max="30" style="width:60px"
+                     value="{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '' }}">
+            {% else %}
+              <span>{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</span>
+            {% endif %}
+          </td>
+          <td><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+          <td>
+            {% if j.mata_mata %}
+              {% if item.editavel %}
+                <select name="classificado_{{ j.id }}" class="form-select form-select-sm" style="min-width:140px">
+                  <option value="">-- Classificado --</option>
+                  <option value="{{ j.time_a }}" {% if p and p.palpite_classificado == j.time_a %}selected{% endif %}>{{ j.time_a }}</option>
+                  <option value="{{ j.time_b }}" {% if p and p.palpite_classificado == j.time_b %}selected{% endif %}>{{ j.time_b }}</option>
+                </select>
+              {% else %}
+                {{ p.palpite_classificado if p else '-' }}
+              {% endif %}
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if j.resultado %}
+              <div class="fw-bold">{{ j.resultado.gols_a }} x {{ j.resultado.gols_b }}</div>
+              {% if j.resultado.classificado %}
+                <small class="text-muted">Clasf.: {{ j.resultado.classificado }}</small>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">Aguardando</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if j.resultado and p %}
+              <div class="d-flex flex-column gap-1">
+                {% if pont and pont.placar_exato %}
+                  <span class="badge bg-success">Placar exato</span>
+                {% elif pont and pont.vencedor_correto and pont.saldo_correto %}
+                  <span class="badge bg-primary">Vencedor + saldo</span>
+                {% elif pont and pont.vencedor_correto %}
+                  <span class="badge bg-info text-dark">Vencedor correto</span>
+                {% elif pont and (pont.gols_time_a_correto or pont.gols_time_b_correto) %}
+                  <span class="badge bg-warning text-dark">Acertou gols</span>
+                {% else %}
+                  <span class="badge bg-secondary">Nao acertou</span>
+                {% endif %}
+
+                {% if pont and pont.classificado_correto %}
+                  <span class="badge bg-dark">Classificado correto</span>
+                {% endif %}
+              </div>
+            {% elif j.resultado and not p %}
+              <span class="badge bg-danger">Sem palpite</span>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td>
+            <small class="text-muted">
+              {% if j.prazo_palpite %}{{ j.prazo_palpite.strftime('%d/%m %H:%M') }}{% endif %}
+            </small>
+          </td>
+          <td>
+            {% set st = item.status %}
+            {% if st == 'Pontuado' %}<span class="badge badge-pontuado">Pontuado</span>
+            {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">Resultado</span>
+            {% elif st == 'Palpite enviado' %}<span class="badge badge-enviado">Enviado</span>
+            {% elif st == 'Aberto para palpite' %}<span class="badge badge-aberto">Aberto</span>
+            {% elif 'Bloqueado' in st %}<span class="badge badge-bloqueado">Bloqueado</span>
+            {% else %}<span class="badge bg-secondary">{{ st }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if pont %}
+              <span class="fw-bold {% if pont.pontos >= 7 %}pts-alto{% elif pont.pontos >= 3 %}pts-medio{% elif pont.pontos > 0 %}pts-baixo{% endif %}">
+                {{ pont.pontos }} pts
+              </span>
+              <br>
+              {% if pont.placar_exato %}<small class="text-success">Exato</small>{% endif %}
+              {% if pont.classificado_correto %}<small class="text-info"> +Clasf.</small>{% endif %}
+            {% elif j.resultado %}
+              <span class="badge bg-danger">0</span>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="14" class="text-center text-muted">Nenhum jogo encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="d-flex gap-2 mt-2">
+    <button type="submit" class="btn btn-success btn-lg">
+      <i class="bi bi-check-all"></i> Salvar Palpites
+    </button>
+    <small class="text-muted align-self-center">
+      Apenas jogos futuros e dentro do prazo permanecem editaveis.
+    </small>
+  </div>
+</form>
+{% endblock %}

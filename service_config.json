@@ -1,0 +1,8 @@
+﻿{
+  "bind_host": "0.0.0.0",
+  "public_host": "bolao2026",
+  "port": 5055,
+  "threads": 8,
+  "debug": false
+}
+

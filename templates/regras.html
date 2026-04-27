@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Regras do Bolao{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="mb-1"><i class="bi bi-journal-text text-success"></i> Regras e Informacoes Uteis</h3>
+        <p class="text-muted mb-0">Resumo rapido de pontuacao, prazos, criterios de desempate e funcionamento geral do bolao.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-success text-white">
+        <strong>Regras de Pontuacao</strong>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Situacao</th>
+                <th class="text-end">Pontos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Placar exato</td>
+                <td class="text-end fw-bold text-success">10</td>
+              </tr>
+              <tr>
+                <td>Vencedor correto + saldo correto</td>
+                <td class="text-end fw-bold text-primary">7</td>
+              </tr>
+              <tr>
+                <td>Vencedor correto</td>
+                <td class="text-end fw-bold text-info">5</td>
+              </tr>
+              <tr>
+                <td>Empate correto com placar diferente</td>
+                <td class="text-end fw-bold text-info">5</td>
+              </tr>
+              <tr>
+                <td>Acerto de gols de um dos times</td>
+                <td class="text-end fw-bold text-warning">2</td>
+              </tr>
+              <tr>
+                <td>Sem acertos relevantes</td>
+                <td class="text-end fw-bold text-danger">0</td>
+              </tr>
+              <tr>
+                <td>Bonus por classificado correto no mata-mata</td>
+                <td class="text-end fw-bold text-dark">+3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-dark text-white">
+        <strong>Criterios de Desempate</strong>
+      </div>
+      <div class="card-body">
+        <ol class="mb-0">
+          <li>Maior pontuacao total.</li>
+          <li>Maior quantidade de placares exatos.</li>
+          <li>Maior quantidade de vencedores corretos.</li>
+          <li>Maior quantidade de saldos corretos.</li>
+          <li>Maior quantidade de classificados corretos.</li>
+          <li>Maior quantidade de palpites enviados.</li>
+          <li>Menor quantidade de palpites nao enviados.</li>
+          <li>Ordem alfabetica do apelido.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-primary text-white">
+        <strong>Prazos e Horarios</strong>
+      </div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Todos os horarios exibidos no sistema estao em Brasilia.</li>
+          <li>O prazo do palpite encerra as 23:59 do dia anterior ao jogo.</li>
+          <li>Depois do prazo, o palpite fica bloqueado para edicao.</li>
+          <li>Jogos sem palpite dentro do prazo contam como nao enviados.</li>
+          <li>Resultados aparecem na tela de palpites para comparacao imediata.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-warning text-dark">
+        <strong>Como Ler a Tela de Palpites</strong>
+      </div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Status <strong>Aberto</strong>: ainda da tempo de editar.</li>
+          <li>Status <strong>Enviado</strong>: palpite salvo dentro do prazo.</li>
+          <li>Status <strong>Resultado</strong>: resultado oficial ja lancado.</li>
+          <li>Status <strong>Pontuado</strong>: pontos calculados para o jogo.</li>
+          <li>Coluna <strong>Resultado</strong>: mostra o placar oficial.</li>
+          <li>Coluna <strong>Comparacao</strong>: mostra se voce acertou placar, vencedor, saldo ou classificado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <strong>Informacoes Uteis</strong>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <div class="border rounded p-3 h-100 bg-light">
+              <h6><i class="bi bi-people"></i> Grupos</h6>
+              <p class="mb-0 small">Usuarios veem os palpites dos participantes do mesmo grupo, mas podem editar apenas os proprios palpites.</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="border rounded p-3 h-100 bg-light">
+              <h6><i class="bi bi-bar-chart-line"></i> Ranking</h6>
+              <p class="mb-0 small">O ranking geral soma todos os jogos pontuados. O ranking por fase considera apenas os jogos da fase selecionada.</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="border rounded p-3 h-100 bg-light">
+              <h6><i class="bi bi-clock-history"></i> Simulacao</h6>
+              <p class="mb-0 small">Administradores podem usar a simulacao para adiantar datas e gerar resultados aleatorios para validar o funcionamento do sistema.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

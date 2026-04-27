@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Jogos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4><i class="bi bi-calendar3 text-success"></i> Jogos da Copa 2026</h4>
+</div>
+
+<!-- Filtros -->
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="fase" class="form-select form-select-sm">
+      <option value="">Todas as fases</option>
+      {% for f in fases %}
+        <option value="{{ f }}" {% if f == fase_filtro %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">Todos os status</option>
+      {% for s in status_list %}
+        <option value="{{ s }}" {% if s == status_filtro %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-success btn-sm">Filtrar</button>
+    <a href="{{ url_for('listar_jogos') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
+    <thead class="table-success">
+      <tr>
+        <th>#</th>
+        <th>Fase</th>
+        <th>Grupo</th>
+        <th>Data</th>
+        <th>Hora BRT</th>
+        <th>Time A</th>
+        <th>Time B</th>
+        <th>Estádio</th>
+        <th>Cidade</th>
+        <th>M-M</th>
+        <th>Status</th>
+        <th>Prazo Palpite</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in jogos %}
+      <tr>
+        <td>{{ j.numero_partida }}</td>
+        <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+        <td>{{ j.grupo or '-' }}</td>
+        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
+        <td>{{ j.hora_brasilia }}</td>
+        <td><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
+        <td><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+        <td><small>{{ j.estadio }}</small></td>
+        <td><small>{{ j.cidade }}, {{ j.pais }}</small></td>
+        <td>
+          {% if j.mata_mata %}
+            <span class="badge bg-danger">Sim</span>
+          {% else %}
+            <span class="badge bg-light text-dark">Não</span>
+          {% endif %}
+        </td>
+        <td>
+          {% set st = j.status %}
+          {% if st == 'Pontuado' %}<span class="badge badge-pontuado">{{ st }}</span>
+          {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">{{ st }}</span>
+          {% elif st == 'Em andamento' %}<span class="badge badge-andamento">{{ st }}</span>
+          {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">{{ st }}</span>
+          {% elif st == 'Aberto para palpites' %}<span class="badge badge-aberto">{{ st }}</span>
+          {% elif st == 'Cancelado/Alterado' %}<span class="badge bg-danger">{{ st }}</span>
+          {% else %}<span class="badge bg-secondary">{{ st }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if j.prazo_palpite %}
+            <small>{{ j.prazo_palpite.strftime('%d/%m %H:%M') }}</small>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('editar_jogo', jid=j.id) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="13" class="text-center text-muted">Nenhum jogo encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<small class="text-muted">Total: {{ jogos|length }} jogo(s)</small>
+{% endblock %}
