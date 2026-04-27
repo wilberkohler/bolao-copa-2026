@@ -1,4 +1,4 @@
-import os
+﻿import os
 import random
 from datetime import datetime, date, timedelta
 from functools import wraps
@@ -17,7 +17,7 @@ BR_TZ = pytz.timezone("America/Sao_Paulo")
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
 database_url = os.environ.get("DATABASE_URL", "sqlite:///bolao.db")
-# Alguns provedores ainda expõem postgres://; SQLAlchemy requer postgresql://.
+# Alguns provedores ainda expÃµem postgres://; SQLAlchemy requer postgresql://.
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
@@ -30,7 +30,7 @@ db.init_app(app)
 
 @app.before_request
 def load_logged_in_user():
-    """Carrega usuário logado na sessão."""
+    """Carrega usuÃ¡rio logado na sessÃ£o."""
     user_id = session.get("user_id")
     if user_id is None:
         g.user = None
@@ -43,7 +43,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if g.user is None:
-            flash("Você precisa fazer login.", "warning")
+            flash("VocÃª precisa fazer login.", "warning")
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
@@ -70,7 +70,7 @@ def agora_br():
 
 
 def ensure_competidor_profile(user):
-    """Cria perfil de competidor para o usuário caso não exista."""
+    """Cria perfil de competidor para o usuÃ¡rio caso nÃ£o exista."""
     if not user:
         return None
 
@@ -112,7 +112,7 @@ def inject_globals():
 
 
 # ---------------------------------------------------------------------------
-# AUTENTICAÇÃO
+# AUTENTICAÃ‡ÃƒO
 # ---------------------------------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -132,7 +132,7 @@ def login():
             flash(f"Bem-vindo, {user.nome}!", "success")
             return redirect(url_for("dashboard"))
         else:
-            flash("E-mail ou senha inválidos, ou usuário inativo.", "danger")
+            flash("E-mail ou senha invÃ¡lidos, ou usuÃ¡rio inativo.", "danger")
     
     return render_template("auth/login.html")
 
@@ -152,11 +152,11 @@ def registro():
         grupo_id = request.form.get("grupo_id")
         
         if not nome or not email or not apelido or not senha:
-            flash("Todos os campos são obrigatórios.", "danger")
+            flash("Todos os campos sÃ£o obrigatÃ³rios.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
         if User.query.filter_by(email=email).first():
-            flash("E-mail já cadastrado.", "danger")
+            flash("E-mail jÃ¡ cadastrado.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
         user = User(
@@ -180,7 +180,7 @@ def registro():
         db.session.add(competidor)
         db.session.commit()
         
-        flash("Cadastro realizado com sucesso! Faça login.", "success")
+        flash("Cadastro realizado com sucesso! FaÃ§a login.", "success")
         return redirect(url_for("login"))
     
     return render_template("auth/registro.html", grupos=grupos)
@@ -189,7 +189,7 @@ def registro():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Você saiu.", "info")
+    flash("VocÃª saiu.", "info")
     return redirect(url_for("login"))
 
 
@@ -211,11 +211,11 @@ def novo_grupo():
         descricao = request.form.get("descricao", "").strip()
         
         if not nome:
-            flash("Nome é obrigatório.", "danger")
+            flash("Nome Ã© obrigatÃ³rio.", "danger")
             return render_template("admin/grupos_form.html", grupo=None)
         
         if Grupo.query.filter_by(nome=nome).first():
-            flash("Grupo já existe.", "danger")
+            flash("Grupo jÃ¡ existe.", "danger")
             return render_template("admin/grupos_form.html", grupo=None)
         
         grupo = Grupo(
@@ -251,16 +251,16 @@ def editar_grupo(gid):
 def excluir_grupo(gid):
     grupo = Grupo.query.get_or_404(gid)
     if User.query.filter_by(grupo_id=gid).count() > 0:
-        flash("Não é possível excluir grupo com usuários. Remova os usuários primeiro.", "danger")
+        flash("NÃ£o Ã© possÃ­vel excluir grupo com usuÃ¡rios. Remova os usuÃ¡rios primeiro.", "danger")
         return redirect(url_for("listar_grupos"))
     db.session.delete(grupo)
     db.session.commit()
-    flash("Grupo excluído.", "success")
+    flash("Grupo excluÃ­do.", "success")
     return redirect(url_for("listar_grupos"))
 
 
 # ---------------------------------------------------------------------------
-# SELEÇÃO DE COMPETIDOR (legacy - será mantido)
+# SELEÃ‡ÃƒO DE COMPETIDOR (legacy - serÃ¡ mantido)
 # ---------------------------------------------------------------------------
 @app.route("/selecionar_competidor/<int:cid>")
 def selecionar_competidor(cid):
@@ -280,20 +280,20 @@ def logout_competidor():
 @app.route("/")
 @login_required
 def dashboard():
-    # Usar o competidor associado ao usuário logado
+    # Usar o competidor associado ao usuÃ¡rio logado
     if not g.user:
         return redirect(url_for("login"))
 
     competidor = ensure_competidor_profile(g.user)
     total_competidores = Competidor.query.count()
     total_jogos = Jogo.query.count()
-    jogos_realizados = Jogo.query.filter(Jogo.status.in_(["Encerrado", "Resultado Lançado", "Pontuado"])).count()
+    jogos_realizados = Jogo.query.filter(Jogo.status.in_(["Encerrado", "Resultado LanÃ§ado", "Pontuado"])).count()
     jogos_pendentes = total_jogos - jogos_realizados
     
-    # Palpites do usuário logado
+    # Palpites do usuÃ¡rio logado
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
 
-    # Próximos jogos (não iniciados, próximos 10)
+    # PrÃ³ximos jogos (nÃ£o iniciados, prÃ³ximos 10)
     hoje = date.today()
     proximos = (Jogo.query
                 .filter(Jogo.data_jogo >= hoje)
@@ -301,15 +301,15 @@ def dashboard():
                 .order_by(Jogo.data_jogo, Jogo.hora_et)
                 .limit(10).all())
 
-    # Próximo jogo
+    # PrÃ³ximo jogo
     proximo_jogo = proximos[0] if proximos else None
 
-    # Próximo prazo
+    # PrÃ³ximo prazo
     proximo_prazo = None
     if proximo_jogo:
         proximo_prazo = proximo_jogo.prazo_palpite
 
-    # Líder atual
+    # LÃ­der atual
     ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
     lider = ranking[0] if ranking else None
 
@@ -363,13 +363,13 @@ def novo_competidor():
         nome = request.form.get("nome", "").strip()
         apelido = request.form.get("apelido", "").strip()
         if not nome:
-            flash("Nome é obrigatório.", "danger")
+            flash("Nome Ã© obrigatÃ³rio.", "danger")
             return render_template("competidores/form.html", competidor=None)
         if not apelido:
-            flash("Apelido é obrigatório.", "danger")
+            flash("Apelido Ã© obrigatÃ³rio.", "danger")
             return render_template("competidores/form.html", competidor=None)
         if Competidor.query.filter_by(apelido=apelido).first():
-            flash("Apelido já cadastrado. Escolha outro.", "danger")
+            flash("Apelido jÃ¡ cadastrado. Escolha outro.", "danger")
             return render_template("competidores/form.html", competidor=None)
 
         c = Competidor(
@@ -391,29 +391,35 @@ def novo_competidor():
 @app.route("/competidores/<int:cid>/editar", methods=["GET", "POST"])
 def editar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
+    grupos = Grupo.query.order_by(Grupo.nome).all()
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         apelido = request.form.get("apelido", "").strip()
         if not nome:
-            flash("Nome é obrigatório.", "danger")
-            return render_template("competidores/form.html", competidor=c)
+            flash("Nome Ã© obrigatÃ³rio.", "danger")
+            return render_template("competidores/form.html", competidor=c), grupos=grupos)
         if not apelido:
-            flash("Apelido é obrigatório.", "danger")
-            return render_template("competidores/form.html", competidor=c)
+            flash("Apelido Ã© obrigatÃ³rio.", "danger")
+            return render_template("competidores/form.html", competidor=c), grupos=grupos)
         dup = Competidor.query.filter_by(apelido=apelido).first()
         if dup and dup.id != c.id:
-            flash("Apelido já cadastrado. Escolha outro.", "danger")
-            return render_template("competidores/form.html", competidor=c)
+            flash("Apelido jÃ¡ cadastrado. Escolha outro.", "danger")
+            return render_template("competidores/form.html", competidor=c), grupos=grupos)
         c.nome = nome
         c.apelido = apelido
         c.email = request.form.get("email", "").strip() or None
         c.telefone = request.form.get("telefone", "").strip() or None
         c.observacoes = request.form.get("observacoes", "").strip() or None
         c.updated_at = datetime.utcnow()
+        if c.user_id:
+            user_vinculado = User.query.get(c.user_id)
+            if user_vinculado:
+                grupo_id = request.form.get("grupo_id")
+                user_vinculado.grupo_id = int(grupo_id) if grupo_id else None
         db.session.commit()
         flash("Competidor atualizado.", "success")
         return redirect(url_for("listar_competidores"))
-    return render_template("competidores/form.html", competidor=c)
+    return render_template("competidores/form.html", competidor=c), grupos=grupos)
 
 
 @app.route("/competidores/<int:cid>/inativar", methods=["POST"])
@@ -440,11 +446,11 @@ def reativar_competidor(cid):
 def excluir_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     if Palpite.query.filter_by(competidor_id=cid).count() > 0:
-        flash("Não é possível excluir competidor com palpites vinculados. Use Inativar.", "danger")
+        flash("NÃ£o Ã© possÃ­vel excluir competidor com palpites vinculados. Use Inativar.", "danger")
         return redirect(url_for("listar_competidores"))
     db.session.delete(c)
     db.session.commit()
-    flash("Competidor excluído.", "success")
+    flash("Competidor excluÃ­do.", "success")
     return redirect(url_for("listar_competidores"))
 
 
@@ -491,7 +497,7 @@ def listar_jogos():
     jogos = q.all()
     fases = [r[0] for r in db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()]
     status_list = ["Agendado", "Aberto para palpites", "Bloqueado para palpites",
-                   "Em andamento", "Encerrado", "Resultado Lançado", "Pontuado", "Cancelado/Alterado"]
+                   "Em andamento", "Encerrado", "Resultado LanÃ§ado", "Pontuado", "Cancelado/Alterado"]
     return render_template("jogos/lista.html", jogos=jogos, fases=fases,
                            fase_filtro=fase_filtro, status_filtro=status_filtro,
                            status_list=status_list)
@@ -523,7 +529,7 @@ def editar_jogo(jid):
         except Exception as e:
             flash(f"Erro: {e}", "danger")
     status_list = ["Agendado", "Aberto para palpites", "Bloqueado para palpites",
-                   "Em andamento", "Encerrado", "Resultado Lançado", "Pontuado", "Cancelado/Alterado"]
+                   "Em andamento", "Encerrado", "Resultado LanÃ§ado", "Pontuado", "Cancelado/Alterado"]
     return render_template("jogos/form.html", jogo=j, status_list=status_list)
 
 
@@ -535,14 +541,15 @@ def editar_jogo(jid):
 def palpites():
     user = g.user
     
-    # POST — salvar palpites (apenas do próprio usuário)
+    # POST â€” salvar palpites (apenas do prÃ³prio usuÃ¡rio)
     if request.method == "POST":
         jogo_ids = request.form.getlist("jogo_id")
         saved = 0
         erros = []
         for jid in jogo_ids:
             jogo = Jogo.query.get(int(jid))
-            if not jogo or not palpite_editavel(jogo):
+            resultado_existente = Resultado.query.filter_by(jogo_id=int(jid)).first()
+            if not jogo or not palpite_editavel(jogo) or resultado_existente:
                 erros.append(f"Jogo #{jid} com prazo encerrado.")
                 continue
             gols_a = request.form.get(f"gols_a_{jid}", "").strip()
@@ -558,23 +565,23 @@ def palpites():
                 if gols_a < 0 or gols_b < 0:
                     raise ValueError
             except ValueError:
-                erros.append(f"Gols inválidos para o jogo #{jid}.")
+                erros.append(f"Gols invÃ¡lidos para o jogo #{jid}.")
                 continue
 
             if jogo.mata_mata and gols_a == gols_b and not classificado:
-                erros.append(f"Classificado obrigatório no mata-mata jogo #{jid} (empate).")
+                erros.append(f"Classificado obrigatÃ³rio no mata-mata jogo #{jid} (empate).")
                 continue
 
             if classificado and jogo.mata_mata:
                 opcoes = [jogo.time_a.lower(), jogo.time_b.lower()]
                 if classificado.lower() not in opcoes:
-                    erros.append(f"Classificado inválido para jogo #{jid}.")
+                    erros.append(f"Classificado invÃ¡lido para jogo #{jid}.")
                     continue
 
-            # Buscar competidor do usuário logado
+            # Buscar competidor do usuÃ¡rio logado
             competidor = ensure_competidor_profile(user)
             if not competidor:
-                flash("Usuário não tem perfil de competidor.", "danger")
+                flash("UsuÃ¡rio nÃ£o tem perfil de competidor.", "danger")
                 return redirect(url_for("dashboard"))
 
             palpite = Palpite.query.filter_by(competidor_id=competidor.id, jogo_id=jogo.id, valido=True).first()
@@ -618,7 +625,7 @@ def palpites():
             flash(e, "danger")
         return redirect(url_for("palpites"))
 
-    # GET — listar jogos com palpites de todos do grupo
+    # GET â€” listar jogos com palpites de todos do grupo
     filtro = request.args.get("filtro", "todos")
     fase_filtro_param = request.args.get("fase", "").strip()
     fase_filtro = fase_filtro_param
@@ -626,7 +633,7 @@ def palpites():
     selecao_filtro = request.args.get("selecao", "").strip()
     data_filtro = request.args.get("data", "")
 
-    # Detectar fase automática se não foi especificada
+    # Detectar fase automÃ¡tica se nÃ£o foi especificada
     if not fase_filtro:
         # Encontrar fase com jogos dentro do prazo
         fases_disponiveis = db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()
@@ -637,7 +644,7 @@ def palpites():
                 fase_filtro = f  # Usa primeira fase com jogos abertos
                 break
         else:
-            # Se nenhuma fase tem jogo aberto, use a última
+            # Se nenhuma fase tem jogo aberto, use a Ãºltima
             if fases_disponiveis:
                 fase_filtro = fases_disponiveis[-1][0]
 
@@ -660,7 +667,7 @@ def palpites():
 
     todos_jogos = query.all()
 
-    # Palpites do usuário logado
+    # Palpites do usuÃ¡rio logado
     competidor = ensure_competidor_profile(user)
     palpites_map = {}
     palpites_todos_usuarios = {}  # {jogo_id: {competidor_id: palpite}}
@@ -669,7 +676,7 @@ def palpites():
         palpites_map = {p.jogo_id: p for p in
                         Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all()}
     
-    # Palpites de todos os usuários do grupo
+    # Palpites de todos os usuÃ¡rios do grupo
     if user.grupo_id:
         usuarios_grupo = User.query.filter_by(grupo_id=user.grupo_id, ativo=True).all()
         competidores_grupo = [ensure_competidor_profile(u) for u in usuarios_grupo]
@@ -702,7 +709,7 @@ def palpites():
             "pontuacao": pont,
         })
 
-    # Filtros de visualização
+    # Filtros de visualizaÃ§Ã£o
     if filtro == "abertos":
         jogos_com_status = [x for x in jogos_com_status if x["editavel"]]
     elif filtro == "enviados":
@@ -740,11 +747,11 @@ def listar_resultados():
         query = query.filter_by(fase=fase_filtro)
 
     if filtro == "pendentes":
-        # Jogos sem resultado lançado mas cujo prazo já encerrou
+        # Jogos sem resultado lanÃ§ado mas cujo prazo jÃ¡ encerrou
         todos = query.all()
         jogos = [j for j in todos if not j.resultado and not prazo_aberto(j)]
     elif filtro == "encerrados":
-        jogos = query.filter(Jogo.status.in_(["Encerrado", "Resultado Lançado", "Pontuado"])).all()
+        jogos = query.filter(Jogo.status.in_(["Encerrado", "Resultado LanÃ§ado", "Pontuado"])).all()
     else:
         jogos = query.all()
 
@@ -765,12 +772,12 @@ def lancar_resultado(jid):
             if gols_a < 0 or gols_b < 0:
                 raise ValueError
         except (ValueError, KeyError):
-            flash("Gols inválidos.", "danger")
+            flash("Gols invÃ¡lidos.", "danger")
             return render_template("resultados/form.html", jogo=jogo, resultado=resultado)
 
         classificado = request.form.get("classificado", "").strip() or None
         if jogo.mata_mata and not classificado:
-            flash("Classificado obrigatório em mata-mata.", "danger")
+            flash("Classificado obrigatÃ³rio em mata-mata.", "danger")
             return render_template("resultados/form.html", jogo=jogo, resultado=resultado)
 
         if resultado:
@@ -792,12 +799,12 @@ def lancar_resultado(jid):
             )
             db.session.add(resultado)
 
-        jogo.status = "Resultado Lançado"
+        jogo.status = "Resultado LanÃ§ado"
         db.session.commit()
 
-        # Recalcular pontuação
+        # Recalcular pontuaÃ§Ã£o
         calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
-        flash("Resultado lançado e pontuação calculada!", "success")
+        flash("Resultado lanÃ§ado e pontuaÃ§Ã£o calculada!", "success")
         return redirect(url_for("listar_resultados"))
 
     return render_template("resultados/form.html", jogo=jogo, resultado=resultado)
@@ -807,7 +814,7 @@ def lancar_resultado(jid):
 def recalcular_resultado(jid):
     jogo = Jogo.query.get_or_404(jid)
     calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
-    flash("Pontuação recalculada.", "success")
+    flash("PontuaÃ§Ã£o recalculada.", "success")
     return redirect(url_for("listar_resultados"))
 
 
@@ -845,7 +852,7 @@ def create_app():
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
-        # Cria admin automático via variáveis de ambiente (útil em cloud)
+        # Cria admin automÃ¡tico via variÃ¡veis de ambiente (Ãºtil em cloud)
         admin_email = os.environ.get("ADMIN_EMAIL")
         admin_senha = os.environ.get("ADMIN_PASSWORD")
         admin_nome = os.environ.get("ADMIN_NOME", "Administrador")
@@ -877,7 +884,7 @@ def create_app():
 
 
 # ---------------------------------------------------------------------------
-# SIMULAÇÃO (admin)
+# SIMULAÃ‡ÃƒO (admin)
 # ---------------------------------------------------------------------------
 @app.route("/admin/simulacao", methods=["GET", "POST"])
 @admin_required
@@ -934,7 +941,7 @@ def simulacao():
                         usuario_lancamento=f"simulacao:{g.user.email}",
                     )
                     db.session.add(resultado)
-                    jogo.status = "Resultado Lançado"
+                    jogo.status = "Resultado LanÃ§ado"
                     jogos_gerados.append(jogo)
 
                 db.session.commit()
@@ -947,7 +954,7 @@ def simulacao():
             # Redireciona para GET com data_simulada como query param
             return redirect(url_for("simulacao", data_simulada=data_str))
         except ValueError:
-            flash("Formato de data inválido. Use YYYY-MM-DD.", "danger")
+            flash("Formato de data invÃ¡lido. Use YYYY-MM-DD.", "danger")
     
     # Carregar dados com data simulada
     info_simulacao = {
@@ -972,14 +979,14 @@ def simulacao():
                 info_simulacao["total_jogos_ate_data"] - info_simulacao["jogos_com_resultado_ate_data"]
             )
             
-            # Jogos já realizados até essa data
+            # Jogos jÃ¡ realizados atÃ© essa data
             info_simulacao["jogos_realizados"] = (
                 Jogo.query
                 .filter(Jogo.data_jogo < data_obj)
                 .count()
             )
             
-            # Próximo jogo após essa data
+            # PrÃ³ximo jogo apÃ³s essa data
             info_simulacao["proximo_jogo"] = (
                 Jogo.query
                 .filter(Jogo.data_jogo >= data_obj)
@@ -999,3 +1006,5 @@ if __name__ == "__main__":
     port = int(config["port"])
     debug = bool(config["debug"])
     app.run(host=host, port=port, debug=debug)
+
+
