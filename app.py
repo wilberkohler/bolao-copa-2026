@@ -411,11 +411,24 @@ def editar_competidor(cid):
         c.telefone = request.form.get("telefone", "").strip() or None
         c.observacoes = request.form.get("observacoes", "").strip() or None
         c.updated_at = datetime.utcnow()
-        if c.user_id:
-            user_vinculado = User.query.get(c.user_id)
-            if user_vinculado:
-                grupo_id = request.form.get("grupo_id")
-                user_vinculado.grupo_id = int(grupo_id) if grupo_id else None
+
+        grupo_id_raw = request.form.get("grupo_id")
+        grupo_id = int(grupo_id_raw) if grupo_id_raw else None
+
+        user_vinculado = User.query.get(c.user_id) if c.user_id else None
+
+        # Em bases antigas pode existir competidor sem user_id; tenta vincular automaticamente.
+        if not user_vinculado and c.email:
+            user_vinculado = User.query.filter(User.email.ilike(c.email)).first()
+        if not user_vinculado and c.apelido:
+            user_vinculado = User.query.filter(User.apelido.ilike(c.apelido)).first()
+
+        if user_vinculado:
+            c.user_id = user_vinculado.id
+            user_vinculado.grupo_id = grupo_id
+        elif grupo_id is not None:
+            flash("Não foi possível vincular este competidor a um usuário para salvar o grupo.", "warning")
+
         db.session.commit()
         flash("Competidor atualizado.", "success")
         return redirect(url_for("listar_competidores"))
