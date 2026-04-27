@@ -36,6 +36,20 @@
             <label class="form-label">Observações</label>
             <textarea name="observacoes" class="form-control" rows="2">{{ competidor.observacoes or '' if competidor else '' }}</textarea>
           </div>
+          {% if grupos is defined and grupos %}
+          <div class="mb-3">
+            <label class="form-label">Grupo</label>
+            <select name="grupo_id" class="form-select">
+              <option value="">-- Sem grupo --</option>
+              {% for g in grupos %}
+              <option value="{{ g.id }}"
+                {% if competidor and competidor.user and competidor.user.grupo_id == g.id %}selected{% endif %}>
+                {{ g.nome }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salvar</button>
             <a href="{{ url_for('listar_competidores') }}" class="btn btn-outline-secondary">Cancelar</a>

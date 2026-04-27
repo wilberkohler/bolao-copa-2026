@@ -397,14 +397,14 @@ def editar_competidor(cid):
         apelido = request.form.get("apelido", "").strip()
         if not nome:
             flash("Nome Ã© obrigatÃ³rio.", "danger")
-            return render_template("competidores/form.html", competidor=c), grupos=grupos)
+            return render_template("competidores/form.html", competidor=c, grupos=grupos)
         if not apelido:
             flash("Apelido Ã© obrigatÃ³rio.", "danger")
-            return render_template("competidores/form.html", competidor=c), grupos=grupos)
+            return render_template("competidores/form.html", competidor=c, grupos=grupos)
         dup = Competidor.query.filter_by(apelido=apelido).first()
         if dup and dup.id != c.id:
             flash("Apelido jÃ¡ cadastrado. Escolha outro.", "danger")
-            return render_template("competidores/form.html", competidor=c), grupos=grupos)
+            return render_template("competidores/form.html", competidor=c, grupos=grupos)
         c.nome = nome
         c.apelido = apelido
         c.email = request.form.get("email", "").strip() or None
@@ -419,7 +419,7 @@ def editar_competidor(cid):
         db.session.commit()
         flash("Competidor atualizado.", "success")
         return redirect(url_for("listar_competidores"))
-    return render_template("competidores/form.html", competidor=c), grupos=grupos)
+    return render_template("competidores/form.html", competidor=c, grupos=grupos)
 
 
 @app.route("/competidores/<int:cid>/inativar", methods=["POST"])
