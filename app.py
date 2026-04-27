@@ -1,5 +1,6 @@
 ﻿import os
 import random
+import hmac
 from datetime import datetime, date, timedelta
 from functools import wraps
 from pathlib import Path
@@ -11,6 +12,7 @@ from flask import (Flask, render_template, redirect, url_for,
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import seed_jogos
+from result_sync import sync_finished_results_football_data
 from scoring import (calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
 
@@ -871,6 +873,77 @@ def recalcular_resultado(jid):
     calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
     flash("PontuaÃ§Ã£o recalculada.", "success")
     return redirect(url_for("listar_resultados"))
+
+
+def _run_auto_result_sync(launched_by: str):
+    api_key = os.environ.get("FOOTBALL_DATA_API_KEY", "").strip()
+    if not api_key:
+        raise ValueError("FOOTBALL_DATA_API_KEY nÃ£o configurada.")
+
+    base_url = os.environ.get("FOOTBALL_DATA_BASE_URL", "https://api.football-data.org/v4").strip()
+    days_back = int(os.environ.get("RESULT_SYNC_DAYS_BACK", "2"))
+    days_forward = int(os.environ.get("RESULT_SYNC_DAYS_FORWARD", "1"))
+
+    return sync_finished_results_football_data(
+        db,
+        Jogo,
+        Resultado,
+        Palpite,
+        Pontuacao,
+        calcular_pontuacao_jogo,
+        api_key=api_key,
+        base_url=base_url,
+        days_back=days_back,
+        days_forward=days_forward,
+        launched_by=launched_by,
+    )
+
+
+@app.route("/admin/sincronizar-resultados", methods=["POST"])
+@admin_required
+def sincronizar_resultados_admin():
+    try:
+        stats = _run_auto_result_sync(launched_by=f"sync-admin:{g.user.email}")
+    except Exception as exc:
+        flash(f"Falha na sincronizaÃ§Ã£o automÃ¡tica: {exc}", "danger")
+        return redirect(url_for("listar_resultados"))
+
+    flash(
+        (
+            "SincronizaÃ§Ã£o concluÃ­da: "
+            f"{stats['fetched']} recebido(s), "
+            f"{stats['created']} criado(s), "
+            f"{stats['updated']} atualizado(s), "
+            f"{stats['unchanged']} sem alteraÃ§Ã£o, "
+            f"{stats['recalculated']} recalculado(s)."
+        ),
+        "success",
+    )
+
+    if stats["unmatched"]:
+        exemplos = ", ".join(stats["unmatched"][:3])
+        flash(
+            f"Jogos nÃ£o mapeados automaticamente ({len(stats['unmatched'])}): {exemplos}",
+            "warning",
+        )
+
+    return redirect(url_for("listar_resultados"))
+
+
+@app.route("/internal/sync-resultados", methods=["POST"])
+def sincronizar_resultados_cron():
+    token = request.headers.get("X-Sync-Token", "").strip()
+    expected = os.environ.get("RESULT_SYNC_TOKEN", "").strip()
+
+    if not expected or not hmac.compare_digest(token, expected):
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    try:
+        stats = _run_auto_result_sync(launched_by="sync-cron")
+        return jsonify({"ok": True, "stats": stats})
+    except Exception as exc:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(exc)}), 500
 
 
 # ---------------------------------------------------------------------------
