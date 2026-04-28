@@ -352,10 +352,16 @@ def dashboard():
     lider = ranking[0] if ranking else None
 
     # Palpites pendentes (jogos abertos sem palpite do competidor logado)
-    jogos_abertos = [j.id for j in Jogo.query.all() if prazo_aberto(j)]
+    # Carrega apenas jogos futuros/nao encerrados para evitar query full-scan
+    jogos_candidatos = (Jogo.query
+                        .filter(Jogo.status.in_(["Agendado", "Aberto para palpites"]))
+                        .filter(Jogo.prazo_palpite >= datetime.utcnow())
+                        .with_entities(Jogo.id).all())
+    jogos_abertos = {row[0] for row in jogos_candidatos}
     palpites_existentes = {p.jogo_id for p in
-                           Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all()}
-    palpites_pendentes = len(set(jogos_abertos) - palpites_existentes)
+                           Palpite.query.filter_by(competidor_id=competidor.id, valido=True)
+                           .filter(Palpite.jogo_id.in_(jogos_abertos)).all()}
+    palpites_pendentes = len(jogos_abertos - palpites_existentes)
 
     # Status palpite por jogo para o competidor logado
     palpites_map = {}
@@ -740,6 +746,18 @@ def palpites():
                 palpites_todos_usuarios[p.jogo_id] = {}
             palpites_todos_usuarios[p.jogo_id][p.competidor_id] = p
 
+    # Carrega pontuacoes do competidor de uma vez para evitar N+1
+    pontuacoes_map = {}
+    if competidor and todos_jogos:
+        jogo_ids = [j.id for j in todos_jogos]
+        pontuacoes_map = {
+            p.jogo_id: p
+            for p in Pontuacao.query.filter(
+                Pontuacao.competidor_id == competidor.id,
+                Pontuacao.jogo_id.in_(jogo_ids)
+            ).all()
+        }
+
     jogos_com_status = []
     for j in todos_jogos:
         p = palpites_map.get(j.id)
@@ -752,9 +770,7 @@ def palpites():
             st = "Resultado Lançado"
         else:
             st = status_palpite_para_jogo(j, p)
-        pont = None
-        if competidor:
-            pont = Pontuacao.query.filter_by(competidor_id=competidor.id, jogo_id=j.id).first()
+        pont = pontuacoes_map.get(j.id)
         palpites_todos = palpites_todos_usuarios.get(j.id, {})
         jogos_com_status.append({
             "jogo": j,
