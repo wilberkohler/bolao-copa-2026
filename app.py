@@ -9,7 +9,7 @@ import pytz
 from flask import (Flask, render_template, redirect, url_for,
                    request, flash, session, jsonify, g,
                    send_from_directory, make_response)
-from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo
+from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import seed_jogos
 from result_sync import sync_finished_results_football_data
@@ -985,6 +985,32 @@ def ranking_por_fase():
 @login_required
 def regras():
     return render_template("regras.html")
+
+
+@app.route("/solicitar-exclusao-dados", methods=["GET", "POST"])
+def solicitar_exclusao_dados():
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        motivo = request.form.get("motivo", "").strip()
+
+        if not nome or not email:
+            flash("Nome e e-mail sao obrigatorios.", "danger")
+            return render_template("solicitar_exclusao_dados.html", nome=nome, email=email, motivo=motivo)
+
+        solicitacao = SolicitacaoExclusaoDados(
+            nome=nome,
+            email=email,
+            motivo=motivo or None,
+            status="Pendente",
+        )
+        db.session.add(solicitacao)
+        db.session.commit()
+
+        flash("Solicitacao recebida com sucesso. Nossa equipe analisara o pedido e retornara por e-mail.", "success")
+        return redirect(url_for("solicitar_exclusao_dados"))
+
+    return render_template("solicitar_exclusao_dados.html")
 
 
 # ---------------------------------------------------------------------------

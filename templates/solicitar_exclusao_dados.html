@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Solicitar Exclusao de Conta e Dados{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-9 col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white">
+        <strong><i class="bi bi-shield-x"></i> Solicitar Exclusao de Conta e Dados</strong>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          Use este formulario para solicitar a exclusao da sua conta e dos seus dados do Bolao Copa 2026.
+        </p>
+
+        <form method="post" action="{{ url_for('solicitar_exclusao_dados') }}" class="row g-3">
+          <div class="col-12">
+            <label for="nome" class="form-label">Nome completo</label>
+            <input type="text" class="form-control" id="nome" name="nome" value="{{ nome or '' }}" required>
+          </div>
+
+          <div class="col-12">
+            <label for="email" class="form-label">E-mail da conta</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}" required>
+          </div>
+
+          <div class="col-12">
+            <label for="motivo" class="form-label">Detalhes do pedido (opcional)</label>
+            <textarea class="form-control" id="motivo" name="motivo" rows="4" placeholder="Informe qualquer detalhe que facilite a identificacao da conta.">{{ motivo or '' }}</textarea>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-send"></i> Enviar solicitacao
+            </button>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">Voltar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

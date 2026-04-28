@@ -156,3 +156,14 @@ class HistoricoPalpite(db.Model):
     palpite_gols_b_novo = db.Column(db.Integer)
     palpite_classificado_novo = db.Column(db.String(60))
     data_alteracao = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class SolicitacaoExclusaoDados(db.Model):
+    __tablename__ = "solicitacoes_exclusao_dados"
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    motivo = db.Column(db.Text)
+    status = db.Column(db.String(30), default="Pendente")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
