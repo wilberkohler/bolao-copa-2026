@@ -45,7 +45,7 @@
   </div>
 </form>
 
-<form method="post" action="{{ url_for('palpites') }}">
+<form id="palpites-form" method="post" action="{{ url_for('palpites') }}">
   <div class="table-responsive">
     <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
       <thead class="table-success">
@@ -192,4 +192,190 @@
     </small>
   </div>
 </form>
+
+<div class="modal fade" id="unsavedChangesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-warning"></i> Alteracoes nao salvas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Voce fez alteracoes nos palpites. Deseja salvar antes de sair desta pagina?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="modalSaveAndLeave">Salvar</button>
+        <button type="button" class="btn btn-outline-danger" id="modalLeaveWithoutSaving">Sair sem salvar</button>
+        <button type="button" class="btn btn-secondary" id="modalStayOnPage" data-bs-dismiss="modal">Permanecer na pagina</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var form = document.getElementById("palpites-form");
+    if (!form) {
+      return;
+    }
+
+    var trackSelector = "input[name^='gols_'], select[name^='classificado_']";
+    var trackedFields = Array.prototype.slice.call(form.querySelectorAll(trackSelector));
+    if (!trackedFields.length) {
+      return;
+    }
+
+    var redirectStorageKey = "palpites.redirect.after.save";
+    var modalElement = document.getElementById("unsavedChangesModal");
+    var saveAndLeaveButton = document.getElementById("modalSaveAndLeave");
+    var leaveWithoutSavingButton = document.getElementById("modalLeaveWithoutSaving");
+    var unsavedChangesModal = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
+    var pendingNavigation = null;
+    var allowImmediateLeave = false;
+    var isSubmitting = false;
+    var initialState = serializeTrackedFields();
+
+    var pendingRedirect = sessionStorage.getItem(redirectStorageKey);
+    if (pendingRedirect) {
+      sessionStorage.removeItem(redirectStorageKey);
+      if (pendingRedirect !== window.location.href) {
+        window.location.href = pendingRedirect;
+        return;
+      }
+    }
+
+    function serializeTrackedFields() {
+      return trackedFields.map(function (field) {
+        return field.name + "=" + (field.value || "");
+      }).join("||");
+    }
+
+    function hasUnsavedChanges() {
+      if (isSubmitting) {
+        return false;
+      }
+      return serializeTrackedFields() !== initialState;
+    }
+
+    function buildFormTargetUrl(targetForm) {
+      var action = targetForm.getAttribute("action") || window.location.href;
+      var method = (targetForm.getAttribute("method") || "get").toLowerCase();
+      if (method !== "get") {
+        return action;
+      }
+
+      var url = new URL(action, window.location.origin);
+      var formData = new FormData(targetForm);
+      var searchParams = new URLSearchParams(formData);
+      url.search = searchParams.toString();
+      return url.toString();
+    }
+
+    function proceedWithoutSaving() {
+      if (!pendingNavigation) {
+        return;
+      }
+
+      allowImmediateLeave = true;
+
+      if (pendingNavigation.type === "link") {
+        window.location.href = pendingNavigation.href;
+        return;
+      }
+
+      if (pendingNavigation.type === "form") {
+        pendingNavigation.form.submit();
+      }
+    }
+
+    function proceedWithSave() {
+      if (!pendingNavigation) {
+        return;
+      }
+
+      var redirectTarget = pendingNavigation.type === "link"
+        ? pendingNavigation.href
+        : buildFormTargetUrl(pendingNavigation.form);
+
+      sessionStorage.setItem(redirectStorageKey, redirectTarget);
+      isSubmitting = true;
+      form.submit();
+    }
+
+    function openUnsavedModal(navigationIntent) {
+      pendingNavigation = navigationIntent;
+      if (unsavedChangesModal) {
+        unsavedChangesModal.show();
+      }
+    }
+
+    form.addEventListener("submit", function () {
+      isSubmitting = true;
+    });
+
+    if (saveAndLeaveButton) {
+      saveAndLeaveButton.addEventListener("click", function () {
+        if (unsavedChangesModal) {
+          unsavedChangesModal.hide();
+        }
+        proceedWithSave();
+      });
+    }
+
+    if (leaveWithoutSavingButton) {
+      leaveWithoutSavingButton.addEventListener("click", function () {
+        if (unsavedChangesModal) {
+          unsavedChangesModal.hide();
+        }
+        proceedWithoutSaving();
+      });
+    }
+
+    if (modalElement) {
+      modalElement.addEventListener("hidden.bs.modal", function () {
+        pendingNavigation = null;
+      });
+    }
+
+    window.addEventListener("beforeunload", function (event) {
+      if (allowImmediateLeave || !hasUnsavedChanges()) {
+        return;
+      }
+      event.preventDefault();
+      event.returnValue = "";
+    });
+
+    document.addEventListener("click", function (event) {
+      var link = event.target.closest("a[href]");
+      if (!link || allowImmediateLeave || !hasUnsavedChanges()) {
+        return;
+      }
+
+      var href = link.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) {
+        return;
+      }
+
+      var target = link.getAttribute("target");
+      if (target && target !== "_self") {
+        return;
+      }
+
+      event.preventDefault();
+      openUnsavedModal({ type: "link", href: link.href });
+    }, true);
+
+    document.addEventListener("submit", function (event) {
+      var targetForm = event.target;
+      if (!targetForm || targetForm === form || allowImmediateLeave || !hasUnsavedChanges()) {
+        return;
+      }
+
+      event.preventDefault();
+      openUnsavedModal({ type: "form", form: targetForm });
+    }, true);
+  })();
+</script>
 {% endblock %}
