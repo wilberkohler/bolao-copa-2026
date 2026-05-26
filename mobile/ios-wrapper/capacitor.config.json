@@ -1,0 +1,24 @@
+{
+  "appId": "br.com.kohler.bolao2026",
+  "appName": "Bolao Copa 2026",
+  "webDir": "www",
+  "server": {
+    "url": "https://SEU_DOMINIO_AQUI",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "scheme": "BolaoCopa2026"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#198754",
+      "iosSpinnerStyle": "small"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#198754"
+    }
+  }
+}

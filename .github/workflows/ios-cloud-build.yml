@@ -1,0 +1,73 @@
+name: iOS Cloud Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "URL HTTPS do backend Flask (opcional para validar build)"
+        required: false
+        type: string
+  push:
+    paths:
+      - ".github/workflows/ios-cloud-build.yml"
+      - "mobile/ios-wrapper/**"
+
+jobs:
+  build-simulator:
+    name: Build iOS Simulator
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: mobile/ios-wrapper
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: mobile/ios-wrapper/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure app URL
+        env:
+          IOS_APP_URL: ${{ inputs.app_url || secrets.IOS_APP_URL }}
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = "capacitor.config.json";
+          const config = JSON.parse(fs.readFileSync(path, "utf8"));
+
+          if (process.env.IOS_APP_URL) {
+            config.server = config.server || {};
+            config.server.url = process.env.IOS_APP_URL;
+            config.server.cleartext = false;
+            fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
+          }
+
+          console.log(`Capacitor server URL: ${config.server && config.server.url}`);
+          NODE
+
+      - name: Generate iOS project
+        run: npx cap add ios
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Build with Xcode for simulator
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
