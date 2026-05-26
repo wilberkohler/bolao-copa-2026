@@ -1,0 +1,172 @@
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archive-upload:
+    name: Archive and Upload to TestFlight
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: mobile/ios-wrapper
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/ios-wrapper/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure app URL
+        env:
+          IOS_APP_URL: ${{ secrets.IOS_APP_URL }}
+        run: |
+          if [ -z "$IOS_APP_URL" ]; then
+            echo "Missing IOS_APP_URL secret"
+            exit 1
+          fi
+
+          node - <<'NODE'
+          const fs = require("fs");
+          const path = "capacitor.config.json";
+          const config = JSON.parse(fs.readFileSync(path, "utf8"));
+          config.server = config.server || {};
+          config.server.url = process.env.IOS_APP_URL;
+          config.server.cleartext = false;
+          fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
+          console.log(`Capacitor server URL: ${config.server.url}`);
+          NODE
+
+      - name: Generate iOS project
+        run: npx cap add ios
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Install Apple signing assets
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -z "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" ] || [ -z "$IOS_PROVISIONING_PROFILE_BASE64" ] || [ -z "$KEYCHAIN_PASSWORD" ]; then
+            echo "Missing signing secrets"
+            exit 1
+          fi
+
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          PP_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          echo -n "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$IOS_DISTRIBUTION_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(security cms -D -i "$PP_PATH")")
+          cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          echo "Installed provisioning profile: $PROFILE_UUID"
+
+      - name: Archive app
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$APPLE_TEAM_ID" ]; then
+            echo "Missing APPLE_TEAM_ID secret"
+            exit 1
+          fi
+
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/BolaoCopa2026.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            archive
+
+      - name: Create export options
+        env:
+          IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          if [ -z "$IOS_PROVISIONING_PROFILE_NAME" ]; then
+            echo "Missing IOS_PROVISIONING_PROFILE_NAME secret"
+            exit 1
+          fi
+
+          cat > "$RUNNER_TEMP/exportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>br.com.kohler.bolao2026</key>
+              <string>${IOS_PROVISIONING_PROFILE_NAME}</string>
+            </dict>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Export IPA
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/BolaoCopa2026.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist"
+
+      - name: Prepare App Store Connect API key
+        env:
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          if [ -z "$APP_STORE_CONNECT_API_KEY_P8" ]; then
+            echo "Missing APP_STORE_CONNECT_API_KEY_P8 secret"
+            exit 1
+          fi
+
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          echo "$APP_STORE_CONNECT_API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          IPA_PATH=$(find "$RUNNER_TEMP/export" -name "*.ipa" -maxdepth 1 | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "IPA not found"
+            exit 1
+          fi
+
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+
