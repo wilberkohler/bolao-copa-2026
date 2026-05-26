@@ -85,9 +85,10 @@ jobs:
       - name: Archive app
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
         run: |
-          if [ -z "$APPLE_TEAM_ID" ]; then
-            echo "Missing APPLE_TEAM_ID secret"
+          if [ -z "$APPLE_TEAM_ID" ] || [ -z "$IOS_PROVISIONING_PROFILE_NAME" ]; then
+            echo "Missing APPLE_TEAM_ID or IOS_PROVISIONING_PROFILE_NAME secret"
             exit 1
           fi
 
@@ -99,6 +100,7 @@ jobs:
             -archivePath "$RUNNER_TEMP/BolaoCopa2026.xcarchive" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_NAME" \
             archive
 
       - name: Create export options
@@ -169,4 +171,3 @@ jobs:
             --file "$IPA_PATH" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
-
