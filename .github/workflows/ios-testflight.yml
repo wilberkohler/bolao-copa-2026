@@ -81,14 +81,15 @@ jobs:
           PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(security cms -D -i "$PP_PATH")")
           cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
           echo "Installed provisioning profile: $PROFILE_UUID"
+          echo "IOS_PROVISIONING_PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
 
       - name: Archive app
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
         run: |
-          if [ -z "$APPLE_TEAM_ID" ] || [ -z "$IOS_PROVISIONING_PROFILE_NAME" ]; then
-            echo "Missing APPLE_TEAM_ID or IOS_PROVISIONING_PROFILE_NAME secret"
+          if [ -z "$APPLE_TEAM_ID" ] || [ -z "$IOS_PROVISIONING_PROFILE_NAME" ] || [ -z "$IOS_PROVISIONING_PROFILE_UUID" ]; then
+            echo "Missing APPLE_TEAM_ID, IOS_PROVISIONING_PROFILE_NAME, or IOS_PROVISIONING_PROFILE_UUID"
             exit 1
           fi
 
@@ -101,6 +102,8 @@ jobs:
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Manual \
             PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_NAME" \
+            PROVISIONING_PROFILE="$IOS_PROVISIONING_PROFILE_UUID" \
+            PRODUCT_BUNDLE_IDENTIFIER="br.com.kohler.bolao2026" \
             archive
 
       - name: Create export options
