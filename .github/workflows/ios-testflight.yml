@@ -96,6 +96,7 @@ jobs:
           const profileName = process.env.IOS_PROVISIONING_PROFILE_NAME;
           const profileUuid = process.env.IOS_PROVISIONING_PROFILE_UUID;
           const bundleId = "br.com.kohler.bolao2026";
+          const buildNumber = process.env.GITHUB_RUN_NUMBER || "1";
 
           if (!teamId || !profileName || !profileUuid) {
             console.error("Missing signing environment values");
@@ -119,6 +120,8 @@ jobs:
             body = upsert(body, "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"", "\"Apple Distribution\"");
             body = upsert(body, "PROVISIONING_PROFILE_SPECIFIER", `"${profileName}"`);
             body = upsert(body, "PROVISIONING_PROFILE", profileUuid);
+            body = upsert(body, "CURRENT_PROJECT_VERSION", buildNumber);
+            body = upsert(body, "MARKETING_VERSION", "1.0");
             body = body.replace(/PRODUCT_BUNDLE_IDENTIFIER = .*?;/, `PRODUCT_BUNDLE_IDENTIFIER = ${bundleId};`);
             return `buildSettings = {${body}\n\t\t\t};`;
           });
