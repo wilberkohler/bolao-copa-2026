@@ -83,28 +83,58 @@ jobs:
           echo "Installed provisioning profile: $PROFILE_UUID"
           echo "IOS_PROVISIONING_PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
 
-      - name: Archive app
+      - name: Configure Xcode signing for app target
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
         run: |
-          if [ -z "$APPLE_TEAM_ID" ] || [ -z "$IOS_PROVISIONING_PROFILE_NAME" ] || [ -z "$IOS_PROVISIONING_PROFILE_UUID" ]; then
-            echo "Missing APPLE_TEAM_ID, IOS_PROVISIONING_PROFILE_NAME, or IOS_PROVISIONING_PROFILE_UUID"
-            exit 1
-          fi
+          node - <<'NODE'
+          const fs = require("fs");
 
+          const projectPath = "ios/App/App.xcodeproj/project.pbxproj";
+          const teamId = process.env.APPLE_TEAM_ID;
+          const profileName = process.env.IOS_PROVISIONING_PROFILE_NAME;
+          const profileUuid = process.env.IOS_PROVISIONING_PROFILE_UUID;
+          const bundleId = "br.com.kohler.bolao2026";
+
+          if (!teamId || !profileName || !profileUuid) {
+            console.error("Missing signing environment values");
+            process.exit(1);
+          }
+
+          let project = fs.readFileSync(projectPath, "utf8");
+
+          function upsert(body, key, value) {
+            const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const line = `\t\t\t\t${key} = ${value};`;
+            const re = new RegExp(`\\n\\t\\t\\t\\t${escaped} = .*?;`, "g");
+            body = body.replace(re, "");
+            return `${line}\n${body}`;
+          }
+
+          project = project.replace(/buildSettings = \{([\s\S]*?PRODUCT_BUNDLE_IDENTIFIER = br\.com\.kohler\.bolao2026;[\s\S]*?)\n\t\t\t\};/g, (match, body) => {
+            body = upsert(body, "CODE_SIGN_STYLE", "Manual");
+            body = upsert(body, "DEVELOPMENT_TEAM", teamId);
+            body = upsert(body, "CODE_SIGN_IDENTITY", "\"Apple Distribution\"");
+            body = upsert(body, "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"", "\"Apple Distribution\"");
+            body = upsert(body, "PROVISIONING_PROFILE_SPECIFIER", `"${profileName}"`);
+            body = upsert(body, "PROVISIONING_PROFILE", profileUuid);
+            body = body.replace(/PRODUCT_BUNDLE_IDENTIFIER = .*?;/, `PRODUCT_BUNDLE_IDENTIFIER = ${bundleId};`);
+            return `buildSettings = {${body}\n\t\t\t};`;
+          });
+
+          fs.writeFileSync(projectPath, project);
+          console.log("Configured manual signing for App target only.");
+          NODE
+
+      - name: Archive app
+        run: |
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath "$RUNNER_TEMP/BolaoCopa2026.xcarchive" \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_NAME" \
-            PROVISIONING_PROFILE="$IOS_PROVISIONING_PROFILE_UUID" \
-            PRODUCT_BUNDLE_IDENTIFIER="br.com.kohler.bolao2026" \
             archive
 
       - name: Create export options
