@@ -17,7 +17,7 @@ from scoring import (calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
 
 BR_TZ = pytz.timezone("America/Sao_Paulo")
-ADMIN_EMAIL = "wilberkohler@gmail.com"
+ADMIN_EMAIL = "wilber.kohler@naest.com.br"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
