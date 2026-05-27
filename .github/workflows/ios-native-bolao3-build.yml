@@ -26,8 +26,12 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Show generated schemes
+        run: xcodebuild -list -project Bolao3.xcodeproj
+
       - name: Build with Xcode for simulator
         run: |
+          set -o pipefail
           xcodebuild \
             -project Bolao3.xcodeproj \
             -scheme Bolao3 \
@@ -35,4 +39,4 @@ jobs:
             -sdk iphonesimulator \
             -destination "generic/platform=iOS Simulator" \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build | tee "$RUNNER_TEMP/bolao3-xcodebuild.log"
