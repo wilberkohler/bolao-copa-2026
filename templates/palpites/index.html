@@ -184,14 +184,6 @@
 <form id="palpites-form" method="post" action="{{ url_for('palpites') }}">
   <input type="hidden" name="acao_palpite" id="acaoPalpite" value="salvar">
   <div id="clearActiveTabGameIds"></div>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <button type="button" class="btn btn-outline-primary btn-sm" id="autoFillEmptyGuesses">
-      <i class="bi bi-dice-5"></i> Preencher vazios aleatoriamente
-    </button>
-    <button type="button" class="btn btn-outline-danger btn-sm" id="clearFutureGuesses">
-      <i class="bi bi-eraser"></i> Limpar palpites futuros
-    </button>
-  </div>
 
   {% if palpites_por_grupo %}
     <ul class="nav nav-tabs mb-3" role="tablist">
@@ -213,6 +205,14 @@
     <div class="tab-content">
       {% for grupo in palpites_por_grupo %}
         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ grupo.id }}" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-outline-primary btn-sm js-fill-tab">
+              <i class="bi bi-dice-5"></i> Preencher vazios desta aba
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm js-clear-tab">
+              <i class="bi bi-eraser"></i> Limpar futuros desta aba
+            </button>
+          </div>
           {{ palpites_table(grupo.itens) }}
         </div>
       {% endfor %}
@@ -269,8 +269,6 @@
     var modalElement = document.getElementById("unsavedChangesModal");
     var saveAndLeaveButton = document.getElementById("modalSaveAndLeave");
     var leaveWithoutSavingButton = document.getElementById("modalLeaveWithoutSaving");
-    var autoFillButton = document.getElementById("autoFillEmptyGuesses");
-    var clearFutureButton = document.getElementById("clearFutureGuesses");
     var actionField = document.getElementById("acaoPalpite");
     var clearGameIdsContainer = document.getElementById("clearActiveTabGameIds");
     var unsavedChangesModal = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
@@ -305,21 +303,17 @@
       return String(Math.floor(Math.random() * 5));
     }
 
-    function classificadoSelectForGame(gameId) {
-      return form.querySelector("select[name='classificado_" + gameId + "']");
+    function tabPaneFromButton(button) {
+      return button ? button.closest(".tab-pane") : null;
     }
 
-    function activeTabPane() {
-      return form.querySelector(".tab-pane.show.active") || form;
+    function tabGameInputs(pane) {
+      return Array.prototype.slice.call((pane || form).querySelectorAll("input[name='jogo_id']"));
     }
 
-    function activeTabGameInputs() {
-      return Array.prototype.slice.call(activeTabPane().querySelectorAll("input[name='jogo_id']"));
-    }
-
-    function fillEmptyGuesses() {
-      var pane = activeTabPane();
-      activeTabGameInputs().forEach(function (gameInput) {
+    function fillEmptyGuesses(pane) {
+      pane = pane || form;
+      tabGameInputs(pane).forEach(function (gameInput) {
         var gameId = gameInput.value;
         var goalsA = pane.querySelector("input[name='gols_a_" + gameId + "']");
         var goalsB = pane.querySelector("input[name='gols_b_" + gameId + "']");
@@ -341,18 +335,18 @@
       });
     }
 
-    function clearFutureGuesses() {
-      var activeGames = activeTabGameInputs();
-      if (!activeGames.length) {
+    function clearFutureGuesses(pane) {
+      var tabGames = tabGameInputs(pane);
+      if (!tabGames.length) {
         return;
       }
 
-      if (!window.confirm("Limpar os palpites ainda editáveis apenas da aba ativa? Esta ação será salva agora.")) {
+      if (!window.confirm("Limpar os palpites ainda editáveis apenas desta aba? Esta ação será salva agora.")) {
         return;
       }
       if (clearGameIdsContainer) {
         clearGameIdsContainer.innerHTML = "";
-        activeGames.forEach(function (gameInput) {
+        tabGames.forEach(function (gameInput) {
           var hidden = document.createElement("input");
           hidden.type = "hidden";
           hidden.name = "limpar_jogo_id";
@@ -447,13 +441,17 @@
       });
     }
 
-    if (autoFillButton) {
-      autoFillButton.addEventListener("click", fillEmptyGuesses);
-    }
+    Array.prototype.slice.call(form.querySelectorAll(".js-fill-tab")).forEach(function (button) {
+      button.addEventListener("click", function () {
+        fillEmptyGuesses(tabPaneFromButton(button));
+      });
+    });
 
-    if (clearFutureButton) {
-      clearFutureButton.addEventListener("click", clearFutureGuesses);
-    }
+    Array.prototype.slice.call(form.querySelectorAll(".js-clear-tab")).forEach(function (button) {
+      button.addEventListener("click", function () {
+        clearFutureGuesses(tabPaneFromButton(button));
+      });
+    });
 
     if (modalElement) {
       modalElement.addEventListener("hidden.bs.modal", function () {
