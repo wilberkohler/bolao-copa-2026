@@ -183,6 +183,7 @@
 
 <form id="palpites-form" method="post" action="{{ url_for('palpites') }}">
   <input type="hidden" name="acao_palpite" id="acaoPalpite" value="salvar">
+  <div id="clearActiveTabGameIds"></div>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <button type="button" class="btn btn-outline-primary btn-sm" id="autoFillEmptyGuesses">
       <i class="bi bi-dice-5"></i> Preencher vazios aleatoriamente
@@ -271,6 +272,7 @@
     var autoFillButton = document.getElementById("autoFillEmptyGuesses");
     var clearFutureButton = document.getElementById("clearFutureGuesses");
     var actionField = document.getElementById("acaoPalpite");
+    var clearGameIdsContainer = document.getElementById("clearActiveTabGameIds");
     var unsavedChangesModal = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
     var pendingNavigation = null;
     var allowImmediateLeave = false;
@@ -307,12 +309,20 @@
       return form.querySelector("select[name='classificado_" + gameId + "']");
     }
 
+    function activeTabPane() {
+      return form.querySelector(".tab-pane.show.active") || form;
+    }
+
+    function activeTabGameInputs() {
+      return Array.prototype.slice.call(activeTabPane().querySelectorAll("input[name='jogo_id']"));
+    }
+
     function fillEmptyGuesses() {
-      var gameIds = Array.prototype.slice.call(form.querySelectorAll("input[name='jogo_id']"));
-      gameIds.forEach(function (gameInput) {
+      var pane = activeTabPane();
+      activeTabGameInputs().forEach(function (gameInput) {
         var gameId = gameInput.value;
-        var goalsA = form.querySelector("input[name='gols_a_" + gameId + "']");
-        var goalsB = form.querySelector("input[name='gols_b_" + gameId + "']");
+        var goalsA = pane.querySelector("input[name='gols_a_" + gameId + "']");
+        var goalsB = pane.querySelector("input[name='gols_b_" + gameId + "']");
         if (!goalsA || !goalsB || goalsA.disabled || goalsB.disabled) {
           return;
         }
@@ -324,7 +334,7 @@
           goalsB.value = randomGoals();
         }
 
-        var classificado = classificadoSelectForGame(gameId);
+        var classificado = pane.querySelector("select[name='classificado_" + gameId + "']");
         if (classificado && classificado.value === "" && goalsA.value === goalsB.value && classificado.options.length > 2) {
           classificado.selectedIndex = Math.random() < 0.5 ? 1 : 2;
         }
@@ -332,8 +342,23 @@
     }
 
     function clearFutureGuesses() {
-      if (!window.confirm("Limpar todos os palpites ainda editáveis? Esta ação será salva agora.")) {
+      var activeGames = activeTabGameInputs();
+      if (!activeGames.length) {
         return;
+      }
+
+      if (!window.confirm("Limpar os palpites ainda editáveis apenas da aba ativa? Esta ação será salva agora.")) {
+        return;
+      }
+      if (clearGameIdsContainer) {
+        clearGameIdsContainer.innerHTML = "";
+        activeGames.forEach(function (gameInput) {
+          var hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "limpar_jogo_id";
+          hidden.value = gameInput.value;
+          clearGameIdsContainer.appendChild(hidden);
+        });
       }
       if (actionField) {
         actionField.value = "limpar_futuros";
@@ -397,6 +422,9 @@
     form.addEventListener("submit", function () {
       if (actionField) {
         actionField.value = "salvar";
+      }
+      if (clearGameIdsContainer) {
+        clearGameIdsContainer.innerHTML = "";
       }
       isSubmitting = true;
     });

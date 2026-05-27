@@ -695,8 +695,15 @@ def palpites():
 
         acao_palpite = request.form.get("acao_palpite", "salvar")
         if acao_palpite == "limpar_futuros":
+            jogo_ids_para_limpar = {
+                int(jid)
+                for jid in request.form.getlist("limpar_jogo_id")
+                if jid and jid.isdigit()
+            }
             palpites_futuros = []
             for palpite in Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all():
+                if jogo_ids_para_limpar and palpite.jogo_id not in jogo_ids_para_limpar:
+                    continue
                 jogo = Jogo.query.get(palpite.jogo_id)
                 if jogo and palpite_editavel(jogo) and not jogo.resultado:
                     palpites_futuros.append(palpite)
