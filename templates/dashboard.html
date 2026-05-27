@@ -4,7 +4,6 @@
 
 <h4 class="mb-3"><i class="bi bi-house-fill text-success"></i> Dashboard</h4>
 
-<!-- Cards de resumo -->
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
@@ -56,15 +55,21 @@
   </div>
 </div>
 
-<!-- Líder, próximo jogo, próximo prazo -->
 <div class="row g-3 mb-4">
   <div class="col-md-4">
     <div class="card shadow-sm border-warning h-100">
-      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Líder Atual</div>
+      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Pódio Atual</div>
       <div class="card-body">
-        {% if lider %}
-          <h5 class="card-title">{{ lider.competidor.apelido }}</h5>
-          <p class="card-text mb-0"><strong>{{ lider.pontos }}</strong> pontos &nbsp;|&nbsp; Posição #1</p>
+        {% if podium %}
+          <div class="podium-wrap">
+            {% for r in podium %}
+              <div class="podium-place podium-place-{{ r.posicao }}">
+                <div class="podium-rank">#{{ r.posicao }}</div>
+                <div class="podium-name mt-2">{{ r.competidor.apelido }}</div>
+                <div class="small text-muted">{{ r.pontos }} pontos</div>
+              </div>
+            {% endfor %}
+          </div>
         {% else %}
           <p class="text-muted">Nenhum resultado lançado ainda.</p>
         {% endif %}
@@ -90,11 +95,7 @@
       <div class="card-header bg-danger text-white fw-bold"><i class="bi bi-clock"></i> Próximo Prazo</div>
       <div class="card-body">
         {% if proximo_prazo %}
-          {% if proximo_prazo.tzinfo %}
-            <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
-          {% else %}
-            <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
-          {% endif %}
+          <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
           <p class="mb-0 text-muted">Prazo para: {{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</p>
         {% else %}
           <p class="text-muted">Sem prazo iminente.</p>
@@ -104,7 +105,6 @@
   </div>
 </div>
 
-<!-- Próximos Jogos -->
 <h5 class="mb-2"><i class="bi bi-calendar3"></i> Próximos Jogos</h5>
 <div class="table-responsive">
   <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
@@ -130,8 +130,8 @@
         <td>{{ j.hora_brasilia }}</td>
         <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
         <td>{{ j.grupo or '-' }}</td>
-        <td><strong>{{ j.time_a }}</strong></td>
-        <td><strong>{{ j.time_b }}</strong></td>
+        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong></td>
+        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong></td>
         <td>{{ j.cidade }}</td>
         <td>
           {% set st = j.status %}
@@ -155,13 +155,7 @@
         {% endif %}
         <td>
           {% if j.prazo_palpite %}
-            <small class="text-muted">
-              {% if j.prazo_palpite.tzinfo %}
-                {{ j.prazo_palpite.strftime('%d/%m %H:%M') }}
-              {% else %}
-                {{ j.prazo_palpite.strftime('%d/%m %H:%M') }}
-              {% endif %}
-            </small>
+            <small class="text-muted">{{ j.prazo_palpite.strftime('%d/%m %H:%M') }}</small>
           {% endif %}
         </td>
       </tr>

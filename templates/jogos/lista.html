@@ -73,8 +73,8 @@
                 <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
                 <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
                 <td>{{ j.hora_brasilia }}</td>
-                <td><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
-                <td><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+                <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
+                <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
                 <td><small>{{ j.estadio }}</small></td>
                 <td><small>{{ j.cidade }}, {{ j.pais }}</small></td>
                 <td>

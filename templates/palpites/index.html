@@ -30,7 +30,7 @@
         <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
         <td>{{ j.hora_brasilia }}</td>
         <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
-        <td><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
+        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
         <td>
           {% if item.editavel %}
             <input type="hidden" name="jogo_id" value="{{ j.id }}">
@@ -50,7 +50,7 @@
             <span>{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</span>
           {% endif %}
         </td>
-        <td><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
         <td>
           {% if j.mata_mata %}
             {% if item.editavel %}
@@ -182,6 +182,16 @@
 </form>
 
 <form id="palpites-form" method="post" action="{{ url_for('palpites') }}">
+  <input type="hidden" name="acao_palpite" id="acaoPalpite" value="salvar">
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <button type="button" class="btn btn-outline-primary btn-sm" id="autoFillEmptyGuesses">
+      <i class="bi bi-dice-5"></i> Preencher vazios aleatoriamente
+    </button>
+    <button type="button" class="btn btn-outline-danger btn-sm" id="clearFutureGuesses">
+      <i class="bi bi-eraser"></i> Limpar palpites futuros
+    </button>
+  </div>
+
   {% if palpites_por_grupo %}
     <ul class="nav nav-tabs mb-3" role="tablist">
       {% for grupo in palpites_por_grupo %}
@@ -258,6 +268,9 @@
     var modalElement = document.getElementById("unsavedChangesModal");
     var saveAndLeaveButton = document.getElementById("modalSaveAndLeave");
     var leaveWithoutSavingButton = document.getElementById("modalLeaveWithoutSaving");
+    var autoFillButton = document.getElementById("autoFillEmptyGuesses");
+    var clearFutureButton = document.getElementById("clearFutureGuesses");
+    var actionField = document.getElementById("acaoPalpite");
     var unsavedChangesModal = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
     var pendingNavigation = null;
     var allowImmediateLeave = false;
@@ -284,6 +297,49 @@
         return false;
       }
       return serializeTrackedFields() !== initialState;
+    }
+
+    function randomGoals() {
+      return String(Math.floor(Math.random() * 5));
+    }
+
+    function classificadoSelectForGame(gameId) {
+      return form.querySelector("select[name='classificado_" + gameId + "']");
+    }
+
+    function fillEmptyGuesses() {
+      var gameIds = Array.prototype.slice.call(form.querySelectorAll("input[name='jogo_id']"));
+      gameIds.forEach(function (gameInput) {
+        var gameId = gameInput.value;
+        var goalsA = form.querySelector("input[name='gols_a_" + gameId + "']");
+        var goalsB = form.querySelector("input[name='gols_b_" + gameId + "']");
+        if (!goalsA || !goalsB || goalsA.disabled || goalsB.disabled) {
+          return;
+        }
+
+        if (goalsA.value === "") {
+          goalsA.value = randomGoals();
+        }
+        if (goalsB.value === "") {
+          goalsB.value = randomGoals();
+        }
+
+        var classificado = classificadoSelectForGame(gameId);
+        if (classificado && classificado.value === "" && goalsA.value === goalsB.value && classificado.options.length > 2) {
+          classificado.selectedIndex = Math.random() < 0.5 ? 1 : 2;
+        }
+      });
+    }
+
+    function clearFutureGuesses() {
+      if (!window.confirm("Limpar todos os palpites ainda editáveis? Esta ação será salva agora.")) {
+        return;
+      }
+      if (actionField) {
+        actionField.value = "limpar_futuros";
+      }
+      isSubmitting = true;
+      form.submit();
     }
 
     function buildFormTargetUrl(targetForm) {
@@ -339,6 +395,9 @@
     }
 
     form.addEventListener("submit", function () {
+      if (actionField) {
+        actionField.value = "salvar";
+      }
       isSubmitting = true;
     });
 
@@ -358,6 +417,14 @@
         }
         proceedWithoutSaving();
       });
+    }
+
+    if (autoFillButton) {
+      autoFillButton.addEventListener("click", fillEmptyGuesses);
+    }
+
+    if (clearFutureButton) {
+      clearFutureButton.addEventListener("click", clearFutureGuesses);
     }
 
     if (modalElement) {

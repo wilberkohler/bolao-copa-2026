@@ -76,8 +76,8 @@
       <tr>
         <td>#{{ j.numero_partida }}</td>
         <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
-        <td>{{ j.time_a }}</td>
-        <td>{{ j.time_b }}</td>
+        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}">{{ j.time_a }}</td>
+        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}">{{ j.time_b }}</td>
         <td>
           {% if p.palpite_gols_a is not none %}
             <strong>{{ p.palpite_gols_a }} x {{ p.palpite_gols_b }}</strong>

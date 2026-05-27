@@ -424,9 +424,10 @@ def dashboard():
     if proximo_jogo:
         proximo_prazo = proximo_jogo.prazo_palpite
 
-    # Líder atual
+    # Pódio atual
     ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
     lider = ranking[0] if ranking else None
+    podium = ranking[:3]
 
     # Palpites pendentes (jogos abertos sem palpite do competidor logado)
     # Carrega apenas jogos futuros/nao encerrados para evitar query full-scan
@@ -464,6 +465,7 @@ def dashboard():
                            palpites_enviados=palpites_enviados,
                            palpites_pendentes=palpites_pendentes,
                            lider=lider,
+                           podium=podium,
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
                            proximos_com_status=proximos_com_status)
@@ -686,6 +688,27 @@ def palpites():
     
     # POST — salvar palpites (apenas do próprio usuário)
     if request.method == "POST":
+        competidor = ensure_competidor_profile(user)
+        if not competidor:
+            flash("Usuário não tem perfil de competidor.", "danger")
+            return redirect(url_for("dashboard"))
+
+        acao_palpite = request.form.get("acao_palpite", "salvar")
+        if acao_palpite == "limpar_futuros":
+            palpites_futuros = []
+            for palpite in Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all():
+                jogo = Jogo.query.get(palpite.jogo_id)
+                if jogo and palpite_editavel(jogo) and not jogo.resultado:
+                    palpites_futuros.append(palpite)
+
+            for palpite in palpites_futuros:
+                HistoricoPalpite.query.filter_by(palpite_id=palpite.id).delete(synchronize_session=False)
+                db.session.delete(palpite)
+
+            db.session.commit()
+            flash(f"{len(palpites_futuros)} palpite(s) futuro(s) limpo(s).", "success")
+            return redirect(url_for("palpites"))
+
         jogo_ids = request.form.getlist("jogo_id")
         saved = 0
         erros = []
@@ -720,12 +743,6 @@ def palpites():
                 if classificado.lower() not in opcoes:
                     erros.append(f"Classificado inválido para jogo #{jid}.")
                     continue
-
-            # Buscar competidor do usuário logado
-            competidor = ensure_competidor_profile(user)
-            if not competidor:
-                flash("Usuário não tem perfil de competidor.", "danger")
-                return redirect(url_for("dashboard"))
 
             palpite = Palpite.query.filter_by(competidor_id=competidor.id, jogo_id=jogo.id, valido=True).first()
             agora = datetime.now(BR_TZ)
@@ -1281,5 +1298,3 @@ if __name__ == "__main__":
     port = int(config["port"])
     debug = bool(config["debug"])
     app.run(host=host, port=port, debug=debug)
-
-
