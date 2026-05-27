@@ -69,9 +69,20 @@ final class APIClient {
     }
 
     func salvarPalpite(jogoId: Int, golsA: Int, golsB: Int) async throws {
-        let payload = SavePalpitesRequest(palpites: [SavePalpite(jogoId: jogoId, golsA: golsA, golsB: golsB)])
+        try await salvarPalpites([SavePalpite(jogoId: jogoId, golsA: golsA, golsB: golsB)])
+    }
+
+    func salvarPalpites(_ palpites: [SavePalpite]) async throws {
+        let payload = SavePalpitesRequest(acao: "salvar", palpites: palpites)
         let data = try encoder.encode(payload)
         let _: GenericSaveResponse = try await request("/api/v1/palpites", method: "POST", body: data)
+    }
+
+    func limparPalpitesFuturos(jogoIds: [Int]) async throws -> Int {
+        let payload = ClearFuturePalpitesRequest(acao: "limpar_futuros", jogoIds: jogoIds)
+        let data = try encoder.encode(payload)
+        let response: GenericSaveResponse = try await request("/api/v1/palpites", method: "POST", body: data)
+        return response.cleared ?? 0
     }
 
     private func request<T: Decodable>(_ path: String, method: String = "GET", body: Data? = nil) async throws -> T {
@@ -113,4 +124,5 @@ struct ServerError: Decodable {
 struct GenericSaveResponse: Decodable {
     let ok: Bool
     let saved: Int?
+    let cleared: Int?
 }

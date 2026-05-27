@@ -162,5 +162,16 @@ struct SavePalpite: Encodable {
 }
 
 struct SavePalpitesRequest: Encodable {
+    let acao: String?
     let palpites: [SavePalpite]
+}
+
+struct ClearFuturePalpitesRequest: Encodable {
+    let acao: String
+    let jogoIds: [Int]
+
+    enum CodingKeys: String, CodingKey {
+        case acao
+        case jogoIds = "jogo_ids"
+    }
 }

@@ -373,6 +373,28 @@ def api_palpites():
 
     if request.method == "POST":
         data = request.get_json(silent=True) or {}
+        acao = data.get("acao") or "salvar"
+        if acao == "limpar_futuros":
+            jogo_ids_para_limpar = {
+                int(jid)
+                for jid in data.get("jogo_ids", [])
+                if str(jid).isdigit()
+            }
+            palpites_futuros = []
+            for palpite in Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all():
+                if jogo_ids_para_limpar and palpite.jogo_id not in jogo_ids_para_limpar:
+                    continue
+                jogo = Jogo.query.get(palpite.jogo_id)
+                if jogo and palpite_editavel(jogo) and not jogo.resultado:
+                    palpites_futuros.append(palpite)
+
+            for palpite in palpites_futuros:
+                HistoricoPalpite.query.filter_by(palpite_id=palpite.id).delete(synchronize_session=False)
+                db.session.delete(palpite)
+
+            db.session.commit()
+            return jsonify({"ok": True, "cleared": len(palpites_futuros)})
+
         palpites = data.get("palpites") or []
         saved = 0
         errors = []
