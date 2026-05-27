@@ -421,12 +421,14 @@ def dashboard():
 # COMPETIDORES
 # ---------------------------------------------------------------------------
 @app.route("/competidores")
+@admin_required
 def listar_competidores():
     competidores = Competidor.query.order_by(Competidor.nome).all()
     return render_template("competidores/lista.html", competidores=competidores)
 
 
 @app.route("/competidores/novo", methods=["GET", "POST"])
+@admin_required
 def novo_competidor():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -458,6 +460,7 @@ def novo_competidor():
 
 
 @app.route("/competidores/<int:cid>/editar", methods=["GET", "POST"])
+@admin_required
 def editar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     grupos = Grupo.query.order_by(Grupo.nome).all()
@@ -505,6 +508,7 @@ def editar_competidor(cid):
 
 
 @app.route("/competidores/<int:cid>/inativar", methods=["POST"])
+@admin_required
 def inativar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     c.ativo = False
@@ -515,6 +519,7 @@ def inativar_competidor(cid):
 
 
 @app.route("/competidores/<int:cid>/reativar", methods=["POST"])
+@admin_required
 def reativar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     c.ativo = True
@@ -525,6 +530,7 @@ def reativar_competidor(cid):
 
 
 @app.route("/competidores/<int:cid>/excluir", methods=["POST"])
+@admin_required
 def excluir_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     if Palpite.query.filter_by(competidor_id=cid).count() > 0:
@@ -537,6 +543,7 @@ def excluir_competidor(cid):
 
 
 @app.route("/competidores/<int:cid>/historico")
+@admin_required
 def historico_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
@@ -837,6 +844,7 @@ def palpites():
 # RESULTADOS (admin)
 # ---------------------------------------------------------------------------
 @app.route("/resultados")
+@admin_required
 def listar_resultados():
     fase_filtro = request.args.get("fase", "")
     filtro = request.args.get("filtro", "pendentes")
@@ -859,6 +867,7 @@ def listar_resultados():
 
 
 @app.route("/resultados/<int:jid>", methods=["GET", "POST"])
+@admin_required
 def lancar_resultado(jid):
     jogo = Jogo.query.get_or_404(jid)
     resultado = jogo.resultado
@@ -909,6 +918,7 @@ def lancar_resultado(jid):
 
 
 @app.route("/resultados/<int:jid>/recalcular", methods=["POST"])
+@admin_required
 def recalcular_resultado(jid):
     jogo = Jogo.query.get_or_404(jid)
     calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
@@ -1055,7 +1065,16 @@ def create_app():
         admin_apelido = os.environ.get("ADMIN_APELIDO", "admin")
         if admin_senha:
             existe = User.query.filter(db.func.lower(User.email) == admin_email).first()
-            if not existe:
+            if existe:
+                existe.nome = admin_nome
+                existe.apelido = admin_apelido
+                existe.eh_admin = True
+                existe.ativo = True
+                existe.set_password(admin_senha)
+                ensure_competidor_profile(existe)
+                db.session.commit()
+                print(f"[setup] Admin atualizado: {admin_email}")
+            else:
                 user = User(
                     nome=admin_nome,
                     email=admin_email,

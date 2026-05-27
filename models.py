@@ -35,7 +35,10 @@ class User(db.Model):
         self.senha_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.senha_hash, password)
+        try:
+            return check_password_hash(self.senha_hash, password)
+        except (TypeError, ValueError):
+            return False
 
 
 class Competidor(db.Model):
