@@ -56,6 +56,35 @@ def sync_admin_flags():
         db.session.commit()
 
 
+def is_simulated_result(resultado):
+    return bool(resultado and (resultado.usuario_lancamento or "").startswith("simulacao:"))
+
+
+def clear_simulated_results():
+    simulated_results = Resultado.query.filter(Resultado.usuario_lancamento.like("simulacao:%")).all()
+    jogo_ids = [r.jogo_id for r in simulated_results]
+
+    if not jogo_ids:
+        return 0
+
+    Pontuacao.query.filter(Pontuacao.jogo_id.in_(jogo_ids)).delete(synchronize_session=False)
+
+    for resultado in simulated_results:
+        db.session.delete(resultado)
+
+    for jogo in Jogo.query.filter(Jogo.id.in_(jogo_ids)).all():
+        jogo.status = "Agendado"
+
+    db.session.commit()
+
+    for jogo in Jogo.query.filter(Jogo.resultado.has()).all():
+        if jogo.resultado and not is_simulated_result(jogo.resultado):
+            calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+
+    db.session.commit()
+    return len(jogo_ids)
+
+
 @app.before_request
 def load_logged_in_user():
     """Carrega usuÃ¡rio logado na sessÃ£o."""
@@ -1110,21 +1139,16 @@ def simulacao():
     if request.method == "POST":
         acao = request.form.get("acao", "definir_data")
         data_str = request.form.get("data_simulada", "").strip()
+        if acao == "limpar_resultados":
+            removidos = clear_simulated_results()
+            flash(f"{removidos} resultado(s) simulado(s) apagado(s). Ranking recalculado com resultados reais restantes.", "success")
+            return redirect(url_for("simulacao"))
+
         try:
             data_obj = datetime.strptime(data_str, "%Y-%m-%d").date()
 
             if acao == "gerar_resultados":
-                # Cada simulacao comeca de um estado limpo para evitar ranking contaminado.
-                Pontuacao.query.delete(synchronize_session=False)
-                Resultado.query.delete(synchronize_session=False)
-
-                for jogo in Jogo.query.all():
-                    if jogo.data_jogo < data_obj:
-                        jogo.status = "Encerrado"
-                    else:
-                        jogo.status = "Agendado"
-
-                db.session.commit()
+                removidos = clear_simulated_results()
 
                 jogos_ate_data = (
                     Jogo.query
@@ -1135,6 +1159,9 @@ def simulacao():
 
                 jogos_gerados = []
                 for jogo in jogos_ate_data:
+                    if jogo.resultado and not is_simulated_result(jogo.resultado):
+                        continue
+
                     gols_a = random.randint(0, 4)
                     gols_b = random.randint(0, 4)
 
@@ -1164,7 +1191,7 @@ def simulacao():
                 for jogo in jogos_gerados:
                     calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
 
-                flash(f"Simulacao refeita do zero: {len(jogos_gerados)} resultado(s) aleatorio(s) gerado(s) ate {data_str} e ranking recalculado.", "success")
+                flash(f"Simulacao refeita: {removidos} resultado(s) simulado(s) anterior(es) apagado(s), {len(jogos_gerados)} novo(s) resultado(s) gerado(s) ate {data_str}. Resultados reais foram preservados.", "success")
 
             # Redireciona para GET com data_simulada como query param
             return redirect(url_for("simulacao", data_simulada=data_str))
@@ -1175,6 +1202,12 @@ def simulacao():
     info_simulacao = {
         "data_simulada": data_simulada,
         "data_real": date.today().isoformat(),
+        "resultados_simulados": Resultado.query.filter(
+            Resultado.usuario_lancamento.like("simulacao:%")
+        ).count(),
+        "resultados_reais": sum(
+            1 for r in Resultado.query.all() if not is_simulated_result(r)
+        ),
     }
     
     if data_simulada:
