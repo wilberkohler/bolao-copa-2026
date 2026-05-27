@@ -264,8 +264,11 @@ private struct PalpiteGameRow: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text("\(jogo.timeA ?? "-") x \(jogo.timeB ?? "-")")
+                        TeamCell(name: jogo.timeA ?? "-", code: jogo.siglaTimeA)
+                        Text("x")
                             .font(.headline)
+                            .foregroundStyle(.secondary)
+                        TeamCell(name: jogo.timeB ?? "-", code: jogo.siglaTimeB)
                         if isBrazilGame {
                             Image(systemName: "star.fill")
                                 .foregroundStyle(.yellow)
