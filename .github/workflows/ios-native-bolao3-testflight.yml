@@ -1,0 +1,147 @@
+name: iOS Native Bolao 3 TestFlight
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archive-upload:
+    name: Archive and Upload Bolao 3 to TestFlight
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: mobile/ios-native-bolao3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Install Apple signing assets
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          BOLAO3_IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.BOLAO3_IOS_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -z "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" ] || [ -z "$BOLAO3_IOS_PROVISIONING_PROFILE_BASE64" ] || [ -z "$KEYCHAIN_PASSWORD" ]; then
+            echo "Missing Bolao 3 signing secrets"
+            exit 1
+          fi
+
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          PP_PATH="$RUNNER_TEMP/bolao3.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/bolao3-signing.keychain-db"
+
+          echo -n "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          echo -n "$BOLAO3_IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$IOS_DISTRIBUTION_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(security cms -D -i "$PP_PATH")")
+          cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          echo "Installed Bolao 3 provisioning profile: $PROFILE_UUID"
+          echo "BOLAO3_IOS_PROVISIONING_PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
+
+      - name: Configure Xcode signing
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BOLAO3_IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.BOLAO3_IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          if [ -z "$APPLE_TEAM_ID" ] || [ -z "$BOLAO3_IOS_PROVISIONING_PROFILE_NAME" ] || [ -z "$BOLAO3_IOS_PROVISIONING_PROFILE_UUID" ]; then
+            echo "Missing Bolao 3 signing configuration"
+            exit 1
+          fi
+
+          echo "BOLAO3_BUILD_NUMBER=${GITHUB_RUN_NUMBER:-1}" >> "$GITHUB_ENV"
+
+      - name: Archive app
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BOLAO3_IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.BOLAO3_IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          xcodebuild \
+            -project Bolao3.xcodeproj \
+            -scheme Bolao3 \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/Bolao3.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$BOLAO3_IOS_PROVISIONING_PROFILE_NAME" \
+            PROVISIONING_PROFILE="$BOLAO3_IOS_PROVISIONING_PROFILE_UUID" \
+            CURRENT_PROJECT_VERSION="$BOLAO3_BUILD_NUMBER" \
+            archive
+
+      - name: Create export options
+        env:
+          BOLAO3_IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.BOLAO3_IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          cat > "$RUNNER_TEMP/exportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>br.com.kohler.bolao2026.bolao3</key>
+              <string>${BOLAO3_IOS_PROVISIONING_PROFILE_NAME}</string>
+            </dict>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Export IPA
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/Bolao3.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist"
+
+      - name: Prepare App Store Connect API key
+        env:
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          if [ -z "$APP_STORE_CONNECT_API_KEY_P8" ]; then
+            echo "Missing APP_STORE_CONNECT_API_KEY_P8 secret"
+            exit 1
+          fi
+
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          printf "%s" "$APP_STORE_CONNECT_API_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          IPA_PATH=$(find "$RUNNER_TEMP/export" -name "*.ipa" -maxdepth 1 | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "IPA not found"
+            exit 1
+          fi
+
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
