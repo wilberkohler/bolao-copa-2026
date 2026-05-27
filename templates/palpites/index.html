@@ -193,7 +193,7 @@
                   type="button"
                   role="tab">
             {{ grupo.label }}
-            <span class="badge bg-secondary ms-1">{{ grupo.items|length }}</span>
+            <span class="badge bg-secondary ms-1">{{ grupo.itens|length }}</span>
           </button>
         </li>
       {% endfor %}
@@ -202,7 +202,7 @@
     <div class="tab-content">
       {% for grupo in palpites_por_grupo %}
         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ grupo.id }}" role="tabpanel">
-          {{ palpites_table(grupo.items) }}
+          {{ palpites_table(grupo.itens) }}
         </div>
       {% endfor %}
     </div>

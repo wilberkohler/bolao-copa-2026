@@ -39,7 +39,7 @@
                 type="button"
                 role="tab">
           {{ grupo.label }}
-          <span class="badge bg-secondary ms-1">{{ grupo.items|length }}</span>
+          <span class="badge bg-secondary ms-1">{{ grupo.itens|length }}</span>
         </button>
       </li>
     {% endfor %}
@@ -67,7 +67,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for j in grupo.items %}
+              {% for j in grupo.itens %}
               <tr>
                 <td>{{ j.numero_partida }}</td>
                 <td><span class="badge bg-secondary">{{ j.fase }}</span></td>

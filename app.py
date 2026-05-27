@@ -102,7 +102,7 @@ def group_items_by_world_cup_group(items, item_to_jogo):
             "id": f"grupo-{idx}",
             "nome": grupo,
             "label": f"Grupo {grupo}" if grupo != "Outros" else "Outros",
-            "items": grupos_map[grupo],
+            "itens": grupos_map[grupo],
         }
         for idx, grupo in enumerate(grupos_ordenados)
     ]
