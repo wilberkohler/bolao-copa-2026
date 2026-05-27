@@ -17,6 +17,7 @@ from scoring import (calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
 
 BR_TZ = pytz.timezone("America/Sao_Paulo")
+ADMIN_EMAIL = "wilberkohler@gmail.com"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
@@ -35,6 +36,26 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 
+def normalize_email(email):
+    return (email or "").strip().lower()
+
+
+def is_authorized_admin(user):
+    return bool(user and user.ativo and normalize_email(user.email) == ADMIN_EMAIL)
+
+
+def sync_admin_flags():
+    """Garante que apenas o e-mail autorizado tenha permissao administrativa."""
+    changed = False
+    for user in User.query.all():
+        should_be_admin = normalize_email(user.email) == ADMIN_EMAIL
+        if user.eh_admin != should_be_admin:
+            user.eh_admin = should_be_admin
+            changed = True
+    if changed:
+        db.session.commit()
+
+
 @app.before_request
 def load_logged_in_user():
     """Carrega usuÃ¡rio logado na sessÃ£o."""
@@ -43,6 +64,9 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = User.query.get(user_id)
+        if g.user and g.user.eh_admin != is_authorized_admin(g.user):
+            g.user.eh_admin = is_authorized_admin(g.user)
+            db.session.commit()
 
 
 def login_required(f):
@@ -60,7 +84,7 @@ def admin_required(f):
     """Decorator para exigir admin."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if g.user is None or not g.user.eh_admin:
+        if not is_authorized_admin(g.user):
             flash("Acesso restrito a administradores.", "danger")
             return redirect(url_for("dashboard"))
         return f(*args, **kwargs)
@@ -160,7 +184,7 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         senha = request.form.get("senha", "")
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter(db.func.lower(User.email) == normalize_email(email)).first()
         
         if user and user.check_password(senha) and user.ativo:
             session.clear()
@@ -193,7 +217,7 @@ def registro():
             flash("Todos os campos sÃ£o obrigatÃ³rios.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
-        if User.query.filter_by(email=email).first():
+        if User.query.filter(db.func.lower(User.email) == normalize_email(email)).first():
             flash("E-mail jÃ¡ cadastrado.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
@@ -202,6 +226,7 @@ def registro():
             email=email,
             apelido=apelido,
             grupo_id=int(grupo_id) if grupo_id else None,
+            eh_admin=normalize_email(email) == ADMIN_EMAIL,
         )
         user.set_password(senha)
         db.session.add(user)
@@ -1022,13 +1047,14 @@ def create_app():
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
+        sync_admin_flags()
         # Cria admin automÃ¡tico via variÃ¡veis de ambiente (Ãºtil em cloud)
-        admin_email = os.environ.get("ADMIN_EMAIL")
+        admin_email = ADMIN_EMAIL
         admin_senha = os.environ.get("ADMIN_PASSWORD")
         admin_nome = os.environ.get("ADMIN_NOME", "Administrador")
         admin_apelido = os.environ.get("ADMIN_APELIDO", "admin")
-        if admin_email and admin_senha:
-            existe = User.query.filter_by(eh_admin=True).first()
+        if admin_senha:
+            existe = User.query.filter(db.func.lower(User.email) == admin_email).first()
             if not existe:
                 user = User(
                     nome=admin_nome,
