@@ -14,6 +14,7 @@ targets:
       - Bolao3
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: br.com.kohler.bolao2026.bolao3
+      GENERATE_INFOPLIST_FILE: YES
       INFOPLIST_KEY_CFBundleDisplayName: "Bolao 3"
       INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.sports
       INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
