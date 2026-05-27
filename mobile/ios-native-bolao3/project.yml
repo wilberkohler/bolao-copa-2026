@@ -1,0 +1,23 @@
+name: Bolao3
+options:
+  bundleIdPrefix: br.com.kohler
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  MARKETING_VERSION: "0.1"
+  CURRENT_PROJECT_VERSION: "1"
+targets:
+  Bolao3:
+    type: application
+    platform: iOS
+    sources:
+      - Bolao3
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: br.com.kohler.bolao2026.bolao3
+      INFOPLIST_KEY_CFBundleDisplayName: "Bolao 3"
+      INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.sports
+      INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+      INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: true
+      INFOPLIST_KEY_UILaunchScreen_Generation: true
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      CODE_SIGN_STYLE: Automatic

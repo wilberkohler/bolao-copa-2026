@@ -1,0 +1,38 @@
+name: iOS Native Bolao 3 Build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/ios-native-bolao3-build.yml"
+      - "mobile/ios-native-bolao3/**"
+
+jobs:
+  build-simulator:
+    name: Build Bolao 3 for iOS Simulator
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: mobile/ios-native-bolao3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build with Xcode for simulator
+        run: |
+          xcodebuild \
+            -project Bolao3.xcodeproj \
+            -scheme Bolao3 \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build

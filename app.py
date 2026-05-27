@@ -212,6 +212,273 @@ def ensure_competidor_profile(user):
 
 
 # ---------------------------------------------------------------------------
+# API JSON para Bolao 3 nativo
+# ---------------------------------------------------------------------------
+def _dt_iso(value):
+    if not value:
+        return None
+    return value.isoformat()
+
+
+def _current_user_payload(user):
+    competidor = ensure_competidor_profile(user)
+    grupo = Grupo.query.get(user.grupo_id) if user and user.grupo_id else None
+    return {
+        "id": user.id,
+        "nome": user.nome,
+        "email": user.email,
+        "apelido": user.apelido,
+        "eh_admin": is_authorized_admin(user),
+        "grupo": {"id": grupo.id, "nome": grupo.nome} if grupo else None,
+        "competidor": {
+            "id": competidor.id,
+            "nome": competidor.nome,
+            "apelido": competidor.apelido,
+        } if competidor else None,
+    }
+
+
+def _jogo_payload(jogo, palpite=None, pontuacao=None):
+    resultado = jogo.resultado
+    return {
+        "id": jogo.id,
+        "numero_partida": jogo.numero_partida,
+        "fase": jogo.fase,
+        "grupo": jogo.grupo,
+        "rodada": jogo.rodada,
+        "data_jogo": _dt_iso(jogo.data_jogo),
+        "hora_brasilia": jogo.hora_brasilia,
+        "time_a": jogo.time_a,
+        "time_b": jogo.time_b,
+        "sigla_time_a": jogo.sigla_time_a,
+        "sigla_time_b": jogo.sigla_time_b,
+        "estadio": jogo.estadio,
+        "cidade": jogo.cidade,
+        "pais": jogo.pais,
+        "mata_mata": bool(jogo.mata_mata),
+        "prazo_palpite": _dt_iso(jogo.prazo_palpite),
+        "status": jogo.status,
+        "editavel": palpite_editavel(jogo) and resultado is None,
+        "resultado": {
+            "gols_a": resultado.gols_a,
+            "gols_b": resultado.gols_b,
+            "classificado": resultado.classificado,
+        } if resultado else None,
+        "palpite": {
+            "gols_a": palpite.palpite_gols_a,
+            "gols_b": palpite.palpite_gols_b,
+            "classificado": palpite.palpite_classificado,
+        } if palpite else None,
+        "pontuacao": {
+            "pontos": pontuacao.pontos,
+            "placar_exato": pontuacao.placar_exato,
+            "vencedor_correto": pontuacao.vencedor_correto,
+        } if pontuacao else None,
+    }
+
+
+def api_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user is None:
+            return jsonify({"ok": False, "error": "unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.route("/api/v1/health")
+def api_health():
+    return jsonify({"ok": True, "app": "Bolao 3", "version": "0.1"})
+
+
+@app.route("/api/v1/login", methods=["POST"])
+def api_login():
+    data = request.get_json(silent=True) or {}
+    email = normalize_email(data.get("email"))
+    senha = data.get("senha") or data.get("password") or ""
+    user = User.query.filter(db.func.lower(User.email) == email).first()
+
+    if not user or not user.check_password(senha) or not user.ativo:
+        return jsonify({"ok": False, "error": "E-mail ou senha invalidos."}), 401
+
+    session.clear()
+    session["user_id"] = user.id
+    session.permanent = True
+    return jsonify({"ok": True, "user": _current_user_payload(user)})
+
+
+@app.route("/api/v1/logout", methods=["POST"])
+@api_login_required
+def api_logout():
+    session.clear()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/v1/me")
+@api_login_required
+def api_me():
+    return jsonify({"ok": True, "user": _current_user_payload(g.user)})
+
+
+@app.route("/api/v1/dashboard")
+@api_login_required
+def api_dashboard():
+    competidor = ensure_competidor_profile(g.user)
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
+    podium = [
+        {
+            "posicao": item["posicao"],
+            "nome": item["competidor"].nome,
+            "apelido": item["competidor"].apelido,
+            "pontos": item["pontos"],
+        }
+        for item in ranking[:3]
+    ]
+    total_jogos = Jogo.query.count()
+    palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
+    proximos = (Jogo.query
+                .filter(Jogo.data_jogo >= date.today())
+                .order_by(Jogo.data_jogo, Jogo.hora_brasilia)
+                .limit(6).all())
+    return jsonify({
+        "ok": True,
+        "summary": {
+            "total_jogos": total_jogos,
+            "palpites_enviados": palpites_enviados,
+            "total_competidores": Competidor.query.filter_by(ativo=True).count(),
+        },
+        "podium": podium,
+        "proximos_jogos": [_jogo_payload(j) for j in proximos],
+    })
+
+
+@app.route("/api/v1/jogos")
+@api_login_required
+def api_jogos():
+    fase = request.args.get("fase", "").strip()
+    grupo = request.args.get("grupo", "").strip()
+    query = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_brasilia)
+    if fase:
+        query = query.filter_by(fase=fase)
+    if grupo:
+        query = query.filter_by(grupo=grupo)
+    jogos = query.all()
+    return jsonify({"ok": True, "jogos": [_jogo_payload(jogo) for jogo in jogos]})
+
+
+@app.route("/api/v1/palpites", methods=["GET", "POST"])
+@api_login_required
+def api_palpites():
+    competidor = ensure_competidor_profile(g.user)
+
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        palpites = data.get("palpites") or []
+        saved = 0
+        errors = []
+
+        for item in palpites:
+            jogo_id = item.get("jogo_id")
+            jogo = Jogo.query.get(jogo_id) if jogo_id else None
+            if not jogo or not palpite_editavel(jogo) or jogo.resultado:
+                errors.append({"jogo_id": jogo_id, "error": "Palpite bloqueado para este jogo."})
+                continue
+
+            try:
+                gols_a = int(item.get("gols_a"))
+                gols_b = int(item.get("gols_b"))
+                if gols_a < 0 or gols_b < 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                errors.append({"jogo_id": jogo_id, "error": "Gols invalidos."})
+                continue
+
+            classificado = (item.get("classificado") or "").strip() or None
+            palpite = Palpite.query.filter_by(
+                competidor_id=competidor.id,
+                jogo_id=jogo.id,
+                valido=True,
+            ).first()
+            agora = datetime.now(BR_TZ)
+
+            if palpite:
+                db.session.add(HistoricoPalpite(
+                    palpite_id=palpite.id,
+                    competidor_id=competidor.id,
+                    jogo_id=jogo.id,
+                    palpite_gols_a_anterior=palpite.palpite_gols_a,
+                    palpite_gols_b_anterior=palpite.palpite_gols_b,
+                    palpite_classificado_anterior=palpite.palpite_classificado,
+                    palpite_gols_a_novo=gols_a,
+                    palpite_gols_b_novo=gols_b,
+                    palpite_classificado_novo=classificado,
+                    data_alteracao=agora,
+                ))
+                palpite.palpite_gols_a = gols_a
+                palpite.palpite_gols_b = gols_b
+                palpite.palpite_classificado = classificado
+                palpite.data_ultima_alteracao = agora
+            else:
+                db.session.add(Palpite(
+                    competidor_id=competidor.id,
+                    jogo_id=jogo.id,
+                    palpite_gols_a=gols_a,
+                    palpite_gols_b=gols_b,
+                    palpite_classificado=classificado,
+                    data_envio=agora,
+                    data_ultima_alteracao=agora,
+                ))
+            saved += 1
+
+        db.session.commit()
+        return jsonify({"ok": not errors, "saved": saved, "errors": errors})
+
+    jogos = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_brasilia).all()
+    jogo_ids = [j.id for j in jogos]
+    palpites_map = {
+        p.jogo_id: p
+        for p in Palpite.query.filter(
+            Palpite.competidor_id == competidor.id,
+            Palpite.valido == True,
+            Palpite.jogo_id.in_(jogo_ids)
+        ).all()
+    }
+    pontuacoes_map = {
+        p.jogo_id: p
+        for p in Pontuacao.query.filter(
+            Pontuacao.competidor_id == competidor.id,
+            Pontuacao.jogo_id.in_(jogo_ids)
+        ).all()
+    }
+    return jsonify({
+        "ok": True,
+        "jogos": [_jogo_payload(j, palpites_map.get(j.id), pontuacoes_map.get(j.id)) for j in jogos],
+    })
+
+
+@app.route("/api/v1/ranking")
+@api_login_required
+def api_ranking():
+    fase = request.args.get("fase", "").strip() or None
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=fase)
+    return jsonify({
+        "ok": True,
+        "ranking": [
+            {
+                "posicao": item["posicao"],
+                "nome": item["competidor"].nome,
+                "apelido": item["competidor"].apelido,
+                "pontos": item["pontos"],
+                "placares_exatos": item["placares_exatos"],
+                "vencedores_corretos": item["vencedores_corretos"],
+                "aproveitamento": item["aproveitamento"],
+            }
+            for item in ranking
+        ],
+    })
+
+
+# ---------------------------------------------------------------------------
 # Helpers de contexto
 # ---------------------------------------------------------------------------
 @app.context_processor
