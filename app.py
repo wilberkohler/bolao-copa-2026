@@ -85,6 +85,29 @@ def clear_simulated_results():
     return len(jogo_ids)
 
 
+def group_items_by_world_cup_group(items, item_to_jogo):
+    grupos_ordenados = []
+    grupos_map = {}
+
+    for item in items:
+        jogo = item_to_jogo(item)
+        grupo = jogo.grupo if jogo and jogo.grupo else "Outros"
+        if grupo not in grupos_map:
+            grupos_map[grupo] = []
+            grupos_ordenados.append(grupo)
+        grupos_map[grupo].append(item)
+
+    return [
+        {
+            "id": f"grupo-{idx}",
+            "nome": grupo,
+            "label": f"Grupo {grupo}" if grupo != "Outros" else "Outros",
+            "items": grupos_map[grupo],
+        }
+        for idx, grupo in enumerate(grupos_ordenados)
+    ]
+
+
 @app.before_request
 def load_logged_in_user():
     """Carrega usuÃ¡rio logado na sessÃ£o."""
@@ -613,12 +636,14 @@ def listar_jogos():
     if status_filtro:
         q = q.filter_by(status=status_filtro)
     jogos = q.all()
+    jogos_por_grupo = group_items_by_world_cup_group(jogos, lambda jogo: jogo)
     fases = [r[0] for r in db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()]
     status_list = ["Agendado", "Aberto para palpites", "Bloqueado para palpites",
                    "Em andamento", "Encerrado", "Resultado LanÃ§ado", "Pontuado", "Cancelado/Alterado"]
     return render_template("jogos/lista.html", jogos=jogos, fases=fases,
                            fase_filtro=fase_filtro, status_filtro=status_filtro,
-                           status_list=status_list)
+                           status_list=status_list,
+                           jogos_por_grupo=jogos_por_grupo)
 
 
 @app.route("/jogos/<int:jid>/editar", methods=["GET", "POST"])
@@ -853,11 +878,13 @@ def palpites():
     elif filtro == "bloqueados":
         jogos_com_status = [x for x in jogos_com_status if not x["editavel"]]
 
+    palpites_por_grupo = group_items_by_world_cup_group(jogos_com_status, lambda item: item["jogo"])
     fases = [r[0] for r in db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()]
     grupos = [r[0] for r in db.session.query(Jogo.grupo).distinct().filter(Jogo.grupo.isnot(None)).order_by(Jogo.grupo).all()]
 
     return render_template("palpites/index.html",
                            jogos_com_status=jogos_com_status,
+                           palpites_por_grupo=palpites_por_grupo,
                            competidor=competidor,
                            user=user,
                            filtro=filtro,
