@@ -8,6 +8,7 @@ struct PalpitesView: View {
     @State private var isLoading = false
     @State private var message: String?
     @State private var errorMessage: String?
+    @FocusState private var focusedField: PalpiteField?
 
     private var grupos: [String] {
         Array(Set(jogos.map { $0.grupo ?? "Outros" })).sorted()
@@ -57,7 +58,8 @@ struct PalpitesView: View {
                             draft: Binding(
                                 get: { drafts[jogo.id] ?? DraftPalpite() },
                                 set: { drafts[jogo.id] = $0 }
-                            )
+                            ),
+                            focusedField: $focusedField
                         )
                     }
                 }
@@ -73,12 +75,21 @@ struct PalpitesView: View {
             }
             .navigationTitle("Palpites")
             .toolbar {
-                Button {
-                    Task { await load(force: true) }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Task { await load(force: true) }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(isLoading)
                 }
-                .disabled(isLoading)
+
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Ocultar teclado") {
+                        focusedField = nil
+                    }
+                }
             }
             .task { await load() }
         }
@@ -253,9 +264,15 @@ private struct DraftPalpite {
     var golsB = ""
 }
 
+private enum PalpiteField: Hashable {
+    case golsA(Int)
+    case golsB(Int)
+}
+
 private struct PalpiteGameRow: View {
     let jogo: Jogo
     @Binding var draft: DraftPalpite
+    let focusedField: FocusState<PalpiteField?>.Binding
 
     private var isBrazilGame: Bool {
         jogo.timeA == "Brasil" || jogo.timeB == "Brasil" || jogo.siglaTimeA == "BRA" || jogo.siglaTimeB == "BRA"
@@ -291,6 +308,7 @@ private struct PalpiteGameRow: View {
             HStack(spacing: 10) {
                 TextField("A", text: $draft.golsA)
                     .keyboardType(.numberPad)
+                    .focused(focusedField, equals: .golsA(jogo.id))
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 58)
                     .disabled(!jogo.editavel)
@@ -300,6 +318,7 @@ private struct PalpiteGameRow: View {
 
                 TextField("B", text: $draft.golsB)
                     .keyboardType(.numberPad)
+                    .focused(focusedField, equals: .golsB(jogo.id))
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 58)
                     .disabled(!jogo.editavel)
