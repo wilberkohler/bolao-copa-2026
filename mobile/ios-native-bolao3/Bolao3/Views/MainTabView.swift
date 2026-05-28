@@ -22,6 +22,11 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Ranking", systemImage: "chart.bar")
                 }
+
+            RegrasView()
+                .tabItem {
+                    Label("Regras", systemImage: "book.closed")
+                }
         }
     }
 }
