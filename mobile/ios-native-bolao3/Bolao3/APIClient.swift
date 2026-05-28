@@ -37,6 +37,28 @@ final class APIClient {
         return user
     }
 
+    func gruposCadastro() async throws -> [GrupoCadastro] {
+        let response: GruposCadastroResponse = try await request("/api/v1/grupos")
+        return response.grupos
+    }
+
+    func registrar(nome: String, email: String, apelido: String, senha: String, grupoId: Int?, codigoGrupo: String?) async throws -> UserProfile {
+        let payload = RegisterRequest(
+            nome: nome,
+            email: email,
+            apelido: apelido,
+            senha: senha,
+            grupoId: grupoId,
+            codigoGrupo: codigoGrupo
+        )
+        let data = try encoder.encode(payload)
+        let envelope: APIEnvelope<UserProfile> = try await request("/api/v1/registro", method: "POST", body: data)
+        guard let user = envelope.user else {
+            throw APIError.server(envelope.error ?? "Cadastro nao realizado.")
+        }
+        return user
+    }
+
     func currentUser() async throws -> UserProfile {
         let envelope: APIEnvelope<UserProfile> = try await request("/api/v1/me")
         guard let user = envelope.user else {

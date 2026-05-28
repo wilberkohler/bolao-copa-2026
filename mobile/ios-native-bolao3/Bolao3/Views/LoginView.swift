@@ -53,6 +53,14 @@ struct LoginView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(appState.isLoading || email.isEmpty || senha.isEmpty)
 
+                NavigationLink {
+                    RegisterView()
+                } label: {
+                    Label("Criar conta", systemImage: "person.crop.circle.badge.plus")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
                 Spacer()
             }
             .padding(24)

@@ -10,12 +10,31 @@ class Grupo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False, unique=True)
     descricao = db.Column(db.Text)
+    publico = db.Column(db.Boolean, default=True)
+    requer_codigo = db.Column(db.Boolean, default=False)
+    codigo_acesso_hash = db.Column(db.String(255))
+    criado_pelo_sistema = db.Column(db.Boolean, default=False)
     criado_por_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     criado_por = db.relationship("User", backref="grupos_criados", foreign_keys=[criado_por_id])
     usuarios = db.relationship("User", backref="grupo", foreign_keys="User.grupo_id")
+
+    def set_codigo_acesso(self, codigo):
+        codigo = (codigo or "").strip()
+        self.codigo_acesso_hash = generate_password_hash(codigo) if codigo else None
+
+    def check_codigo_acesso(self, codigo):
+        if not self.requer_codigo:
+            return True
+        codigo = (codigo or "").strip()
+        if not codigo or not self.codigo_acesso_hash:
+            return False
+        try:
+            return check_password_hash(self.codigo_acesso_hash, codigo)
+        except (TypeError, ValueError):
+            return False
 
 
 class User(db.Model):

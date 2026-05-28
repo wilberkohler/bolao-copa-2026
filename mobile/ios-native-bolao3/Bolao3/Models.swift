@@ -26,6 +26,39 @@ struct GrupoResumo: Decodable, Identifiable {
     let nome: String
 }
 
+struct GrupoCadastro: Decodable, Identifiable, Hashable {
+    let id: Int
+    let nome: String
+    let descricao: String?
+    let publico: Bool
+    let requerCodigo: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case id, nome, descricao, publico
+        case requerCodigo = "requer_codigo"
+    }
+}
+
+struct GruposCadastroResponse: Decodable {
+    let ok: Bool
+    let grupos: [GrupoCadastro]
+}
+
+struct RegisterRequest: Encodable {
+    let nome: String
+    let email: String
+    let apelido: String
+    let senha: String
+    let grupoId: Int?
+    let codigoGrupo: String?
+
+    enum CodingKeys: String, CodingKey {
+        case nome, email, apelido, senha
+        case grupoId = "grupo_id"
+        case codigoGrupo = "codigo_grupo"
+    }
+}
+
 struct CompetidorResumo: Decodable, Identifiable {
     let id: Int
     let nome: String

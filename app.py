@@ -9,6 +9,7 @@ import pytz
 from flask import (Flask, render_template, redirect, url_for,
                    request, flash, session, jsonify, g,
                    send_from_directory, make_response)
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import selectinload
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados
 from runtime_config import load_runtime_config
@@ -19,6 +20,9 @@ from scoring import (calcular_pontuacao_jogo, get_ranking,
 
 BR_TZ = pytz.timezone("America/Sao_Paulo")
 ADMIN_EMAIL = "wilber.kohler@naest.com.br"
+WK3_GROUP_NAME = "WK3"
+WK3_GROUP_CODE = os.environ.get("WK3_GROUP_CODE", "WK3")
+PUBLIC_GROUP_COUNT = int(os.environ.get("PUBLIC_GROUP_COUNT", "100"))
 RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
@@ -58,6 +62,118 @@ def sync_admin_flags():
         if user.eh_admin != should_be_admin:
             user.eh_admin = should_be_admin
             changed = True
+    if changed:
+        db.session.commit()
+
+
+def ensure_group_publication_columns():
+    """Adds group publication columns for existing Render databases."""
+    inspector = inspect(db.engine)
+    existing = {column["name"] for column in inspector.get_columns("grupos")}
+    dialect = db.engine.dialect.name
+    bool_type = "BOOLEAN" if dialect != "sqlite" else "INTEGER"
+    bool_true = "TRUE" if dialect != "sqlite" else "1"
+    bool_false = "FALSE" if dialect != "sqlite" else "0"
+    statements = []
+
+    if "publico" not in existing:
+        statements.append(f"ALTER TABLE grupos ADD COLUMN publico {bool_type} DEFAULT {bool_true}")
+    if "requer_codigo" not in existing:
+        statements.append(f"ALTER TABLE grupos ADD COLUMN requer_codigo {bool_type} DEFAULT {bool_false}")
+    if "codigo_acesso_hash" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN codigo_acesso_hash VARCHAR(255)")
+    if "criado_pelo_sistema" not in existing:
+        statements.append(f"ALTER TABLE grupos ADD COLUMN criado_pelo_sistema {bool_type} DEFAULT {bool_false}")
+
+    if not statements:
+        return
+
+    with db.engine.begin() as conn:
+        for statement in statements:
+            conn.execute(text(statement))
+
+
+def grupo_publico_payload(grupo):
+    return {
+        "id": grupo.id,
+        "nome": grupo.nome,
+        "descricao": grupo.descricao,
+        "publico": bool(grupo.publico),
+        "requer_codigo": bool(grupo.requer_codigo),
+    }
+
+
+def grupos_para_cadastro():
+    return (Grupo.query
+            .filter(Grupo.publico == True)
+            .order_by(Grupo.requer_codigo, Grupo.nome)
+            .all())
+
+
+def validar_grupo_cadastro(grupo_id, codigo_grupo=""):
+    if not grupo_id:
+        return None, None
+
+    try:
+        grupo_id_int = int(grupo_id)
+    except (TypeError, ValueError):
+        return None, "Grupo invalido."
+
+    grupo = Grupo.query.get(grupo_id_int)
+    if not grupo or not grupo.publico:
+        return None, "Grupo indisponivel para cadastro."
+
+    if grupo.requer_codigo and not grupo.check_codigo_acesso(codigo_grupo):
+        return None, "Codigo do grupo privado invalido."
+
+    return grupo, None
+
+
+def seed_public_groups():
+    changed = False
+    existing = {grupo.nome: grupo for grupo in Grupo.query.all()}
+
+    for numero in range(1, PUBLIC_GROUP_COUNT + 1):
+        nome = f"Grupo {numero:03d}"
+        grupo = existing.get(nome)
+        if grupo:
+            if grupo.publico is None:
+                grupo.publico = True
+                changed = True
+            continue
+
+        db.session.add(Grupo(
+            nome=nome,
+            descricao="Grupo aberto para participantes do Bolao Copa 2026.",
+            publico=True,
+            requer_codigo=False,
+            criado_pelo_sistema=True,
+        ))
+        changed = True
+
+    grupo_wk3 = existing.get(WK3_GROUP_NAME)
+    if not grupo_wk3:
+        grupo_wk3 = Grupo(
+            nome=WK3_GROUP_NAME,
+            descricao="Grupo privado WK3.",
+            publico=True,
+            requer_codigo=True,
+            criado_pelo_sistema=True,
+        )
+        grupo_wk3.set_codigo_acesso(WK3_GROUP_CODE)
+        db.session.add(grupo_wk3)
+        changed = True
+    else:
+        if grupo_wk3.publico is not True:
+            grupo_wk3.publico = True
+            changed = True
+        if grupo_wk3.requer_codigo is not True:
+            grupo_wk3.requer_codigo = True
+            changed = True
+        if not grupo_wk3.codigo_acesso_hash and WK3_GROUP_CODE:
+            grupo_wk3.set_codigo_acesso(WK3_GROUP_CODE)
+            changed = True
+
     if changed:
         db.session.commit()
 
@@ -344,6 +460,55 @@ def api_login():
     return jsonify({"ok": True, "user": _current_user_payload(user)})
 
 
+@app.route("/api/v1/grupos")
+def api_grupos():
+    grupos = grupos_para_cadastro()
+    return jsonify({"ok": True, "grupos": [grupo_publico_payload(grupo) for grupo in grupos]})
+
+
+@app.route("/api/v1/registro", methods=["POST"])
+def api_registro():
+    data = request.get_json(silent=True) or {}
+    nome = (data.get("nome") or "").strip()
+    email = normalize_email(data.get("email"))
+    apelido = (data.get("apelido") or "").strip()
+    senha = data.get("senha") or data.get("password") or ""
+    grupo, erro_grupo = validar_grupo_cadastro(data.get("grupo_id"), data.get("codigo_grupo"))
+
+    if not nome or not email or not apelido or not senha:
+        return jsonify({"ok": False, "error": "Preencha nome, e-mail, apelido e senha."}), 400
+
+    if erro_grupo:
+        return jsonify({"ok": False, "error": erro_grupo}), 400
+
+    if User.query.filter(db.func.lower(User.email) == email).first():
+        return jsonify({"ok": False, "error": "E-mail ja cadastrado."}), 409
+
+    user = User(
+        nome=nome,
+        email=email,
+        apelido=apelido,
+        grupo_id=grupo.id if grupo else None,
+        eh_admin=normalize_email(email) == ADMIN_EMAIL,
+    )
+    user.set_password(senha)
+    db.session.add(user)
+    db.session.flush()
+    db.session.add(Competidor(
+        nome=nome,
+        apelido=apelido,
+        email=email,
+        user_id=user.id,
+        ativo=True,
+    ))
+    db.session.commit()
+
+    session.clear()
+    session["user_id"] = user.id
+    session.permanent = True
+    return jsonify({"ok": True, "user": _current_user_payload(user)})
+
+
 @app.route("/api/v1/logout", methods=["POST"])
 @api_login_required
 def api_logout():
@@ -594,7 +759,7 @@ def registro():
     if g.user is not None:
         return redirect(url_for("dashboard"))
     
-    grupos = Grupo.query.order_by(Grupo.nome).all()
+    grupos = grupos_para_cadastro()
     
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -602,11 +767,17 @@ def registro():
         apelido = request.form.get("apelido", "").strip()
         senha = request.form.get("senha", "")
         grupo_id = request.form.get("grupo_id")
+        codigo_grupo = request.form.get("codigo_grupo", "")
+        grupo, erro_grupo = validar_grupo_cadastro(grupo_id, codigo_grupo)
         
         if not nome or not email or not apelido or not senha:
             flash("Todos os campos são obrigatórios.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
+        if erro_grupo:
+            flash(erro_grupo, "danger")
+            return render_template("auth/registro.html", grupos=grupos)
+
         if User.query.filter(db.func.lower(User.email) == normalize_email(email)).first():
             flash("E-mail já cadastrado.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
@@ -615,7 +786,7 @@ def registro():
             nome=nome,
             email=email,
             apelido=apelido,
-            grupo_id=int(grupo_id) if grupo_id else None,
+            grupo_id=grupo.id if grupo else None,
             eh_admin=normalize_email(email) == ADMIN_EMAIL,
         )
         user.set_password(senha)
@@ -661,6 +832,9 @@ def novo_grupo():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         descricao = request.form.get("descricao", "").strip()
+        publico = request.form.get("publico") == "on"
+        requer_codigo = request.form.get("requer_codigo") == "on"
+        codigo_acesso = request.form.get("codigo_acesso", "").strip()
         
         if not nome:
             flash("Nome é obrigatório.", "danger")
@@ -670,11 +844,19 @@ def novo_grupo():
             flash("Grupo já existe.", "danger")
             return render_template("admin/grupos_form.html", grupo=None)
         
+        if requer_codigo and not codigo_acesso:
+            flash("Informe um codigo para grupos privados.", "danger")
+            return render_template("admin/grupos_form.html", grupo=None)
+
         grupo = Grupo(
             nome=nome,
             descricao=descricao or None,
+            publico=publico,
+            requer_codigo=requer_codigo,
             criado_por_id=g.user.id
         )
+        if requer_codigo:
+            grupo.set_codigo_acesso(codigo_acesso)
         db.session.add(grupo)
         db.session.commit()
         flash(f"Grupo '{grupo.nome}' criado!", "success")
@@ -690,6 +872,16 @@ def editar_grupo(gid):
     if request.method == "POST":
         grupo.nome = request.form.get("nome", "").strip()
         grupo.descricao = request.form.get("descricao", "").strip() or None
+        grupo.publico = request.form.get("publico") == "on"
+        grupo.requer_codigo = request.form.get("requer_codigo") == "on"
+        codigo_acesso = request.form.get("codigo_acesso", "").strip()
+        if grupo.requer_codigo and codigo_acesso:
+            grupo.set_codigo_acesso(codigo_acesso)
+        elif grupo.requer_codigo and not grupo.codigo_acesso_hash:
+            flash("Informe um codigo para grupos privados.", "danger")
+            return render_template("admin/grupos_form.html", grupo=grupo)
+        elif not grupo.requer_codigo:
+            grupo.codigo_acesso_hash = None
         grupo.updated_at = datetime.utcnow()
         db.session.commit()
         flash("Grupo atualizado.", "success")
@@ -1392,9 +1584,11 @@ def solicitar_exclusao_dados():
 def create_app():
     with app.app_context():
         db.create_all()
+        ensure_group_publication_columns()
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
+        seed_public_groups()
         sync_admin_flags()
         # Cria admin automático via variáveis de ambiente (útil em cloud)
         admin_email = ADMIN_EMAIL

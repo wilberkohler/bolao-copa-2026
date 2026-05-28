@@ -14,12 +14,27 @@
             <label class="form-label fw-bold">Nome <span class="text-danger">*</span></label>
             <input type="text" name="nome" class="form-control" required
                    value="{{ grupo.nome if grupo else '' }}">
-            <small class="text-muted">Escolha um nome único para identificar o grupo.</small>
+            <small class="text-muted">Escolha um nome unico para identificar o grupo.</small>
           </div>
           <div class="mb-3">
-            <label class="form-label fw-bold">Descrição</label>
+            <label class="form-label fw-bold">Descricao</label>
             <textarea name="descricao" class="form-control" rows="3"
                       placeholder="ex: Grupo de amigos da empresa...">{{ grupo.descricao if grupo else '' }}</textarea>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="publico" name="publico"
+                   {% if not grupo or grupo.publico %}checked{% endif %}>
+            <label class="form-check-label" for="publico">Disponivel para cadastro publico</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="requer_codigo" name="requer_codigo"
+                   {% if grupo and grupo.requer_codigo %}checked{% endif %}>
+            <label class="form-check-label" for="requer_codigo">Exigir codigo de acesso</label>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Codigo de acesso</label>
+            <input type="text" name="codigo_acesso" class="form-control" placeholder="{% if grupo and grupo.requer_codigo %}Deixe em branco para manter o codigo atual{% else %}Ex.: WK3{% endif %}">
+            <small class="text-muted">Use apenas para grupos privados. O codigo salvo nao fica visivel novamente.</small>
           </div>
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Salvar</button>

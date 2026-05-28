@@ -32,6 +32,25 @@ final class AppState: ObservableObject {
         isLoading = false
     }
 
+    func registrar(nome: String, email: String, apelido: String, senha: String, grupoId: Int?, codigoGrupo: String?) async {
+        isLoading = true
+        message = nil
+        do {
+            user = try await api.registrar(
+                nome: nome,
+                email: email,
+                apelido: apelido,
+                senha: senha,
+                grupoId: grupoId,
+                codigoGrupo: codigoGrupo
+            )
+            clearCaches()
+        } catch {
+            message = error.localizedDescription
+        }
+        isLoading = false
+    }
+
     func restoreSession() async {
         isLoading = true
         do {

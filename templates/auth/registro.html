@@ -7,10 +7,10 @@
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
-  <title>Cadastro - Bolão Copa 2026</title>
+  <title>Cadastro - Bolao Copa 2026</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260527-2">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260528-1">
   <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #198754 0%, #0d5132 100%); }
     .register-container { width: 100%; max-width: 450px; }
@@ -26,7 +26,7 @@
     <div class="card-body p-5">
       <div class="text-center mb-4">
         <h1 class="display-6 mb-2"><i class="bi bi-person-plus-fill text-success"></i></h1>
-        <h2 class="h4">Cadastro - Bolão Copa 2026</h2>
+        <h2 class="h4">Cadastro - Bolao Copa 2026</h2>
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -49,21 +49,27 @@
         </div>
         <div class="mb-3">
           <label class="form-label fw-bold">Apelido <span class="text-danger">*</span></label>
-          <input type="text" name="apelido" class="form-control" placeholder="Como você quer ser chamado?" required>
+          <input type="text" name="apelido" class="form-control" placeholder="Como voce quer ser chamado?" required>
         </div>
         <div class="mb-3">
           <label class="form-label fw-bold">Senha <span class="text-danger">*</span></label>
           <input type="password" name="senha" class="form-control" required>
         </div>
-        <div class="mb-4">
+        <div class="mb-3">
           <label class="form-label fw-bold">Grupo <span class="text-muted">(opcional)</span></label>
           <select name="grupo_id" class="form-select">
             <option value="">-- Sem grupo --</option>
             {% for g in grupos %}
-              <option value="{{ g.id }}">{{ g.nome }}</option>
+              <option value="{{ g.id }}" data-requer-codigo="{{ '1' if g.requer_codigo else '0' }}">
+                {{ g.nome }}{% if g.requer_codigo %} (privado){% endif %}
+              </option>
             {% endfor %}
           </select>
-          <small class="text-muted">Se não encontrar seu grupo, peça ao administrador para criá-lo.</small>
+          <small class="text-muted">Escolha um grupo aberto. Grupos privados exigem codigo.</small>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-bold">Codigo do grupo privado</label>
+          <input type="text" name="codigo_grupo" class="form-control" placeholder="Necessario apenas para grupos privados">
         </div>
         <button type="submit" class="btn btn-register w-100 mb-3">
           <i class="bi bi-check-lg"></i> Cadastrar
@@ -72,21 +78,12 @@
 
       <hr>
       <p class="text-center text-muted mb-0">
-        Já tem conta? <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success">Entre aqui</a>
+        Ja tem conta? <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success">Entre aqui</a>
       </p>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
-        console.log("Service worker registration failed:", err);
-      });
-    });
-  }
-</script>
 </body>
 </html>

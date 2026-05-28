@@ -12,10 +12,11 @@
       <tr>
         <th>#</th>
         <th>Nome</th>
-        <th>Descrição</th>
+        <th>Tipo</th>
+        <th>Descricao</th>
         <th>Criado por</th>
-        <th>Usuários</th>
-        <th>Ações</th>
+        <th>Usuarios</th>
+        <th>Acoes</th>
       </tr>
     </thead>
     <tbody>
@@ -24,6 +25,16 @@
       <tr>
         <td>{{ g.id }}</td>
         <td><strong>{{ g.nome }}</strong></td>
+        <td>
+          {% if g.publico %}
+            <span class="badge bg-success">Publico</span>
+          {% else %}
+            <span class="badge bg-secondary">Oculto</span>
+          {% endif %}
+          {% if g.requer_codigo %}
+            <span class="badge bg-warning text-dark">Com codigo</span>
+          {% endif %}
+        </td>
         <td>{{ g.descricao or '-' }}</td>
         <td>{{ g.criado_por.nome if g.criado_por else '-' }}</td>
         <td><span class="badge bg-info">{{ count_users }}</span></td>
@@ -31,13 +42,13 @@
           <div class="btn-group btn-group-sm">
             <a href="{{ url_for('editar_grupo', gid=g.id) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
             <form method="post" action="{{ url_for('excluir_grupo', gid=g.id) }}" style="display:inline">
-              <button class="btn btn-outline-danger" onclick="return confirm('Excluir {{ g.nome }}?{% if count_users %} (Atenção: remova os usuários primeiro){% endif %}')"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-outline-danger" onclick="return confirm('Excluir {{ g.nome }}?{% if count_users %} Remova os usuarios primeiro.{% endif %}')"><i class="bi bi-trash"></i></button>
             </form>
           </div>
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="6" class="text-center text-muted">Nenhum grupo cadastrado.</td></tr>
+      <tr><td colspan="7" class="text-center text-muted">Nenhum grupo cadastrado.</td></tr>
       {% endfor %}
     </tbody>
   </table>
