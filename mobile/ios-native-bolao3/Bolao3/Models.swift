@@ -36,10 +36,18 @@ struct DashboardResponse: Decodable {
     let ok: Bool
     let summary: DashboardSummary
     let podium: [PodiumItem]
+    let podiumGeral: [PodiumItem]?
+    let podiumEtapa: [PodiumItem]?
+    let podiumEtapaKey: String?
+    let podiumEtapaLabel: String?
     let proximosJogos: [Jogo]
 
     enum CodingKeys: String, CodingKey {
         case ok, summary, podium
+        case podiumGeral = "podium_geral"
+        case podiumEtapa = "podium_etapa"
+        case podiumEtapaKey = "podium_etapa_key"
+        case podiumEtapaLabel = "podium_etapa_label"
         case proximosJogos = "proximos_jogos"
     }
 }
@@ -112,12 +120,22 @@ struct RankingItem: Decodable, Identifiable {
     let pontos: Int
     let placaresExatos: Int
     let vencedoresCorretos: Int
+    let saldosCorretos: Int?
+    let classificadosCorretos: Int?
+    let palpitesEnviados: Int?
+    let palpitesNaoEnviados: Int?
     let aproveitamento: Double
+    let ultimaPontuacao: Int?
 
     enum CodingKeys: String, CodingKey {
         case posicao, nome, apelido, pontos, aproveitamento
         case placaresExatos = "placares_exatos"
         case vencedoresCorretos = "vencedores_corretos"
+        case saldosCorretos = "saldos_corretos"
+        case classificadosCorretos = "classificados_corretos"
+        case palpitesEnviados = "palpites_enviados"
+        case palpitesNaoEnviados = "palpites_nao_enviados"
+        case ultimaPontuacao = "ultima_pontuacao"
     }
 }
 

@@ -71,6 +71,28 @@ def ranking_kwargs_por_etapa(etapa):
     return {} if etapa == "geral" else {"etapa": etapa}
 
 
+def etapa_atual_ranking():
+    primeiro_mata_mata = (Jogo.query
+                          .filter_by(mata_mata=True)
+                          .order_by(Jogo.data_jogo)
+                          .first())
+    if primeiro_mata_mata and date.today() >= primeiro_mata_mata.data_jogo:
+        return "mata_mata"
+    return "grupos"
+
+
+def podium_payload(ranking):
+    return [
+        {
+            "posicao": item["posicao"],
+            "nome": item["competidor"].nome,
+            "apelido": item["competidor"].apelido,
+            "pontos": item["pontos"],
+        }
+        for item in ranking[:3]
+    ]
+
+
 def is_simulated_result(resultado):
     return bool(resultado and (resultado.usuario_lancamento or "").startswith("simulacao:"))
 
@@ -339,16 +361,11 @@ def api_me():
 @api_login_required
 def api_dashboard():
     competidor = ensure_competidor_profile(g.user)
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    podium = [
-        {
-            "posicao": item["posicao"],
-            "nome": item["competidor"].nome,
-            "apelido": item["competidor"].apelido,
-            "pontos": item["pontos"],
-        }
-        for item in ranking[:3]
-    ]
+    etapa_podium = etapa_atual_ranking()
+    ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
+    ranking_etapa = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa_podium))
+    podium_geral = podium_payload(ranking_geral)
+    podium_etapa = podium_payload(ranking_etapa)
     total_jogos = Jogo.query.count()
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
     proximos = (Jogo.query
@@ -362,7 +379,11 @@ def api_dashboard():
             "palpites_enviados": palpites_enviados,
             "total_competidores": Competidor.query.filter_by(ativo=True).count(),
         },
-        "podium": podium,
+        "podium": podium_etapa,
+        "podium_geral": podium_geral,
+        "podium_etapa": podium_etapa,
+        "podium_etapa_key": etapa_podium,
+        "podium_etapa_label": RANKING_ETAPAS[etapa_podium],
         "proximos_jogos": [_jogo_payload(j) for j in proximos],
     })
 
@@ -519,7 +540,12 @@ def api_ranking():
                 "pontos": item["pontos"],
                 "placares_exatos": item["placares_exatos"],
                 "vencedores_corretos": item["vencedores_corretos"],
+                "saldos_corretos": item["saldos_corretos"],
+                "classificados_corretos": item["classificados_corretos"],
+                "palpites_enviados": item["palpites_enviados"],
+                "palpites_nao_enviados": item["palpites_nao_enviados"],
                 "aproveitamento": item["aproveitamento"],
+                "ultima_pontuacao": item["ultima_pontuacao"],
             }
             for item in ranking
         ],

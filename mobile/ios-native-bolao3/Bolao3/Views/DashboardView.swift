@@ -5,6 +5,25 @@ struct DashboardView: View {
     @State private var dashboard: DashboardResponse?
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var podiumMode: PodiumMode = .etapa
+
+    private var selectedPodium: [PodiumItem] {
+        switch podiumMode {
+        case .etapa:
+            return dashboard?.podiumEtapa ?? dashboard?.podium ?? []
+        case .geral:
+            return dashboard?.podiumGeral ?? dashboard?.podium ?? []
+        }
+    }
+
+    private var podiumTitle: String {
+        switch podiumMode {
+        case .etapa:
+            return "Podium atual - \(dashboard?.podiumEtapaLabel ?? "Etapa")"
+        case .geral:
+            return "Podium geral"
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -28,9 +47,22 @@ struct DashboardView: View {
                     }
                 }
 
-                if let podium = dashboard?.podium, !podium.isEmpty {
-                    Section("Podium atual") {
-                        PodiumView(items: podium)
+                if !selectedPodium.isEmpty {
+                    Section(podiumTitle) {
+                        Picker("Podium", selection: $podiumMode) {
+                            ForEach(PodiumMode.allCases) { mode in
+                                Text(mode.title).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+
+                        if podiumMode == .etapa {
+                            Text("A etapa muda automaticamente pela data da Copa.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        PodiumView(items: selectedPodium)
                             .listRowInsets(EdgeInsets(top: 14, leading: 12, bottom: 14, trailing: 12))
                     }
                 }
@@ -78,6 +110,22 @@ struct DashboardView: View {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+}
+
+private enum PodiumMode: String, CaseIterable, Identifiable {
+    case etapa
+    case geral
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .etapa:
+            return "Etapa"
+        case .geral:
+            return "Geral"
+        }
     }
 }
 

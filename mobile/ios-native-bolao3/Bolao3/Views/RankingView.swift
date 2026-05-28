@@ -23,19 +23,33 @@ struct RankingView: View {
                 }
 
                 ForEach(ranking) { item in
-                    HStack {
-                        Text("\(item.posicao)")
-                            .font(.headline)
-                            .frame(width: 32, height: 32)
-                            .background(.green.opacity(item.posicao <= 3 ? 0.22 : 0.08), in: Circle())
-                        VStack(alignment: .leading) {
-                            Text(item.nome).font(.headline)
-                            Text("\(item.placaresExatos) exatos | \(item.vencedoresCorretos) vencedores")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                    DisclosureGroup {
+                        VStack(spacing: 8) {
+                            RankingStatRow(title: "Placares exatos", value: "\(item.placaresExatos)")
+                            RankingStatRow(title: "Vencedores corretos", value: "\(item.vencedoresCorretos)")
+                            RankingStatRow(title: "Saldos corretos", value: "\(item.saldosCorretos ?? 0)")
+                            RankingStatRow(title: "Classificados corretos", value: "\(item.classificadosCorretos ?? 0)")
+                            RankingStatRow(title: "Palpites enviados", value: "\(item.palpitesEnviados ?? 0)")
+                            RankingStatRow(title: "Nao enviados", value: "\(item.palpitesNaoEnviados ?? 0)")
+                            RankingStatRow(title: "Aproveitamento", value: "\(item.aproveitamento)%")
+                            RankingStatRow(title: "Ultima pontuacao", value: "\(item.ultimaPontuacao ?? 0) pts")
                         }
-                        Spacer()
-                        Text("\(item.pontos) pts").bold()
+                        .padding(.top, 8)
+                    } label: {
+                        HStack {
+                            Text("\(item.posicao)")
+                                .font(.headline)
+                                .frame(width: 32, height: 32)
+                                .background(.green.opacity(item.posicao <= 3 ? 0.22 : 0.08), in: Circle())
+                            VStack(alignment: .leading) {
+                                Text(item.nome).font(.headline)
+                                Text("\(item.placaresExatos) exatos | \(item.vencedoresCorretos) vencedores")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("\(item.pontos) pts").bold()
+                        }
                     }
                 }
                 if let errorMessage {
@@ -55,5 +69,21 @@ struct RankingView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+private struct RankingStatRow: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .fontWeight(.semibold)
+        }
+        .font(.subheadline)
     }
 }
