@@ -642,8 +642,7 @@ def registro():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Você saiu.", "info")
-    return redirect(url_for("login"))
+    return redirect(url_for("login", logged_out="1"))
 
 
 # ---------------------------------------------------------------------------

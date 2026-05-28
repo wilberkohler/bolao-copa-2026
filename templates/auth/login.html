@@ -38,6 +38,12 @@
           </div>
         {% endfor %}
       {% endwith %}
+      {% if request.args.get('logged_out') %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          Voce saiu.
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endif %}
 
       <form method="post">
         <div class="mb-3">

@@ -56,6 +56,13 @@ struct RegrasView: View {
                     NumberedRule(number: 7, text: "Menor quantidade de palpites nao enviados.")
                     NumberedRule(number: 8, text: "Ordem alfabetica do apelido.")
                 }
+
+                Section("Versao para computador") {
+                    RuleBullet(text: "Para tarefas mais detalhadas, como comparar tabelas grandes, administrar participantes ou revisar muitas informacoes de uma vez, acesse tambem a versao para computador.")
+                    Link(destination: URL(string: "https://bolao2026-9jgh.onrender.com")!) {
+                        Label("Abrir versao web", systemImage: "safari")
+                    }
+                }
             }
             .navigationTitle("Regras")
         }
