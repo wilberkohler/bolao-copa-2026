@@ -5,6 +5,8 @@
   <h4><i class="bi bi-calendar3 text-success"></i> Jogos da Copa 2026</h4>
 </div>
 
+{# Filtros removidos: as abas por grupo agora organizam a tela. #}
+{#
 <form class="row g-2 mb-3" method="get">
   <div class="col-auto">
     <select name="fase" class="form-select form-select-sm">
@@ -27,6 +29,7 @@
     <a href="{{ url_for('listar_jogos') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
   </div>
 </form>
+#}
 
 {% if jogos_por_grupo %}
   <ul class="nav nav-tabs mb-3" role="tablist">
