@@ -25,13 +25,13 @@ struct JogosView: View {
             }
             .navigationTitle("Jogos")
             .task { await load() }
-            .refreshable { await load() }
+            .refreshable { await load(force: true) }
         }
     }
 
-    private func load() async {
+    private func load(force: Bool = false) async {
         do {
-            jogos = try await appState.api.jogos()
+            jogos = try await appState.loadJogos(force: force)
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription

@@ -68,13 +68,13 @@ struct PalpitesView: View {
                     }
                 }
                 .refreshable {
-                    await load()
+                    await load(force: true)
                 }
             }
             .navigationTitle("Palpites")
             .toolbar {
                 Button {
-                    Task { await load() }
+                    Task { await load(force: true) }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -152,10 +152,10 @@ struct PalpitesView: View {
         .padding(.bottom, 12)
     }
 
-    private func load() async {
+    private func load(force: Bool = false) async {
         isLoading = true
         do {
-            let loaded = try await appState.api.palpites()
+            let loaded = try await appState.loadPalpites(force: force)
             jogos = loaded
             rebuildDrafts(from: loaded)
             if selectedGrupo.isEmpty || !grupos.contains(selectedGrupo) {
@@ -203,8 +203,9 @@ struct PalpitesView: View {
             for id in jogoIds {
                 drafts[id] = DraftPalpite()
             }
+            appState.invalidateAfterPalpiteChange()
             message = "\(cleared) palpite(s) futuro(s) limpo(s) nesta aba."
-            await load()
+            await load(force: true)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -237,8 +238,9 @@ struct PalpitesView: View {
         isLoading = true
         do {
             try await appState.api.salvarPalpites(payload)
+            appState.invalidateAfterPalpiteChange()
             message = "\(payload.count) palpite(s) salvo(s) nesta aba."
-            await load()
+            await load(force: true)
         } catch {
             errorMessage = error.localizedDescription
         }

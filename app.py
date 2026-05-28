@@ -9,6 +9,7 @@ import pytz
 from flask import (Flask, render_template, redirect, url_for,
                    request, flash, session, jsonify, g,
                    send_from_directory, make_response)
+from sqlalchemy.orm import selectinload
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import seed_jogos
@@ -357,7 +358,7 @@ def api_dashboard():
 def api_jogos():
     fase = request.args.get("fase", "").strip()
     grupo = request.args.get("grupo", "").strip()
-    query = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_brasilia)
+    query = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_brasilia)
     if fase:
         query = query.filter_by(fase=fase)
     if grupo:
@@ -455,7 +456,7 @@ def api_palpites():
         db.session.commit()
         return jsonify({"ok": not errors, "saved": saved, "errors": errors})
 
-    jogos = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_brasilia).all()
+    jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_brasilia).all()
     jogo_ids = [j.id for j in jogos]
     palpites_map = {
         p.jogo_id: p
@@ -505,11 +506,8 @@ def api_ranking():
 # ---------------------------------------------------------------------------
 @app.context_processor
 def inject_globals():
-    grupos = Grupo.query.order_by(Grupo.nome).all() if g.user else []
-    grupos_dropdown = [g for g in grupos]
     return dict(
         user=g.user,
-        grupos_dropdown=grupos_dropdown,
         agora_br=agora_br(),
     )
 
@@ -919,21 +917,10 @@ def historico_competidor(cid):
 # ---------------------------------------------------------------------------
 @app.route("/jogos")
 def listar_jogos():
-    fase_filtro = request.args.get("fase", "")
-    status_filtro = request.args.get("status", "")
-    q = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_et)
-    if fase_filtro:
-        q = q.filter_by(fase=fase_filtro)
-    if status_filtro:
-        q = q.filter_by(status=status_filtro)
-    jogos = q.all()
+    jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_et).all()
     jogos_por_grupo = group_items_by_world_cup_group(jogos, lambda jogo: jogo)
-    fases = [r[0] for r in db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()]
-    status_list = ["Agendado", "Aberto para palpites", "Bloqueado para palpites",
-                   "Em andamento", "Encerrado", "Resultado Lançado", "Pontuado", "Cancelado/Alterado"]
-    return render_template("jogos/lista.html", jogos=jogos, fases=fases,
-                           fase_filtro=fase_filtro, status_filtro=status_filtro,
-                           status_list=status_list,
+    return render_template("jogos/lista.html",
+                           jogos=jogos,
                            jogos_por_grupo=jogos_por_grupo)
 
 
@@ -1081,71 +1068,18 @@ def palpites():
             flash(e, "danger")
         return redirect(url_for("palpites"))
 
-    # GET — listar jogos com palpites de todos do grupo
-    filtro = request.args.get("filtro", "todos")
-    fase_filtro_param = request.args.get("fase", "").strip()
-    fase_filtro = fase_filtro_param
-    grupo_filtro = request.args.get("grupo", "")
-    selecao_filtro = request.args.get("selecao", "").strip()
-    data_filtro = request.args.get("data", "")
+    todos_jogos = (Jogo.query
+                   .options(selectinload(Jogo.resultado))
+                   .order_by(Jogo.data_jogo, Jogo.hora_et)
+                   .all())
 
-    # Detectar fase automática se não foi especificada
-    if not fase_filtro:
-        # Encontrar fase com jogos dentro do prazo
-        fases_disponiveis = db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()
-        for (f,) in fases_disponiveis:
-            jogos_fase = Jogo.query.filter_by(fase=f).all()
-            jogos_abertos = [j for j in jogos_fase if prazo_aberto(j)]
-            if jogos_abertos:
-                fase_filtro = f  # Usa primeira fase com jogos abertos
-                break
-        else:
-            # Se nenhuma fase tem jogo aberto, use a última
-            if fases_disponiveis:
-                fase_filtro = fases_disponiveis[-1][0]
-
-    query = Jogo.query.order_by(Jogo.data_jogo, Jogo.hora_et)
-    if fase_filtro:
-        query = query.filter_by(fase=fase_filtro)
-    if grupo_filtro:
-        query = query.filter_by(grupo=grupo_filtro)
-    if selecao_filtro:
-        query = query.filter(
-            (Jogo.time_a.ilike(f"%{selecao_filtro}%")) |
-            (Jogo.time_b.ilike(f"%{selecao_filtro}%"))
-        )
-    if data_filtro:
-        try:
-            data_obj = datetime.strptime(data_filtro, "%Y-%m-%d").date()
-            query = query.filter_by(data_jogo=data_obj)
-        except ValueError:
-            pass
-
-    todos_jogos = query.all()
-
-    # Palpites do usuário logado
     competidor = ensure_competidor_profile(user)
     palpites_map = {}
-    palpites_todos_usuarios = {}  # {jogo_id: {competidor_id: palpite}}
-    
+
     if competidor:
         palpites_map = {p.jogo_id: p for p in
                         Palpite.query.filter_by(competidor_id=competidor.id, valido=True).all()}
-    
-    # Palpites de todos os usuários do grupo
-    if user.grupo_id:
-        usuarios_grupo = User.query.filter_by(grupo_id=user.grupo_id, ativo=True).all()
-        competidores_grupo = [ensure_competidor_profile(u) for u in usuarios_grupo]
-        competidores_grupo = [c for c in competidores_grupo if c]
-        competidor_ids = [c.id for c in competidores_grupo]
-        
-        palpites_grupo = Palpite.query.filter(Palpite.competidor_id.in_(competidor_ids), Palpite.valido == True).all()
-        for p in palpites_grupo:
-            if p.jogo_id not in palpites_todos_usuarios:
-                palpites_todos_usuarios[p.jogo_id] = {}
-            palpites_todos_usuarios[p.jogo_id][p.competidor_id] = p
 
-    # Carrega pontuacoes do competidor de uma vez para evitar N+1
     pontuacoes_map = {}
     if competidor and todos_jogos:
         jogo_ids = [j.id for j in todos_jogos]
@@ -1170,43 +1104,23 @@ def palpites():
         else:
             st = status_palpite_para_jogo(j, p)
         pont = pontuacoes_map.get(j.id)
-        palpites_todos = palpites_todos_usuarios.get(j.id, {})
         jogos_com_status.append({
             "jogo": j,
             "palpite": p,
-            "palpites_todos": palpites_todos,  # todos os palpites do grupo
+            "palpites_todos": {},
             "prazo_aberto": aberto,
             "editavel": editavel,
             "status": st,
             "pontuacao": pont,
         })
 
-    # Filtros de visualização
-    if filtro == "abertos":
-        jogos_com_status = [x for x in jogos_com_status if x["editavel"]]
-    elif filtro == "enviados":
-        jogos_com_status = [x for x in jogos_com_status if x["palpite"]]
-    elif filtro == "sem_palpite":
-        jogos_com_status = [x for x in jogos_com_status if not x["palpite"]]
-    elif filtro == "bloqueados":
-        jogos_com_status = [x for x in jogos_com_status if not x["editavel"]]
-
     palpites_por_grupo = group_items_by_world_cup_group(jogos_com_status, lambda item: item["jogo"])
-    fases = [r[0] for r in db.session.query(Jogo.fase).distinct().order_by(Jogo.fase).all()]
-    grupos = [r[0] for r in db.session.query(Jogo.grupo).distinct().filter(Jogo.grupo.isnot(None)).order_by(Jogo.grupo).all()]
 
     return render_template("palpites/index.html",
                            jogos_com_status=jogos_com_status,
                            palpites_por_grupo=palpites_por_grupo,
                            competidor=competidor,
-                           user=user,
-                           filtro=filtro,
-                           fase_filtro=fase_filtro,
-                           grupo_filtro=grupo_filtro,
-                           selecao_filtro=selecao_filtro,
-                           data_filtro=data_filtro,
-                           fases=fases,
-                           grupos=grupos)
+                           user=user)
 
 
 # ---------------------------------------------------------------------------

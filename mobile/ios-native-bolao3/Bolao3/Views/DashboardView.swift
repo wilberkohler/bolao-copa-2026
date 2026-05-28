@@ -64,16 +64,16 @@ struct DashboardView: View {
                 await load()
             }
             .refreshable {
-                await load()
+                await load(force: true)
             }
         }
     }
 
-    private func load() async {
+    private func load(force: Bool = false) async {
         isLoading = true
         errorMessage = nil
         do {
-            dashboard = try await appState.api.dashboard()
+            dashboard = try await appState.loadDashboard(force: force)
         } catch {
             errorMessage = error.localizedDescription
         }
