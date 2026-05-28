@@ -39,7 +39,7 @@ struct RegisterView: View {
                     .textContentType(.newPassword)
             }
 
-            Section("Grupo") {
+            Section {
                 if isLoadingGroups {
                     ProgressView("Carregando grupos...")
                 } else {
@@ -56,6 +56,8 @@ struct RegisterView: View {
                     TextField("Codigo do grupo", text: $codigoGrupo)
                         .textInputAutocapitalization(.characters)
                 }
+            } header: {
+                Text("Grupo")
             } footer: {
                 Text("Grupos abertos podem ser escolhidos livremente. O grupo WK3 exige codigo.")
             }
