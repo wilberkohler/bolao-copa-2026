@@ -8,13 +8,13 @@ final class AppState: ObservableObject {
     @Published var dashboardCache: DashboardResponse?
     @Published var jogosCache: [Jogo] = []
     @Published var palpitesCache: [Jogo] = []
-    @Published var rankingCache: [RankingItem] = []
+    @Published var rankingCache: [RankingEtapa: [RankingItem]] = [:]
 
     let api = APIClient()
     private var dashboardLoadedAt: Date?
     private var jogosLoadedAt: Date?
     private var palpitesLoadedAt: Date?
-    private var rankingLoadedAt: Date?
+    private var rankingLoadedAt: [RankingEtapa: Date] = [:]
     private let cacheLifetime: TimeInterval = 120
 
     var isAuthenticated: Bool {
@@ -52,11 +52,11 @@ final class AppState: ObservableObject {
         dashboardCache = nil
         jogosCache = []
         palpitesCache = []
-        rankingCache = []
+        rankingCache = [:]
         dashboardLoadedAt = nil
         jogosLoadedAt = nil
         palpitesLoadedAt = nil
-        rankingLoadedAt = nil
+        rankingLoadedAt = [:]
     }
 
     func loadDashboard(force: Bool = false) async throws -> DashboardResponse {
@@ -89,20 +89,20 @@ final class AppState: ObservableObject {
         return loaded
     }
 
-    func loadRanking(force: Bool = false) async throws -> [RankingItem] {
-        if !force, !rankingCache.isEmpty, isFresh(rankingLoadedAt) {
-            return rankingCache
+    func loadRanking(etapa: RankingEtapa = .geral, force: Bool = false) async throws -> [RankingItem] {
+        if !force, let cached = rankingCache[etapa], !cached.isEmpty, isFresh(rankingLoadedAt[etapa]) {
+            return cached
         }
-        let loaded = try await api.ranking()
-        rankingCache = loaded
-        rankingLoadedAt = Date()
+        let loaded = try await api.ranking(etapa: etapa)
+        rankingCache[etapa] = loaded
+        rankingLoadedAt[etapa] = Date()
         return loaded
     }
 
     func invalidateAfterPalpiteChange() {
         dashboardLoadedAt = nil
         palpitesLoadedAt = nil
-        rankingLoadedAt = nil
+        rankingLoadedAt = [:]
     }
 
     private func isFresh(_ loadedAt: Date?) -> Bool {

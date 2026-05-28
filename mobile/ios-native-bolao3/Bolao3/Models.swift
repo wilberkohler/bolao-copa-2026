@@ -74,6 +74,36 @@ struct RankingResponse: Decodable {
     let ranking: [RankingItem]
 }
 
+enum RankingEtapa: String, CaseIterable, Identifiable {
+    case geral
+    case grupos
+    case mataMata = "mata_mata"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .geral:
+            return "Geral"
+        case .grupos:
+            return "Grupos"
+        case .mataMata:
+            return "Mata-mata"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .geral:
+            return "Soma todos os jogos pontuados."
+        case .grupos:
+            return "Conta apenas a fase de grupos."
+        case .mataMata:
+            return "Recomeca no mata-mata e segue ate a final."
+        }
+    }
+}
+
 struct RankingItem: Decodable, Identifiable {
     var id: Int { posicao }
     let posicao: Int

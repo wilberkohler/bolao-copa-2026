@@ -111,22 +111,32 @@ def calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo):
     db.session.commit()
 
 
-def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None):
+def _jogo_ids_por_etapa(Jogo, etapa=None, fase=None):
+    if fase:
+        return [j.id for j in Jogo.query.filter_by(fase=fase).all()]
+    if etapa == "grupos":
+        return [j.id for j in Jogo.query.filter_by(mata_mata=False).all()]
+    if etapa == "mata_mata":
+        return [j.id for j in Jogo.query.filter_by(mata_mata=True).all()]
+    return None
+
+
+def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None):
     """
     Retorna lista ordenada de dicts com o ranking dos competidores.
     Se fase for informado, filtra por fase.
     """
     competidores = Competidor.query.all()
     ranking = []
+    jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase)
 
     for c in competidores:
         query = db.session.query(Pontuacao).filter_by(competidor_id=c.id)
         palpite_query = db.session.query(Palpite).filter_by(competidor_id=c.id, valido=True)
 
-        if fase:
-            jogo_ids = [j.id for j in Jogo.query.filter_by(fase=fase).all()]
-            query = query.filter(Pontuacao.jogo_id.in_(jogo_ids))
-            palpite_query = palpite_query.filter(Palpite.jogo_id.in_(jogo_ids))
+        if jogo_ids_filtrados is not None:
+            query = query.filter(Pontuacao.jogo_id.in_(jogo_ids_filtrados))
+            palpite_query = palpite_query.filter(Palpite.jogo_id.in_(jogo_ids_filtrados))
 
         pontuacoes = query.all()
         palpites = palpite_query.all()
@@ -142,8 +152,8 @@ def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None):
         jogos_encerrados = Jogo.query.filter(
             Jogo.status.in_(["Encerrado", "Resultado Lançado", "Pontuado"])
         )
-        if fase:
-            jogos_encerrados = jogos_encerrados.filter_by(fase=fase)
+        if jogo_ids_filtrados is not None:
+            jogos_encerrados = jogos_encerrados.filter(Jogo.id.in_(jogo_ids_filtrados))
         jogos_ids_enc = {j.id for j in jogos_encerrados.all()}
         palpites_ids = {p.jogo_id for p in palpites}
         palpites_nao_enviados = len(jogos_ids_enc - palpites_ids)

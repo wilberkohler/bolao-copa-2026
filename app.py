@@ -19,6 +19,11 @@ from scoring import (calcular_pontuacao_jogo, get_ranking,
 
 BR_TZ = pytz.timezone("America/Sao_Paulo")
 ADMIN_EMAIL = "wilber.kohler@naest.com.br"
+RANKING_ETAPAS = {
+    "geral": "Geral",
+    "grupos": "Fase de Grupos",
+    "mata_mata": "Mata-mata ate a Final",
+}
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
@@ -55,6 +60,15 @@ def sync_admin_flags():
             changed = True
     if changed:
         db.session.commit()
+
+
+def normalizar_etapa_ranking(etapa):
+    etapa = (etapa or "geral").strip()
+    return etapa if etapa in RANKING_ETAPAS else "geral"
+
+
+def ranking_kwargs_por_etapa(etapa):
+    return {} if etapa == "geral" else {"etapa": etapa}
 
 
 def is_simulated_result(resultado):
@@ -483,9 +497,20 @@ def api_palpites():
 @api_login_required
 def api_ranking():
     fase = request.args.get("fase", "").strip() or None
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=fase)
+    etapa = normalizar_etapa_ranking(request.args.get("etapa"))
+    ranking = get_ranking(
+        db,
+        Competidor,
+        Pontuacao,
+        Palpite,
+        Jogo,
+        fase=fase,
+        **({} if fase else ranking_kwargs_por_etapa(etapa))
+    )
     return jsonify({
         "ok": True,
+        "etapa": etapa if not fase else "fase",
+        "etapa_label": fase or RANKING_ETAPAS[etapa],
         "ranking": [
             {
                 "posicao": item["posicao"],
@@ -1285,8 +1310,13 @@ def sincronizar_resultados_cron():
 # ---------------------------------------------------------------------------
 @app.route("/ranking")
 def ranking_geral():
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    return render_template("ranking/geral.html", ranking=ranking)
+    etapa = normalizar_etapa_ranking(request.args.get("etapa"))
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa))
+    return render_template("ranking/geral.html",
+                           ranking=ranking,
+                           etapa=etapa,
+                           etapa_label=RANKING_ETAPAS[etapa],
+                           ranking_etapas=RANKING_ETAPAS)
 
 
 @app.route("/ranking/fase")

@@ -1,7 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Ranking Geral{% endblock %}
 {% block content %}
-<h4 class="mb-3"><i class="bi bi-bar-chart-fill text-success"></i> Ranking Geral</h4>
+<h4 class="mb-3"><i class="bi bi-bar-chart-fill text-success"></i> Ranking - {{ etapa_label }}</h4>
+
+<ul class="nav nav-tabs mb-4">
+  {% for key, label in ranking_etapas.items() %}
+    <li class="nav-item">
+      <a class="nav-link {% if etapa == key %}active{% endif %}"
+         href="{{ url_for('ranking_geral', etapa=key) }}">
+        {{ label }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+{% if etapa == 'grupos' %}
+<div class="alert alert-success small">
+  Esta etapa considera apenas os jogos da fase de grupos. Ela fecha quando todos esses jogos estiverem pontuados.
+</div>
+{% elif etapa == 'mata_mata' %}
+<div class="alert alert-primary small">
+  Esta etapa comeca zerada para os jogos de mata-mata e segue ate a final, mantendo a disputa aberta novamente.
+</div>
+{% else %}
+<div class="alert alert-secondary small">
+  O ranking geral continua somando todos os jogos da Copa.
+</div>
+{% endif %}
 
 <!-- Cards destaques -->
 <div class="row g-3 mb-4">

@@ -3,11 +3,25 @@ import SwiftUI
 struct RankingView: View {
     @EnvironmentObject private var appState: AppState
     @State private var ranking: [RankingItem] = []
+    @State private var etapa: RankingEtapa = .geral
     @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Picker("Etapa", selection: $etapa) {
+                        ForEach(RankingEtapa.allCases) { item in
+                            Text(item.title).tag(item)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text(etapa.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 ForEach(ranking) { item in
                     HStack {
                         Text("\(item.posicao)")
@@ -29,14 +43,14 @@ struct RankingView: View {
                 }
             }
             .navigationTitle("Ranking")
-            .task { await load() }
+            .task(id: etapa) { await load() }
             .refreshable { await load(force: true) }
         }
     }
 
     private func load(force: Bool = false) async {
         do {
-            ranking = try await appState.loadRanking(force: force)
+            ranking = try await appState.loadRanking(etapa: etapa, force: force)
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription

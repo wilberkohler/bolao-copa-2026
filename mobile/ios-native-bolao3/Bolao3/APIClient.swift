@@ -63,8 +63,8 @@ final class APIClient {
         return response.jogos
     }
 
-    func ranking() async throws -> [RankingItem] {
-        let response: RankingResponse = try await request("/api/v1/ranking")
+    func ranking(etapa: RankingEtapa = .geral) async throws -> [RankingItem] {
+        let response: RankingResponse = try await request("/api/v1/ranking?etapa=\(etapa.rawValue)")
         return response.ranking
     }
 
