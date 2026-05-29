@@ -954,9 +954,23 @@ def dashboard():
         proximo_prazo = proximo_jogo.prazo_palpite
 
     # Pódio atual
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    lider = ranking[0] if ranking else None
-    podium = ranking[:3]
+    podium_view = request.args.get("podium", "etapa").strip()
+    if podium_view not in {"etapa", "geral"}:
+        podium_view = "etapa"
+    etapa_podium = etapa_atual_ranking()
+    ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
+    ranking_etapa = get_ranking(
+        db,
+        Competidor,
+        Pontuacao,
+        Palpite,
+        Jogo,
+        **ranking_kwargs_por_etapa(etapa_podium),
+    )
+    podium_geral = ranking_geral[:3]
+    podium_etapa = ranking_etapa[:3]
+    podium = podium_geral if podium_view == "geral" else podium_etapa
+    lider = podium[0] if podium else None
 
     # Palpites pendentes (jogos abertos sem palpite do competidor logado)
     # Carrega apenas jogos futuros/nao encerrados para evitar query full-scan
@@ -995,6 +1009,9 @@ def dashboard():
                            palpites_pendentes=palpites_pendentes,
                            lider=lider,
                            podium=podium,
+                           podium_view=podium_view,
+                           podium_etapa_label=RANKING_ETAPAS[etapa_podium],
+                           podium_etapa_key=etapa_podium,
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
                            proximos_com_status=proximos_com_status)

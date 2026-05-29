@@ -60,6 +60,21 @@
     <div class="card shadow-sm border-warning h-100">
       <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Pódio Atual</div>
       <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <span class="small text-muted">
+            {% if podium_view == 'geral' %}Ranking geral{% else %}{{ podium_etapa_label }}{% endif %}
+          </span>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Selecionar podium">
+            <a href="{{ url_for('dashboard') }}"
+               class="btn {% if podium_view != 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              Etapa
+            </a>
+            <a href="{{ url_for('dashboard', podium='geral') }}"
+               class="btn {% if podium_view == 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              Geral
+            </a>
+          </div>
+        </div>
         {% if podium %}
           <div class="podium-wrap">
             {% for r in podium %}
