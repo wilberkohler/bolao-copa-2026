@@ -9,7 +9,8 @@ import pytz
 from flask import (Flask, render_template, redirect, url_for,
                    request, flash, session, jsonify, g,
                    send_from_directory, make_response)
-from sqlalchemy import inspect, text
+from sqlalchemy import func, inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados
 from runtime_config import load_runtime_config
@@ -37,6 +38,10 @@ if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
 app.config["SESSION_PERMANENT"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
@@ -48,6 +53,13 @@ STATIC_DIR = BASE_DIR / "static"
 
 def normalize_email(email):
     return (email or "").strip().lower()
+
+
+def find_user_by_email(email):
+    email = normalize_email(email)
+    if not email:
+        return None
+    return User.query.filter(func.lower(User.email) == email).first()
 
 
 def is_authorized_admin(user):
@@ -268,7 +280,14 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = User.query.get(user_id)
+        try:
+            g.user = User.query.get(user_id)
+        except SQLAlchemyError:
+            app.logger.exception("Falha ao carregar usuário da sessão")
+            db.session.rollback()
+            session.clear()
+            g.user = None
+            return
         if g.user and g.user.eh_admin != is_authorized_admin(g.user):
             g.user.eh_admin = is_authorized_admin(g.user)
             db.session.commit()
@@ -449,7 +468,7 @@ def api_login():
     data = request.get_json(silent=True) or {}
     email = normalize_email(data.get("email"))
     senha = data.get("senha") or data.get("password") or ""
-    user = User.query.filter(db.func.lower(User.email) == email).first()
+    user = find_user_by_email(email)
 
     if not user or not user.check_password(senha) or not user.ativo:
         return jsonify({"ok": False, "error": "E-mail ou senha invalidos."}), 401
@@ -481,7 +500,7 @@ def api_registro():
     if erro_grupo:
         return jsonify({"ok": False, "error": erro_grupo}), 400
 
-    if User.query.filter(db.func.lower(User.email) == email).first():
+    if find_user_by_email(email):
         return jsonify({"ok": False, "error": "E-mail ja cadastrado."}), 409
 
     user = User(
@@ -739,13 +758,26 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         senha = request.form.get("senha", "")
-        user = User.query.filter(db.func.lower(User.email) == normalize_email(email)).first()
+        try:
+            user = find_user_by_email(email)
+            password_ok = bool(user and user.check_password(senha))
+        except Exception:
+            app.logger.exception("Falha ao validar login para %s", normalize_email(email))
+            db.session.rollback()
+            flash("Não foi possível validar o login agora. Tente novamente em instantes.", "danger")
+            return render_template("auth/login.html", email=email)
         
-        if user and user.check_password(senha) and user.ativo:
+        if user and password_ok and user.ativo:
             session.clear()
             session["user_id"] = user.id
             session.permanent = True
-            ensure_competidor_profile(user)
+            try:
+                ensure_competidor_profile(user)
+            except Exception:
+                app.logger.exception("Falha ao preparar perfil do usuário %s", user.id)
+                db.session.rollback()
+                flash("Não foi possível preparar seu acesso agora. Tente novamente em instantes.", "danger")
+                return render_template("auth/login.html", email=email)
             flash(f"Bem-vindo, {user.nome}!", "success")
             return redirect(url_for("dashboard"))
         else:
@@ -778,7 +810,7 @@ def registro():
             flash(erro_grupo, "danger")
             return render_template("auth/registro.html", grupos=grupos)
 
-        if User.query.filter(db.func.lower(User.email) == normalize_email(email)).first():
+        if find_user_by_email(email):
             flash("E-mail já cadastrado.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
         
@@ -1613,7 +1645,7 @@ def create_app():
         admin_nome = os.environ.get("ADMIN_NOME", "Administrador")
         admin_apelido = os.environ.get("ADMIN_APELIDO", "admin")
         if admin_senha:
-            existe = User.query.filter(db.func.lower(User.email) == admin_email).first()
+            existe = find_user_by_email(admin_email)
             if existe:
                 existe.nome = admin_nome
                 existe.apelido = admin_apelido
