@@ -52,7 +52,7 @@ jobs:
           fi
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/bolao-upload-key.jks
 
-      - name: Configure release signing
+      - name: Check release signing secrets
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -62,39 +62,27 @@ jobs:
             echo "Android signing secrets are missing"
             exit 1
           fi
-          cat >> android/gradle.properties <<EOF
-          MYAPP_UPLOAD_STORE_FILE=bolao-upload-key.jks
-          MYAPP_UPLOAD_KEY_ALIAS=$ANDROID_KEY_ALIAS
-          MYAPP_UPLOAD_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD
-          MYAPP_UPLOAD_KEY_PASSWORD=$ANDROID_KEY_PASSWORD
-          EOF
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("android/app/build.gradle")
-          text = path.read_text()
-          if "signingConfigs {" not in text:
-              text = text.replace(
-                  "android {",
-                  """android {
-              signingConfigs {
-                  release {
-                      storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                      storePassword MYAPP_UPLOAD_STORE_PASSWORD
-                      keyAlias MYAPP_UPLOAD_KEY_ALIAS
-                      keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-                  }
-              }""",
-                  1,
-              )
-          text = text.replace("signingConfig signingConfigs.debug", "signingConfig signingConfigs.release")
-          path.write_text(text)
-          PY
 
       - name: Build debug APK
         run: ./android/gradlew -p android assembleDebug
 
       - name: Build release AAB
         run: ./android/gradlew -p android bundleRelease
+
+      - name: Sign release AAB
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          jarsigner \
+            -keystore android/app/bolao-upload-key.jks \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            -signedjar android/app/build/outputs/bundle/release/app-release-signed.aab \
+            android/app/build/outputs/bundle/release/app-release.aab \
+            "$ANDROID_KEY_ALIAS"
+          jarsigner -verify -verbose -certs android/app/build/outputs/bundle/release/app-release-signed.aab
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -106,4 +94,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bolao-android-release-aab
-          path: mobile/android-wrapper/android/app/build/outputs/bundle/release/*.aab
+          path: mobile/android-wrapper/android/app/build/outputs/bundle/release/app-release-signed.aab
