@@ -155,7 +155,7 @@
   </div>
   <div class="bracket-board bracket-tree shadow-sm">
     {% for fase in knockout_bracket %}
-      <div class="bracket-round">
+      <div class="bracket-round bracket-round-{{ loop.index }}">
         <div class="bracket-round-title">{{ fase.label }}</div>
         <div class="bracket-matches">
           {% for partida in fase.jogos %}
