@@ -246,6 +246,21 @@ def grupos_para_cadastro():
             .all())
 
 
+def convite_url(user=None):
+    params = {"_external": True}
+    if user and user.grupo_id:
+        grupo = Grupo.query.get(user.grupo_id)
+        if grupo and grupo.publico:
+            params["grupo_id"] = user.grupo_id
+    try:
+        return url_for("registro", **params)
+    except RuntimeError:
+        base_url = os.environ.get("APP_PUBLIC_URL", "https://bolao2026-9jgh.onrender.com").rstrip("/")
+        if "grupo_id" in params:
+            return f"{base_url}/registro?grupo_id={params['grupo_id']}"
+        return f"{base_url}/registro"
+
+
 def validar_grupo_cadastro(grupo_id, codigo_grupo=""):
     if not grupo_id:
         return None, None
@@ -460,6 +475,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
         for item in top5_geral
     ]
+    invite_url = convite_url(user)
     subject = f"Relatório da {rodada['label']} - Bolão Copa 2026"
     text = (
         f"Olá, {user.nome}!\n\n"
@@ -475,6 +491,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + "\n\nTop 5 geral:\n"
         + "\n".join(top_geral_linhas)
         + "\n\nAcesse o app para ver todos os detalhes."
+        + f"\n\nConvide um amigo para participar:\n{invite_url}"
     )
     html = (
         f"<p>Olá, {escape(user.nome)}!</p>"
@@ -490,6 +507,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + "</ol><h3>Top 5 geral</h3><ol>"
         + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_geral)
         + "</ol><p>Acesse o app para ver todos os detalhes.</p>"
+        + f"<p>Convide um amigo para participar:<br><a href=\"{invite_url}\">{invite_url}</a></p>"
     )
     return subject, text, html
 
@@ -1450,6 +1468,9 @@ def dashboard():
             "palpite": p,
         })
 
+    invite_url = convite_url(g.user)
+    invite_text = f"Convide um amigo para participar: {invite_url}"
+
     return render_template("dashboard.html",
                            competidor_logado=competidor,
                            total_competidores=total_competidores,
@@ -1465,7 +1486,9 @@ def dashboard():
                            podium_etapa_key=etapa_podium,
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
-                           proximos_com_status=proximos_com_status)
+                           proximos_com_status=proximos_com_status,
+                           invite_url=invite_url,
+                           invite_text=invite_text)
 
 
 # ---------------------------------------------------------------------------

@@ -60,7 +60,7 @@
           <select id="grupo_id" name="grupo_id" class="form-select" aria-describedby="grupo-ajuda">
             <option value="">-- Sem grupo --</option>
             {% for g in grupos %}
-              <option value="{{ g.id }}" data-requer-codigo="{{ '1' if g.requer_codigo else '0' }}" {% if request.form.get('grupo_id') == g.id|string %}selected{% endif %}>
+              <option value="{{ g.id }}" data-requer-codigo="{{ '1' if g.requer_codigo else '0' }}" {% if (request.form.get('grupo_id') or request.args.get('grupo_id')) == g.id|string %}selected{% endif %}>
                 {{ g.nome }}{% if g.requer_codigo %} (privado){% endif %}
               </option>
             {% endfor %}

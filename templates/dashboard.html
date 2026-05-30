@@ -2,7 +2,22 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
-<h4 class="mb-3"><i class="bi bi-house-fill text-success"></i> Dashboard</h4>
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+  <h4 class="mb-0"><i class="bi bi-house-fill text-success"></i> Dashboard</h4>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-sm btn-outline-success"
+       href="https://wa.me/?text={{ invite_text|urlencode }}"
+       target="_blank"
+       rel="noopener">
+      <i class="bi bi-whatsapp" aria-hidden="true"></i> Convidar amigo
+    </a>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary js-copy-invite"
+            data-invite="{{ invite_text }}">
+      <i class="bi bi-link-45deg" aria-hidden="true"></i> Copiar convite
+    </button>
+  </div>
+</div>
 
 {% if user and not user.email_confirmado %}
 <div class="alert alert-warning d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2" role="alert">
@@ -192,4 +207,21 @@
     </tbody>
   </table>
 </div>
+<script>
+  document.querySelectorAll(".js-copy-invite").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var text = button.dataset.invite || "";
+      if (!navigator.clipboard || !text) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var original = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> Copiado';
+        button.disabled = true;
+        window.setTimeout(function () {
+          button.innerHTML = original;
+          button.disabled = false;
+        }, 1600);
+      });
+    });
+  });
+</script>
 {% endblock %}
