@@ -20,13 +20,12 @@ def et_to_brasilia(data: date, hora_et_str: str) -> str:
 
 
 def calcular_prazo_palpite(data_jogo: date, hora_et_str: str) -> datetime:
-    """Prazo = 23h59 de Brasília do dia anterior ao jogo."""
+    """Prazo = 30 minutos antes do jogo, salvo como horario naive em Brasilia."""
     h, m = map(int, hora_et_str.split(":"))
     dt_et = ET_TZ.localize(datetime(data_jogo.year, data_jogo.month, data_jogo.day, h, m))
     dt_br = dt_et.astimezone(BR_TZ)
-    dia_anterior = dt_br.date() - timedelta(days=1)
-    prazo_br = BR_TZ.localize(datetime(dia_anterior.year, dia_anterior.month, dia_anterior.day, 23, 59))
-    return prazo_br
+    prazo_br = dt_br - timedelta(minutes=30)
+    return prazo_br.replace(tzinfo=None)
 
 
 # ---------------------------------------------------------------------------

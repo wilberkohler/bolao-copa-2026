@@ -215,6 +215,8 @@ def prazo_aberto(jogo):
     prazo = jogo.prazo_palpite
     if prazo.tzinfo is None:
         prazo = BR_TZ_local.localize(prazo)
+    else:
+        prazo = prazo.astimezone(BR_TZ_local)
     return agora_br <= prazo
 
 

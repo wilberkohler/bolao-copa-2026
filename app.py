@@ -2393,6 +2393,31 @@ def _jogo_datetime_origem(jogo):
     return BR_TZ.localize(datetime(data.year, data.month, data.day, h, m))
 
 
+def prazo_palpite_brasilia(jogo):
+    origem = _jogo_datetime_origem(jogo)
+    if not origem:
+        return None
+    return (origem.astimezone(BR_TZ) - timedelta(minutes=30)).replace(tzinfo=None)
+
+
+def recalcular_prazos_palpite(force=False):
+    jogos = Jogo.query.all()
+    changed = False
+    for jogo in jogos:
+        novo_prazo = prazo_palpite_brasilia(jogo)
+        if not novo_prazo:
+            continue
+        atual = jogo.prazo_palpite
+        if getattr(atual, "tzinfo", None) is not None:
+            atual = atual.astimezone(BR_TZ).replace(tzinfo=None)
+        if force or atual != novo_prazo:
+            jogo.prazo_palpite = novo_prazo
+            changed = True
+    if changed:
+        db.session.commit()
+    return changed
+
+
 def datetime_jogo_exibicao(jogo, user=None):
     origem = _jogo_datetime_origem(jogo)
     if not origem:
@@ -2416,6 +2441,8 @@ def prazo_palpite_exibicao(jogo, user=None):
         return ""
     if prazo.tzinfo is None:
         prazo = BR_TZ.localize(prazo)
+    else:
+        prazo = prazo.astimezone(BR_TZ)
     return prazo.astimezone(timezone_time_destacado(user)).strftime("%d/%m %H:%M")
 
 
@@ -4071,7 +4098,7 @@ def dashboard():
     # Carrega apenas jogos futuros/nao encerrados para evitar query full-scan
     jogos_candidatos = (Jogo.query
                         .filter(Jogo.status.in_(["Agendado", "Aberto para palpites"]))
-                        .filter(Jogo.prazo_palpite >= datetime.utcnow())
+                        .filter(Jogo.prazo_palpite >= agora_br().replace(tzinfo=None))
                         .with_entities(Jogo.id).all())
     jogos_abertos = {row[0] for row in jogos_candidatos}
     palpites_existentes = {p.jogo_id for p in
@@ -4719,6 +4746,8 @@ def create_app():
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
+        if recalcular_prazos_palpite(force=True):
+            print("[setup] Prazos de palpite recalculados para 30 minutos antes dos jogos.")
         seed_public_groups()
         sync_admin_flags()
         # Cria admin automático via variáveis de ambiente (útil em cloud)
