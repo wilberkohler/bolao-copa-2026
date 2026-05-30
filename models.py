@@ -47,6 +47,9 @@ class User(db.Model):
     grupo_id = db.Column(db.Integer, db.ForeignKey("grupos.id"))
     eh_admin = db.Column(db.Boolean, default=False)
     ativo = db.Column(db.Boolean, default=True)
+    email_confirmado = db.Column(db.Boolean, default=False)
+    email_confirmado_em = db.Column(db.DateTime)
+    receber_relatorios = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -162,6 +165,24 @@ class Pontuacao(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint("competidor_id", "jogo_id", name="uq_pont_competidor_jogo"),
+    )
+
+
+class RelatorioRodadaEnvio(db.Model):
+    __tablename__ = "relatorios_rodada_envios"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    rodada_key = db.Column(db.String(120), nullable=False)
+    rodada_label = db.Column(db.String(160), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    enviado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(30), default="enviado")
+    erro = db.Column(db.Text)
+
+    user = db.relationship("User", backref="relatorios_rodada")
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "rodada_key", name="uq_relatorio_user_rodada"),
     )
 
 

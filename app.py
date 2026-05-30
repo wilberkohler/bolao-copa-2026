@@ -1,8 +1,12 @@
 import os
 import random
 import hmac
+import re
+import smtplib
 from datetime import datetime, date, timedelta
+from email.message import EmailMessage
 from functools import wraps
+from html import escape
 from pathlib import Path
 
 import pytz
@@ -11,8 +15,9 @@ from flask import (Flask, render_template, redirect, url_for,
                    send_from_directory, make_response)
 from sqlalchemy import func, inspect, text
 from sqlalchemy.exc import SQLAlchemyError
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy.orm import selectinload
-from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados
+from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados, RelatorioRodadaEnvio
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import seed_jogos
 from result_sync import sync_finished_results_football_data
@@ -29,6 +34,7 @@ RANKING_ETAPAS = {
     "grupos": "Fase de Grupos",
     "mata_mata": "Mata-mata ate a Final",
 }
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
@@ -55,11 +61,73 @@ def normalize_email(email):
     return (email or "").strip().lower()
 
 
+def email_valido(email):
+    return bool(EMAIL_RE.match(normalize_email(email)))
+
+
 def find_user_by_email(email):
     email = normalize_email(email)
     if not email:
         return None
     return User.query.filter(func.lower(User.email) == email).first()
+
+
+def email_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="confirmar-email")
+
+
+def make_email_token(user):
+    return email_serializer().dumps({"id": user.id, "email": normalize_email(user.email)})
+
+
+def send_email_message(to_email, subject, text_body, html_body=None):
+    host = os.environ.get("SMTP_HOST", "").strip()
+    if not host:
+        app.logger.warning("SMTP_HOST não configurado; e-mail não enviado para %s", to_email)
+        return False
+
+    port = int(os.environ.get("SMTP_PORT", "587"))
+    username = os.environ.get("SMTP_USER", "").strip()
+    password = os.environ.get("SMTP_PASSWORD", "")
+    from_email = os.environ.get("SMTP_FROM", username or "no-reply@bolao2026.com").strip()
+    use_ssl = os.environ.get("SMTP_SSL", "").lower() in {"1", "true", "yes"}
+    use_tls = os.environ.get("SMTP_TLS", "true").lower() in {"1", "true", "yes"}
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = from_email
+    message["To"] = to_email
+    message.set_content(text_body)
+    if html_body:
+        message.add_alternative(html_body, subtype="html")
+
+    smtp_cls = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+    with smtp_cls(host, port, timeout=30) as smtp:
+        if use_tls and not use_ssl:
+            smtp.starttls()
+        if username or password:
+            smtp.login(username, password)
+        smtp.send_message(message)
+    return True
+
+
+def send_email_confirmation(user):
+    token = make_email_token(user)
+    confirm_url = url_for("confirmar_email", token=token, _external=True)
+    subject = "Confirme seu e-mail - Bolão Copa 2026"
+    text = (
+        f"Olá, {user.nome}!\n\n"
+        "Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026:\n"
+        f"{confirm_url}\n\n"
+        "Se você não fez este cadastro, ignore esta mensagem."
+    )
+    html = f"""
+    <p>Olá, {escape(user.nome)}!</p>
+    <p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p>
+    <p><a href="{confirm_url}">Confirmar e-mail</a></p>
+    <p>Se você não fez este cadastro, ignore esta mensagem.</p>
+    """
+    return send_email_message(user.email, subject, text, html)
 
 
 def is_authorized_admin(user):
@@ -96,6 +164,31 @@ def ensure_group_publication_columns():
         statements.append("ALTER TABLE grupos ADD COLUMN codigo_acesso_hash VARCHAR(255)")
     if "criado_pelo_sistema" not in existing:
         statements.append(f"ALTER TABLE grupos ADD COLUMN criado_pelo_sistema {bool_type} DEFAULT {bool_false}")
+
+    if not statements:
+        return
+
+    with db.engine.begin() as conn:
+        for statement in statements:
+            conn.execute(text(statement))
+
+
+def ensure_user_email_columns():
+    """Adds email confirmation columns for existing databases."""
+    inspector = inspect(db.engine)
+    existing = {column["name"] for column in inspector.get_columns("users")}
+    dialect = db.engine.dialect.name
+    bool_type = "BOOLEAN" if dialect != "sqlite" else "INTEGER"
+    bool_false = "FALSE" if dialect != "sqlite" else "0"
+    bool_true = "TRUE" if dialect != "sqlite" else "1"
+    statements = []
+
+    if "email_confirmado" not in existing:
+        statements.append(f"ALTER TABLE users ADD COLUMN email_confirmado {bool_type} DEFAULT {bool_false}")
+    if "email_confirmado_em" not in existing:
+        statements.append("ALTER TABLE users ADD COLUMN email_confirmado_em TIMESTAMP")
+    if "receber_relatorios" not in existing:
+        statements.append(f"ALTER TABLE users ADD COLUMN receber_relatorios {bool_type} DEFAULT {bool_true}")
 
     if not statements:
         return
@@ -273,6 +366,126 @@ def group_items_by_world_cup_group(items, item_to_jogo):
     ]
 
 
+def rodada_key_label(jogos):
+    primeiro = jogos[0]
+    rodada = primeiro.rodada if primeiro.rodada is not None else 0
+    key = f"{primeiro.fase}|{rodada}"
+    label = f"{primeiro.fase} - Rodada {rodada}" if rodada else primeiro.fase
+    return key, label
+
+
+def rodadas_fechadas_com_resultado():
+    jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.fase, Jogo.rodada, Jogo.data_jogo).all()
+    grupos = {}
+    for jogo in jogos:
+        if jogo.rodada is None:
+            continue
+        grupos.setdefault((jogo.fase, jogo.rodada), []).append(jogo)
+
+    fechadas = []
+    for _, itens in grupos.items():
+        if itens and all(j.resultado for j in itens):
+            key, label = rodada_key_label(itens)
+            fechadas.append({"key": key, "label": label, "jogos": itens})
+    return fechadas
+
+
+def montar_relatorio_rodada(user, competidor, rodada):
+    jogo_ids = [j.id for j in rodada["jogos"]]
+    pontuacoes = Pontuacao.query.filter(
+        Pontuacao.competidor_id == competidor.id,
+        Pontuacao.jogo_id.in_(jogo_ids),
+    ).all()
+    pontos_rodada = sum(p.pontos for p in pontuacoes)
+    placares = sum(1 for p in pontuacoes if p.placar_exato)
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
+    posicao = next((item["posicao"] for item in ranking if item["competidor"].id == competidor.id), None)
+    top5 = ranking[:5]
+    jogos_linhas = []
+
+    for jogo in rodada["jogos"]:
+        resultado = jogo.resultado
+        pont = next((p for p in pontuacoes if p.jogo_id == jogo.id), None)
+        jogos_linhas.append(
+            f"- {jogo.time_a} {resultado.gols_a} x {resultado.gols_b} {jogo.time_b}: "
+            f"{pont.pontos if pont else 0} ponto(s)"
+        )
+
+    top_linhas = [
+        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
+        for item in top5
+    ]
+    subject = f"Relatório da {rodada['label']} - Bolão Copa 2026"
+    text = (
+        f"Olá, {user.nome}!\n\n"
+        f"Relatório da {rodada['label']}:\n"
+        f"Seus pontos na rodada: {pontos_rodada}\n"
+        f"Placares exatos na rodada: {placares}\n"
+        f"Sua posição no ranking geral: {posicao or '-'}\n\n"
+        "Jogos da rodada:\n"
+        + "\n".join(jogos_linhas)
+        + "\n\nTop 5 geral:\n"
+        + "\n".join(top_linhas)
+        + "\n\nAcesse o app para ver todos os detalhes."
+    )
+    html = (
+        f"<p>Olá, {escape(user.nome)}!</p>"
+        f"<h2>{escape(rodada['label'])}</h2>"
+        f"<p><strong>Seus pontos na rodada:</strong> {pontos_rodada}</p>"
+        f"<p><strong>Placares exatos na rodada:</strong> {placares}</p>"
+        f"<p><strong>Sua posição no ranking geral:</strong> {posicao or '-'}</p>"
+        "<h3>Jogos da rodada</h3><ul>"
+        + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
+        + "</ul><h3>Top 5 geral</h3><ol>"
+        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5)
+        + "</ol><p>Acesse o app para ver todos os detalhes.</p>"
+    )
+    return subject, text, html
+
+
+def send_pending_round_reports():
+    if not os.environ.get("SMTP_HOST", "").strip():
+        return {"sent": 0, "skipped": 0, "errors": ["SMTP_HOST não configurado."]}
+
+    sent = 0
+    skipped = 0
+    errors = []
+    rodadas = rodadas_fechadas_com_resultado()
+    users = User.query.filter_by(ativo=True, email_confirmado=True, receber_relatorios=True).all()
+
+    for rodada in rodadas:
+        for user in users:
+            envio = RelatorioRodadaEnvio.query.filter_by(user_id=user.id, rodada_key=rodada["key"]).first()
+            if envio and envio.status == "enviado":
+                skipped += 1
+                continue
+            competidor = Competidor.query.filter_by(user_id=user.id, ativo=True).first()
+            if not competidor:
+                skipped += 1
+                continue
+
+            subject, text_body, html_body = montar_relatorio_rodada(user, competidor, rodada)
+            if not envio:
+                envio = RelatorioRodadaEnvio(user_id=user.id, rodada_key=rodada["key"])
+            envio.rodada_label = rodada["label"]
+            envio.email = user.email
+            envio.enviado_em = datetime.utcnow()
+            envio.erro = None
+            try:
+                send_email_message(user.email, subject, text_body, html_body)
+                envio.status = "enviado"
+                sent += 1
+            except Exception as exc:
+                app.logger.exception("Falha ao enviar relatório %s para %s", rodada["key"], user.email)
+                envio.status = "erro"
+                envio.erro = str(exc)[:1000]
+                errors.append(f"{user.email}: {exc}")
+            db.session.add(envio)
+
+    db.session.commit()
+    return {"sent": sent, "skipped": skipped, "errors": errors}
+
+
 @app.before_request
 def load_logged_in_user():
     """Carrega usuário logado na sessão."""
@@ -401,6 +614,8 @@ def _current_user_payload(user):
         "email": user.email,
         "apelido": user.apelido,
         "eh_admin": is_authorized_admin(user),
+        "email_confirmado": bool(user.email_confirmado),
+        "receber_relatorios": bool(user.receber_relatorios),
         "grupo": {"id": grupo.id, "nome": grupo.nome} if grupo else None,
         "competidor": {
             "id": competidor.id,
@@ -497,6 +712,9 @@ def api_registro():
     if not nome or not email or not apelido or not senha:
         return jsonify({"ok": False, "error": "Preencha nome, e-mail, apelido e senha."}), 400
 
+    if not email_valido(email):
+        return jsonify({"ok": False, "error": "Informe um e-mail válido."}), 400
+
     if erro_grupo:
         return jsonify({"ok": False, "error": erro_grupo}), 400
 
@@ -509,6 +727,8 @@ def api_registro():
         apelido=apelido,
         grupo_id=grupo.id if grupo else None,
         eh_admin=normalize_email(email) == ADMIN_EMAIL,
+        email_confirmado=False,
+        receber_relatorios=True,
     )
     user.set_password(senha)
     db.session.add(user)
@@ -522,6 +742,11 @@ def api_registro():
     ))
     db.session.commit()
 
+    try:
+        send_email_confirmation(user)
+    except Exception:
+        app.logger.exception("Falha ao enviar confirmação de e-mail para %s", user.email)
+
     session.clear()
     session["user_id"] = user.id
     session.permanent = True
@@ -532,6 +757,23 @@ def api_registro():
 @api_login_required
 def api_logout():
     session.clear()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/v1/reenviar-confirmacao-email", methods=["POST"])
+@api_login_required
+def api_reenviar_confirmacao_email():
+    if g.user.email_confirmado:
+        return jsonify({"ok": True, "message": "E-mail ja confirmado."})
+
+    try:
+        sent = send_email_confirmation(g.user)
+    except Exception as exc:
+        app.logger.exception("Falha ao reenviar confirmação para %s", g.user.email)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    if not sent:
+        return jsonify({"ok": False, "error": "SMTP ainda nao configurado."}), 503
     return jsonify({"ok": True})
 
 
@@ -756,7 +998,7 @@ def login():
         return redirect(url_for("dashboard"))
     
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
+        email = normalize_email(request.form.get("email", ""))
         senha = request.form.get("senha", "")
         try:
             user = find_user_by_email(email)
@@ -810,6 +1052,10 @@ def registro():
             flash(erro_grupo, "danger")
             return render_template("auth/registro.html", grupos=grupos)
 
+        if not email_valido(email):
+            flash("Informe um e-mail válido.", "danger")
+            return render_template("auth/registro.html", grupos=grupos)
+
         if find_user_by_email(email):
             flash("E-mail já cadastrado.", "danger")
             return render_template("auth/registro.html", grupos=grupos)
@@ -820,6 +1066,8 @@ def registro():
             apelido=apelido,
             grupo_id=grupo.id if grupo else None,
             eh_admin=normalize_email(email) == ADMIN_EMAIL,
+            email_confirmado=False,
+            receber_relatorios=True,
         )
         user.set_password(senha)
         db.session.add(user)
@@ -837,9 +1085,59 @@ def registro():
         db.session.commit()
         
         flash("Cadastro realizado com sucesso! Faça login.", "success")
+        try:
+            if send_email_confirmation(user):
+                flash("Enviamos um link de confirmação para seu e-mail.", "info")
+            else:
+                flash("Cadastro criado. A confirmação de e-mail será enviada quando o SMTP estiver configurado.", "warning")
+        except Exception:
+            app.logger.exception("Falha ao enviar confirmação de e-mail para %s", user.email)
+            flash("Cadastro criado, mas não foi possível enviar a confirmação de e-mail agora.", "warning")
+
         return redirect(url_for("login"))
     
     return render_template("auth/registro.html", grupos=grupos)
+
+
+@app.route("/confirmar-email/<token>")
+def confirmar_email(token):
+    try:
+        data = email_serializer().loads(token, max_age=60 * 60 * 24 * 7)
+    except SignatureExpired:
+        flash("O link de confirmação expirou. Faça login e solicite um novo link.", "warning")
+        return redirect(url_for("login"))
+    except BadSignature:
+        flash("Link de confirmação inválido.", "danger")
+        return redirect(url_for("login"))
+
+    user = User.query.get(data.get("id"))
+    if not user or normalize_email(user.email) != normalize_email(data.get("email")):
+        flash("Não foi possível confirmar este e-mail.", "danger")
+        return redirect(url_for("login"))
+
+    user.email_confirmado = True
+    user.email_confirmado_em = datetime.utcnow()
+    db.session.commit()
+    flash("E-mail confirmado com sucesso. Você receberá os relatórios das rodadas.", "success")
+    return redirect(url_for("login"))
+
+
+@app.route("/reenviar-confirmacao-email", methods=["POST"])
+@login_required
+def reenviar_confirmacao_email():
+    if g.user.email_confirmado:
+        flash("Seu e-mail já está confirmado.", "info")
+        return redirect(url_for("dashboard"))
+
+    try:
+        if send_email_confirmation(g.user):
+            flash("Enviamos um novo link de confirmação para seu e-mail.", "success")
+        else:
+            flash("SMTP ainda não configurado. Não foi possível enviar a confirmação.", "warning")
+    except Exception:
+        app.logger.exception("Falha ao reenviar confirmação para %s", g.user.email)
+        flash("Não foi possível enviar a confirmação agora.", "danger")
+    return redirect(url_for("dashboard"))
 
 
 @app.route("/logout")
@@ -1485,7 +1783,13 @@ def lancar_resultado(jid):
 
         # Recalcular pontuação
         calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+        report_stats = send_pending_round_reports()
         flash("Resultado lançado e pontuação calculada!", "success")
+        if report_stats["sent"] or report_stats["skipped"]:
+            flash(
+                f"Relatórios de rodada: {report_stats['sent']} enviado(s), {report_stats['skipped']} ignorado(s).",
+                "info",
+            )
         return redirect(url_for("listar_resultados"))
 
     return render_template("resultados/form.html", jogo=jogo, resultado=resultado)
@@ -1529,6 +1833,7 @@ def _run_auto_result_sync(launched_by: str):
 def sincronizar_resultados_admin():
     try:
         stats = _run_auto_result_sync(launched_by=f"sync-admin:{g.user.email}")
+        report_stats = send_pending_round_reports()
     except Exception as exc:
         flash(f"Falha na sincronização automática: {exc}", "danger")
         return redirect(url_for("listar_resultados"))
@@ -1551,6 +1856,11 @@ def sincronizar_resultados_admin():
             f"Jogos não mapeados automaticamente ({len(stats['unmatched'])}): {exemplos}",
             "warning",
         )
+    if report_stats["sent"] or report_stats["skipped"]:
+        flash(
+            f"Relatórios de rodada: {report_stats['sent']} enviado(s), {report_stats['skipped']} ignorado(s).",
+            "info",
+        )
 
     return redirect(url_for("listar_resultados"))
 
@@ -1565,7 +1875,8 @@ def sincronizar_resultados_cron():
 
     try:
         stats = _run_auto_result_sync(launched_by="sync-cron")
-        return jsonify({"ok": True, "stats": stats})
+        report_stats = send_pending_round_reports()
+        return jsonify({"ok": True, "stats": stats, "email_reports": report_stats})
     except Exception as exc:
         db.session.rollback()
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -1634,6 +1945,7 @@ def create_app():
     with app.app_context():
         db.create_all()
         ensure_group_publication_columns()
+        ensure_user_email_columns()
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
