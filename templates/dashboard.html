@@ -172,8 +172,8 @@
         <td>{{ j.hora_brasilia }}</td>
         <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
         <td>{{ grupo_label_traduzido(j.grupo) if j.grupo else '-' }}</td>
-        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong></td>
-        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_b) }}</strong></td>
+        <td class="{% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong></td>
+        <td class="{% if is_time_destacado(j.sigla_time_b) %}team-destaque{% endif %}"><strong>{{ time_nome_traduzido(j.time_b) }}</strong></td>
         <td>{{ j.cidade }}</td>
         <td>
           {% set st = j.status %}

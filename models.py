@@ -51,6 +51,7 @@ class User(db.Model):
     email_confirmado_em = db.Column(db.DateTime)
     receber_relatorios = db.Column(db.Boolean, default=True)
     idioma = db.Column(db.String(10), default="pt-BR")
+    time_destaque = db.Column(db.String(5))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

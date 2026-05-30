@@ -42,6 +42,13 @@ SUPPORTED_LANGUAGES = {
     "de": "Deutsch",
 }
 DEFAULT_LANGUAGE = "pt-BR"
+DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE = {
+    "pt-BR": "BRA",
+    "en": "USA",
+    "es": "ESP",
+    "fr": "FRA",
+    "de": "GER",
+}
 TEAM_TRANSLATIONS = {
     "en": {
         "México": "Mexico",
@@ -289,6 +296,9 @@ TRANSLATIONS = {
         "nav_simulation": "Simulação",
         "my_predictions": "Meus palpites",
         "group_label": "Grupo",
+        "highlight_team": "Seleção em destaque",
+        "highlight_team_auto": "Automático pelo idioma ({team})",
+        "save_highlight_team": "Aplicar selección",
         "logout": "Sair",
         "account_deletion": "Solicitar exclusão de conta e dados",
         "footer_note": "Bolão Copa do Mundo FIFA 2026 — Todos os horários em Brasília (BRT/UTC-3)",
@@ -511,6 +521,9 @@ TRANSLATIONS = {
         "nav_simulation": "Simulation",
         "my_predictions": "My predictions",
         "group_label": "Group",
+        "highlight_team": "Highlighted team",
+        "highlight_team_auto": "Automatic by language ({team})",
+        "save_highlight_team": "Apply highlight",
         "logout": "Sign out",
         "account_deletion": "Request account and data deletion",
         "footer_note": "FIFA World Cup Pool 2026 — All times in Brasília (BRT/UTC-3)",
@@ -733,6 +746,9 @@ TRANSLATIONS = {
         "nav_simulation": "Simulación",
         "my_predictions": "Mis pronósticos",
         "group_label": "Grupo",
+        "highlight_team": "Selección destacada",
+        "highlight_team_auto": "Automático por idioma ({team})",
+        "save_highlight_team": "Aplicar destaque",
         "logout": "Salir",
         "account_deletion": "Solicitar eliminación de cuenta y datos",
         "footer_note": "Quiniela Mundial FIFA 2026 — Todos los horarios en Brasilia (BRT/UTC-3)",
@@ -955,6 +971,9 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "nav_simulation": "Simulation",
     "my_predictions": "Mes pronostics",
     "group_label": "Groupe",
+    "highlight_team": "Sélection mise en avant",
+    "highlight_team_auto": "Automatique selon la langue ({team})",
+    "save_highlight_team": "Appliquer",
     "logout": "Se dÃ©connecter",
     "account_deletion": "Demander la suppression du compte et des donnÃ©es",
     "footer_note": "Pool Coupe du Monde FIFA 2026 - Tous les horaires sont Ã  Brasilia (BRT/UTC-3)",
@@ -1176,6 +1195,9 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "nav_simulation": "Simulation",
     "my_predictions": "Meine Tipps",
     "group_label": "Gruppe",
+    "highlight_team": "Hervorgehobene Auswahl",
+    "highlight_team_auto": "Automatisch nach Sprache ({team})",
+    "save_highlight_team": "Anwenden",
     "logout": "Abmelden",
     "account_deletion": "Konto- und DatenlÃ¶schung beantragen",
     "footer_note": "FIFA WM-Tippspiel 2026 - Alle Zeiten in Brasilia (BRT/UTC-3)",
@@ -1490,6 +1512,50 @@ def time_nome_traduzido(nome, idioma=None):
     return TEAM_TRANSLATIONS.get(idioma, {}).get(nome_original, nome_original)
 
 
+def codigo_time_destaque_padrao(idioma=None):
+    idioma = normalizar_idioma(idioma) or getattr(g, "idioma", None) or DEFAULT_LANGUAGE
+    return DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE.get(idioma, "BRA")
+
+
+def codigo_time_destacado(user=None):
+    user = user if user is not None else getattr(g, "user", None)
+    codigo = (getattr(user, "time_destaque", "") or "").strip().upper() if user else ""
+    return codigo or codigo_time_destaque_padrao()
+
+
+def is_time_destacado(sigla, user=None):
+    return (sigla or "").strip().upper() == codigo_time_destacado(user)
+
+
+def opcoes_time_destaque():
+    try:
+        jogos = Jogo.query.with_entities(
+            Jogo.time_a, Jogo.sigla_time_a, Jogo.time_b, Jogo.sigla_time_b
+        ).all()
+    except Exception:
+        return []
+
+    opcoes = {}
+    for time_a, sigla_a, time_b, sigla_b in jogos:
+        if sigla_a:
+            opcoes[sigla_a.strip().upper()] = time_a
+        if sigla_b:
+            opcoes[sigla_b.strip().upper()] = time_b
+
+    return [
+        {"code": code, "name": time_nome_traduzido(nome), "raw_name": nome}
+        for code, nome in sorted(opcoes.items(), key=lambda item: time_nome_traduzido(item[1]).lower())
+    ]
+
+
+def nome_time_por_sigla(sigla):
+    sigla = (sigla or "").strip().upper()
+    for opcao in opcoes_time_destaque():
+        if opcao["code"] == sigla:
+            return opcao["name"]
+    return sigla
+
+
 def find_user_by_email(email):
     email = normalize_email(email)
     if not email:
@@ -1627,6 +1693,8 @@ def ensure_user_email_columns():
         statements.append(f"ALTER TABLE users ADD COLUMN receber_relatorios {bool_type} DEFAULT {bool_true}")
     if "idioma" not in existing:
         statements.append(f"ALTER TABLE users ADD COLUMN idioma VARCHAR(10) DEFAULT '{DEFAULT_LANGUAGE}'")
+    if "time_destaque" not in existing:
+        statements.append("ALTER TABLE users ADD COLUMN time_destaque VARCHAR(5)")
 
     if not statements:
         return
@@ -2117,6 +2185,7 @@ def _current_user_payload(user):
         "email_confirmado": bool(user.email_confirmado),
         "receber_relatorios": bool(user.receber_relatorios),
         "idioma": user.idioma or DEFAULT_LANGUAGE,
+        "time_destaque": codigo_time_destacado(user),
         "grupo": {"id": grupo.id, "nome": grupo.nome} if grupo else None,
         "competidor": {
             "id": competidor.id,
@@ -2498,6 +2567,11 @@ def inject_globals():
         grupo_label_traduzido=grupo_label_traduzido,
         status_jogo_traduzido=status_jogo_traduzido,
         time_nome_traduzido=time_nome_traduzido,
+        is_time_destacado=is_time_destacado,
+        codigo_time_destacado=codigo_time_destacado,
+        codigo_time_destaque_padrao=codigo_time_destaque_padrao,
+        opcoes_time_destaque=opcoes_time_destaque,
+        nome_time_por_sigla=nome_time_por_sigla,
     )
 
 
@@ -2516,6 +2590,28 @@ def alterar_idioma(idioma):
     next_url = request.form.get("next") or request.referrer or url_for("dashboard" if g.user else "login")
     if not ((next_url.startswith("/") and not next_url.startswith("//")) or next_url.startswith(request.host_url)):
         next_url = url_for("dashboard" if g.user else "login")
+    return redirect(next_url)
+
+
+@app.route("/time-destaque", methods=["POST"])
+@login_required
+def alterar_time_destaque():
+    codigo = (request.form.get("time_destaque") or "").strip().upper()
+    codigos_validos = {opcao["code"] for opcao in opcoes_time_destaque()}
+    if codigo == "AUTO":
+        g.user.time_destaque = None
+    elif codigo in codigos_validos:
+        g.user.time_destaque = codigo
+    else:
+        flash("Seleção indisponível para destaque.", "warning")
+        codigo = None
+
+    if codigo:
+        db.session.commit()
+
+    next_url = request.form.get("next") or request.referrer or url_for("dashboard")
+    if not ((next_url.startswith("/") and not next_url.startswith("//")) or next_url.startswith(request.host_url)):
+        next_url = url_for("dashboard")
     return redirect(next_url)
 
 

@@ -12,7 +12,7 @@
       <div class="card-body">
         <form method="post">
           <div class="row align-items-end">
-            <div class="col mb-3 text-center {% if jogo.time_a == 'Brasil' or jogo.sigla_time_a == 'BRA' %}team-brasil{% endif %}">
+            <div class="col mb-3 text-center {% if is_time_destacado(jogo.sigla_time_a) %}team-destaque{% endif %}">
               <label class="form-label fw-bold">{{ time_nome_traduzido(jogo.time_a) }}</label>
               <input type="number" name="gols_a" class="form-control form-control-lg text-center"
                      min="0" max="30" required
@@ -21,7 +21,7 @@
             <div class="col-auto mb-3">
               <div class="fs-2 fw-bold text-muted mt-3">x</div>
             </div>
-            <div class="col mb-3 text-center {% if jogo.time_b == 'Brasil' or jogo.sigla_time_b == 'BRA' %}team-brasil{% endif %}">
+            <div class="col mb-3 text-center {% if is_time_destacado(jogo.sigla_time_b) %}team-destaque{% endif %}">
               <label class="form-label fw-bold">{{ time_nome_traduzido(jogo.time_b) }}</label>
               <input type="number" name="gols_b" class="form-control form-control-lg text-center"
                      min="0" max="30" required

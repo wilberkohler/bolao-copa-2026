@@ -36,12 +36,14 @@ body { background: #f4f6f9; }
 .pts-medio { color: #0d6efd; }
 .pts-baixo { color: #dc3545; }
 
-/* Destaque Brasil */
+/* Destaque de selecao */
+.team-destaque,
 .team-brasil {
 	background: linear-gradient(90deg, #fff3b0 0%, #d8f3dc 100%) !important;
 	border-left: 4px solid #198754 !important;
 	color: #0b3d22;
 }
+.team-destaque strong,
 .team-brasil strong {
 	color: #0b6b34;
 }
