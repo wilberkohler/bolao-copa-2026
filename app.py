@@ -1156,7 +1156,7 @@ def registro():
         flash("Cadastro realizado com sucesso! Faça login.", "success")
         try:
             if send_email_confirmation(user):
-                flash("Enviamos um link de confirmação para seu e-mail.", "info")
+                flash("Enviamos um link de confirmação para seu e-mail (verifique spam).", "info")
             else:
                 flash("Cadastro criado. A confirmação de e-mail será enviada quando o SMTP estiver configurado.", "warning")
         except Exception:
@@ -1270,7 +1270,7 @@ def reenviar_confirmacao_email():
 
     try:
         if send_email_confirmation(g.user):
-            flash("Enviamos um novo link de confirmação para seu e-mail.", "success")
+            flash("Enviamos um novo link de confirmação para seu e-mail (verifique spam).", "success")
         else:
             flash("SMTP ainda não configurado. Não foi possível enviar a confirmação.", "warning")
     except Exception:
