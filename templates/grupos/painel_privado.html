@@ -6,7 +6,7 @@
     <h4 class="mb-1"><i class="bi bi-shield-lock-fill text-success"></i> {{ grupo.nome }}</h4>
     <div class="text-muted small">{{ tr('private_group_admin_panel') }}</div>
   </div>
-  <a href="{{ url_for('meus_grupos_privados') }}" class="btn btn-outline-secondary btn-sm">Voltar</a>
+  <a href="{{ url_for('meus_grupos_privados') }}" class="btn btn-outline-secondary btn-sm">{{ tr('back') }}</a>
 </div>
 
 <div class="row g-3 mb-4">
@@ -32,7 +32,7 @@
   </div>
   <div class="col-md-4">
     <div class="bg-white border rounded shadow-sm p-3">
-      <div class="text-muted small">Convite</div>
+      <div class="text-muted small">{{ tr('private_group_invite') }}</div>
       <button class="btn btn-outline-success btn-sm mt-1" type="button" onclick="navigator.clipboard.writeText('{{ convite }}')">
         <i class="bi bi-link-45deg"></i> {{ tr('copy_invite') }}
       </button>
@@ -61,18 +61,18 @@
           {% if participante.ativo %}
             <span class="badge bg-success">{{ tr('private_group_active') }}</span>
           {% else %}
-            <span class="badge bg-secondary">Inativo</span>
+            <span class="badge bg-secondary">{{ tr('inactive') }}</span>
           {% endif %}
         </td>
         <td>
           {% if participante.id != user.id %}
             <form method="post" action="{{ url_for('remover_participante_grupo_privado', gid=grupo.id, user_id=participante.id) }}">
-              <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Remover participante deste grupo?')">
+              <button class="btn btn-outline-danger btn-sm" onclick="return confirm({{ tr('remove_participant_confirm')|tojson }})">
                 <i class="bi bi-person-dash"></i>
               </button>
             </form>
           {% else %}
-            <span class="text-muted small">Admin</span>
+            <span class="text-muted small">{{ tr('admin_label') }}</span>
           {% endif %}
         </td>
       </tr>

@@ -569,6 +569,13 @@ TRANSLATIONS = {
         "private_group_active": "Ativo",
         "private_group_pending": "Pendente",
         "private_group_free": "Gratuito",
+        "private_group_learn_more": "Saiba mais",
+        "private_group_invite": "Convite",
+        "inactive": "Inativo",
+        "back": "Voltar",
+        "admin_label": "Admin",
+        "remove_participant_confirm": "Remover participante deste grupo?",
+        "round_label_with_number": "{stage} - Rodada {round}",
         "predictions_title": "Palpites",
         "goals_a": "Gols A",
         "goals_b": "Gols B",
@@ -815,6 +822,13 @@ TRANSLATIONS = {
         "private_group_active": "Active",
         "private_group_pending": "Pending",
         "private_group_free": "Free",
+        "private_group_learn_more": "Learn more",
+        "private_group_invite": "Invite",
+        "inactive": "Inactive",
+        "back": "Back",
+        "admin_label": "Admin",
+        "remove_participant_confirm": "Remove participant from this group?",
+        "round_label_with_number": "{stage} - Round {round}",
         "predictions_title": "Predictions",
         "goals_a": "Goals A",
         "goals_b": "Goals B",
@@ -1853,6 +1867,255 @@ TRANSLATIONS["ja"] = {**TRANSLATIONS["en"], **{
 }}
 
 
+TRANSLATIONS["es"].update({
+    "nav_private_group": "Grupo privado",
+    "private_group_title": "Grupo privado",
+    "private_group_hero": "Crea un grupo privado para administrar tu propia quiniela.",
+    "private_group_price": "Pago unico por el Mundial 2026.",
+    "private_group_price_usd": "Precio unico estimado en dolares",
+    "private_group_local_price": "Moneda aproximada de la seleccion destacada",
+    "private_group_price_note": "Valores aproximados. El precio final sera mostrado por Apple o Google Play al comprar.",
+    "private_group_mobile_only": "La contratacion se hara desde la app movil, usando Apple o Google Play. En computadora, esta pagina es solo informativa.",
+    "private_group_feature_1": "Panel administrativo limitado al grupo que creaste.",
+    "private_group_feature_2": "Invitacion por enlace y codigo de acceso para participantes.",
+    "private_group_feature_3": "Ranking exclusivo, informes y seguimiento de pronosticos del grupo.",
+    "private_group_capacity_note": "Para proteger la estabilidad del servidor, cada grupo tiene un limite tecnico inicial de {limit} participantes.",
+    "private_group_my_groups": "Mis grupos privados",
+    "private_group_no_groups": "Todavia no administras un grupo privado activo.",
+    "private_group_app_hint": "Cuando la app este publicada, activa el grupo desde el celular y luego acompanalo aqui.",
+    "private_group_admin_panel": "Panel del grupo",
+    "private_group_participants": "Participantes",
+    "private_group_status": "Estado del pago",
+    "private_group_active": "Activo",
+    "private_group_pending": "Pendiente",
+    "private_group_free": "Gratis",
+    "private_group_learn_more": "Saber mas",
+    "private_group_invite": "Invitacion",
+    "inactive": "Inactivo",
+    "back": "Volver",
+    "admin_label": "Admin",
+    "remove_participant_confirm": "Eliminar participante de este grupo?",
+    "round_label_with_number": "{stage} - Ronda {round}",
+})
+
+TRANSLATIONS["fr"].update({
+    "nav_private_group": "Groupe prive",
+    "private_group_title": "Groupe prive",
+    "private_group_hero": "Creez un groupe prive pour administrer votre propre pool.",
+    "private_group_price": "Paiement unique pour la Coupe du Monde 2026.",
+    "private_group_price_usd": "Prix unique estime en dollars",
+    "private_group_local_price": "Devise approximative de l'equipe mise en avant",
+    "private_group_price_note": "Montants approximatifs. Le prix final sera affiche par Apple ou Google Play au moment de l'achat.",
+    "private_group_mobile_only": "L'achat se fera dans l'application mobile via Apple ou Google Play. Sur ordinateur, cette page est uniquement informative.",
+    "private_group_feature_1": "Panneau d'administration limite au groupe que vous avez cree.",
+    "private_group_feature_2": "Invitation par lien et code d'acces pour les participants.",
+    "private_group_feature_3": "Classement exclusif, rapports et suivi des pronostics du groupe.",
+    "private_group_capacity_note": "Pour proteger la stabilite du serveur, chaque groupe a une limite technique initiale de {limit} participants.",
+    "private_group_my_groups": "Mes groupes prives",
+    "private_group_no_groups": "Vous n'administrez pas encore de groupe prive actif.",
+    "private_group_app_hint": "Quand l'application sera publiee, activez le groupe sur mobile puis suivez-le ici.",
+    "private_group_admin_panel": "Panneau du groupe",
+    "private_group_participants": "Participants",
+    "private_group_status": "Statut du paiement",
+    "private_group_active": "Actif",
+    "private_group_pending": "En attente",
+    "private_group_free": "Gratuit",
+    "private_group_learn_more": "En savoir plus",
+    "private_group_invite": "Invitation",
+    "inactive": "Inactif",
+    "back": "Retour",
+    "admin_label": "Admin",
+    "remove_participant_confirm": "Retirer ce participant du groupe ?",
+    "round_label_with_number": "{stage} - Journee {round}",
+})
+
+TRANSLATIONS["de"].update({
+    "nav_private_group": "Private Gruppe",
+    "private_group_title": "Private Gruppe",
+    "private_group_hero": "Erstellen Sie eine private Gruppe, um Ihr eigenes Tippspiel zu verwalten.",
+    "private_group_price": "Einmalzahlung fuer die WM 2026.",
+    "private_group_price_usd": "Geschaetzter Einmalpreis in US-Dollar",
+    "private_group_local_price": "Ungefaehre Waehrung des hervorgehobenen Teams",
+    "private_group_price_note": "Ungefaehre Werte. Der endgueltige Preis wird beim Kauf von Apple oder Google Play angezeigt.",
+    "private_group_mobile_only": "Der Kauf erfolgt in der mobilen App ueber Apple oder Google Play. Am Computer dient diese Seite nur zur Information.",
+    "private_group_feature_1": "Administrationsbereich nur fuer die von Ihnen erstellte Gruppe.",
+    "private_group_feature_2": "Einladungslink und Zugangscode fuer Teilnehmer.",
+    "private_group_feature_3": "Exklusive Rangliste, Berichte und Tippuebersicht der Gruppe.",
+    "private_group_capacity_note": "Zum Schutz der Serverstabilitaet hat jede Gruppe anfangs ein technisches Limit von {limit} Teilnehmern.",
+    "private_group_my_groups": "Meine privaten Gruppen",
+    "private_group_no_groups": "Sie verwalten noch keine aktive private Gruppe.",
+    "private_group_app_hint": "Sobald die App veroeffentlicht ist, aktivieren Sie die Gruppe am Smartphone und verwalten sie danach hier.",
+    "private_group_admin_panel": "Gruppenbereich",
+    "private_group_participants": "Teilnehmer",
+    "private_group_status": "Zahlungsstatus",
+    "private_group_active": "Aktiv",
+    "private_group_pending": "Ausstehend",
+    "private_group_free": "Kostenlos",
+    "private_group_learn_more": "Mehr erfahren",
+    "private_group_invite": "Einladung",
+    "inactive": "Inaktiv",
+    "back": "Zurueck",
+    "admin_label": "Admin",
+    "remove_participant_confirm": "Teilnehmer aus dieser Gruppe entfernen?",
+    "round_label_with_number": "{stage} - Runde {round}",
+})
+
+TRANSLATIONS["it"].update({
+    "nav_private_group": "Gruppo privato",
+    "private_group_title": "Gruppo privato",
+    "private_group_hero": "Crea un gruppo privato per amministrare il tuo gioco.",
+    "private_group_price": "Pagamento unico per la Coppa del Mondo 2026.",
+    "private_group_price_usd": "Prezzo unico stimato in dollari",
+    "private_group_local_price": "Valuta approssimativa della squadra in evidenza",
+    "private_group_price_note": "Valori approssimativi. Il prezzo finale sara mostrato da Apple o Google Play al momento dell'acquisto.",
+    "private_group_mobile_only": "L'acquisto sara disponibile nell'app mobile tramite Apple o Google Play. Sul computer questa pagina e solo informativa.",
+    "private_group_feature_1": "Pannello amministrativo limitato al gruppo creato da te.",
+    "private_group_feature_2": "Invito tramite link e codice di accesso per i partecipanti.",
+    "private_group_feature_3": "Classifica esclusiva, report e controllo dei pronostici del gruppo.",
+    "private_group_capacity_note": "Per proteggere la stabilita del server, ogni gruppo ha un limite tecnico iniziale di {limit} partecipanti.",
+    "private_group_my_groups": "I miei gruppi privati",
+    "private_group_no_groups": "Non amministri ancora un gruppo privato attivo.",
+    "private_group_app_hint": "Quando l'app sara pubblicata, attiva il gruppo dal cellulare e poi gestiscilo qui.",
+    "private_group_admin_panel": "Pannello del gruppo",
+    "private_group_participants": "Partecipanti",
+    "private_group_status": "Stato del pagamento",
+    "private_group_active": "Attivo",
+    "private_group_pending": "In sospeso",
+    "private_group_free": "Gratuito",
+    "private_group_learn_more": "Scopri di piu",
+    "private_group_invite": "Invito",
+    "inactive": "Inattivo",
+    "back": "Indietro",
+    "admin_label": "Admin",
+    "remove_participant_confirm": "Rimuovere questo partecipante dal gruppo?",
+    "round_label_with_number": "{stage} - Turno {round}",
+})
+
+TRANSLATIONS["ar"].update({
+    "nav_private_group": "\u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629",
+    "private_group_title": "\u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629",
+    "private_group_hero": "\u0623\u0646\u0634\u0626 \u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629 \u0644\u0625\u062f\u0627\u0631\u0629 \u062a\u0648\u0642\u0639\u0627\u062a\u0643.",
+    "private_group_price": "\u062f\u0641\u0639\u0629 \u0648\u0627\u062d\u062f\u0629 \u0644\u0643\u0623\u0633 \u0627\u0644\u0639\u0627\u0644\u0645 2026.",
+    "private_group_price_usd": "\u0633\u0639\u0631 \u062a\u0642\u0631\u064a\u0628\u064a \u0628\u0627\u0644\u062f\u0648\u0644\u0627\u0631",
+    "private_group_local_price": "\u0627\u0644\u0639\u0645\u0644\u0629 \u0627\u0644\u062a\u0642\u0631\u064a\u0628\u064a\u0629 \u0644\u0644\u0645\u0646\u062a\u062e\u0628 \u0627\u0644\u0645\u0645\u064a\u0632",
+    "private_group_price_note": "\u0627\u0644\u0642\u064a\u0645 \u062a\u0642\u0631\u064a\u0628\u064a\u0629. \u0633\u064a\u0638\u0647\u0631 \u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0646\u0647\u0627\u0626\u064a \u0641\u064a Apple \u0623\u0648 Google Play.",
+    "private_group_mobile_only": "\u0633\u064a\u062a\u0645 \u0627\u0644\u0634\u0631\u0627\u0621 \u0645\u0646 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u0647\u0627\u062a\u0641 \u0639\u0628\u0631 Apple \u0623\u0648 Google Play. \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629 \u0644\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0641\u0642\u0637.",
+    "private_group_feature_1": "\u0644\u0648\u062d\u0629 \u0625\u062f\u0627\u0631\u0629 \u0645\u062d\u062f\u0648\u062f\u0629 \u0628\u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629 \u0627\u0644\u062a\u064a \u0623\u0646\u0634\u0623\u062a\u0647\u0627.",
+    "private_group_feature_2": "\u0631\u0627\u0628\u0637 \u062f\u0639\u0648\u0629 \u0648\u0631\u0645\u0632 \u0648\u0635\u0648\u0644 \u0644\u0644\u0645\u0634\u0627\u0631\u0643\u064a\u0646.",
+    "private_group_feature_3": "\u062a\u0631\u062a\u064a\u0628 \u062e\u0627\u0635 \u0648\u062a\u0642\u0627\u0631\u064a\u0631 \u0648\u0645\u062a\u0627\u0628\u0639\u0629 \u062a\u0648\u0642\u0639\u0627\u062a \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629.",
+    "private_group_capacity_note": "\u0644\u062d\u0645\u0627\u064a\u0629 \u0627\u0633\u062a\u0642\u0631\u0627\u0631 \u0627\u0644\u062e\u0627\u062f\u0645\u060c \u0644\u0643\u0644 \u0645\u062c\u0645\u0648\u0639\u0629 \u062d\u062f \u062a\u0642\u0646\u064a \u0623\u0648\u0644\u064a \u0645\u0646 {limit} \u0645\u0634\u0627\u0631\u0643\u0627.",
+    "private_group_my_groups": "\u0645\u062c\u0645\u0648\u0639\u0627\u062a\u064a \u0627\u0644\u062e\u0627\u0635\u0629",
+    "private_group_no_groups": "\u0644\u0627 \u062a\u062f\u064a\u0631 \u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629 \u0646\u0634\u0637\u0629 \u0628\u0639\u062f.",
+    "private_group_app_hint": "\u0639\u0646\u062f \u0646\u0634\u0631 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u060c \u0641\u0639\u0644 \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629 \u0645\u0646 \u0627\u0644\u0647\u0627\u062a\u0641 \u062b\u0645 \u0623\u062f\u0631\u0647\u0627 \u0647\u0646\u0627.",
+    "private_group_admin_panel": "\u0644\u0648\u062d\u0629 \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629",
+    "private_group_participants": "\u0627\u0644\u0645\u0634\u0627\u0631\u0643\u0648\u0646",
+    "private_group_status": "\u062d\u0627\u0644\u0629 \u0627\u0644\u062f\u0641\u0639",
+    "private_group_active": "\u0646\u0634\u0637",
+    "private_group_pending": "\u0645\u0639\u0644\u0642",
+    "private_group_free": "\u0645\u062c\u0627\u0646\u064a",
+    "private_group_learn_more": "\u0627\u0639\u0631\u0641 \u0627\u0644\u0645\u0632\u064a\u062f",
+    "private_group_invite": "\u062f\u0639\u0648\u0629",
+    "inactive": "\u063a\u064a\u0631 \u0646\u0634\u0637",
+    "back": "\u0631\u062c\u0648\u0639",
+    "admin_label": "\u0645\u0633\u0624\u0648\u0644",
+    "remove_participant_confirm": "\u0625\u0632\u0627\u0644\u0629 \u0647\u0630\u0627 \u0627\u0644\u0645\u0634\u0627\u0631\u0643 \u0645\u0646 \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629\u061f",
+    "round_label_with_number": "{stage} - \u0627\u0644\u062c\u0648\u0644\u0629 {round}",
+})
+
+TRANSLATIONS["zh"].update({
+    "nav_private_group": "\u79c1\u4eba\u5c0f\u7ec4",
+    "private_group_title": "\u79c1\u4eba\u5c0f\u7ec4",
+    "private_group_hero": "\u521b\u5efa\u79c1\u4eba\u5c0f\u7ec4\u5e76\u7ba1\u7406\u4f60\u7684\u9884\u6d4b\u6d3b\u52a8\u3002",
+    "private_group_price": "2026 \u4e16\u754c\u676f\u4e00\u6b21\u6027\u4ed8\u8d39\u3002",
+    "private_group_price_usd": "\u7f8e\u5143\u9884\u4f30\u4e00\u6b21\u6027\u4ef7\u683c",
+    "private_group_local_price": "\u6309\u9ad8\u4eae\u7403\u961f\u4f30\u7b97\u7684\u5f53\u5730\u8d27\u5e01",
+    "private_group_price_note": "\u91d1\u989d\u4e3a\u4f30\u7b97\u503c\u3002\u6700\u7ec8\u4ef7\u683c\u5c06\u7531 Apple \u6216 Google Play \u5728\u8d2d\u4e70\u65f6\u663e\u793a\u3002",
+    "private_group_mobile_only": "\u8d2d\u4e70\u5c06\u901a\u8fc7\u624b\u673a\u5e94\u7528\u5185\u7684 Apple \u6216 Google Play \u5b8c\u6210\u3002\u7535\u8111\u7aef\u6b64\u9875\u4ec5\u4f9b\u8bf4\u660e\u3002",
+    "private_group_feature_1": "\u7ba1\u7406\u9762\u677f\u4ec5\u9650\u4f60\u521b\u5efa\u7684\u5c0f\u7ec4\u3002",
+    "private_group_feature_2": "\u9080\u8bf7\u94fe\u63a5\u548c\u53c2\u4e0e\u8005\u8bbf\u95ee\u7801\u3002",
+    "private_group_feature_3": "\u5c0f\u7ec4\u4e13\u5c5e\u6392\u540d\u3001\u62a5\u544a\u548c\u9884\u6d4b\u8ddf\u8e2a\u3002",
+    "private_group_capacity_note": "\u4e3a\u4fdd\u62a4\u670d\u52a1\u5668\u7a33\u5b9a\u6027\uff0c\u6bcf\u4e2a\u5c0f\u7ec4\u521d\u59cb\u6280\u672f\u9650\u5236\u4e3a {limit} \u540d\u53c2\u4e0e\u8005\u3002",
+    "private_group_my_groups": "\u6211\u7684\u79c1\u4eba\u5c0f\u7ec4",
+    "private_group_no_groups": "\u4f60\u8fd8\u6ca1\u6709\u7ba1\u7406\u6d3b\u8dc3\u7684\u79c1\u4eba\u5c0f\u7ec4\u3002",
+    "private_group_app_hint": "\u5e94\u7528\u53d1\u5e03\u540e\uff0c\u8bf7\u5728\u624b\u673a\u4e0a\u6fc0\u6d3b\u5c0f\u7ec4\uff0c\u7136\u540e\u5728\u8fd9\u91cc\u7ba1\u7406\u3002",
+    "private_group_admin_panel": "\u5c0f\u7ec4\u9762\u677f",
+    "private_group_participants": "\u53c2\u4e0e\u8005",
+    "private_group_status": "\u4ed8\u6b3e\u72b6\u6001",
+    "private_group_active": "\u5df2\u6fc0\u6d3b",
+    "private_group_pending": "\u5f85\u5904\u7406",
+    "private_group_free": "\u514d\u8d39",
+    "private_group_learn_more": "\u4e86\u89e3\u66f4\u591a",
+    "private_group_invite": "\u9080\u8bf7",
+    "inactive": "\u672a\u542f\u7528",
+    "back": "\u8fd4\u56de",
+    "admin_label": "\u7ba1\u7406\u5458",
+    "remove_participant_confirm": "\u8981\u5c06\u6b64\u53c2\u4e0e\u8005\u4ece\u5c0f\u7ec4\u79fb\u9664\u5417\uff1f",
+    "round_label_with_number": "{stage} - \u7b2c {round} \u8f6e",
+})
+
+TRANSLATIONS["ru"].update({
+    "nav_private_group": "\u041f\u0440\u0438\u0432\u0430\u0442\u043d\u0430\u044f \u0433\u0440\u0443\u043f\u043f\u0430",
+    "private_group_title": "\u041f\u0440\u0438\u0432\u0430\u0442\u043d\u0430\u044f \u0433\u0440\u0443\u043f\u043f\u0430",
+    "private_group_hero": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u043f\u0440\u0438\u0432\u0430\u0442\u043d\u0443\u044e \u0433\u0440\u0443\u043f\u043f\u0443 \u0434\u043b\u044f \u0441\u0432\u043e\u0435\u0433\u043e \u043f\u0443\u043b\u0430 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u043e\u0432.",
+    "private_group_price": "\u0420\u0430\u0437\u043e\u0432\u044b\u0439 \u043f\u043b\u0430\u0442\u0435\u0436 \u0437\u0430 \u0427\u041c-2026.",
+    "private_group_price_usd": "\u041e\u0440\u0438\u0435\u043d\u0442\u0438\u0440\u043e\u0432\u043e\u0447\u043d\u0430\u044f \u0446\u0435\u043d\u0430 \u0432 USD",
+    "private_group_local_price": "\u041f\u0440\u0438\u043c\u0435\u0440\u043d\u0430\u044f \u0432\u0430\u043b\u044e\u0442\u0430 \u0434\u043b\u044f \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0439 \u0441\u0431\u043e\u0440\u043d\u043e\u0439",
+    "private_group_price_note": "\u0421\u0443\u043c\u043c\u044b \u043e\u0440\u0438\u0435\u043d\u0442\u0438\u0440\u043e\u0432\u043e\u0447\u043d\u044b\u0435. \u0418\u0442\u043e\u0433\u043e\u0432\u0443\u044e \u0446\u0435\u043d\u0443 \u043f\u043e\u043a\u0430\u0436\u0435\u0442 Apple \u0438\u043b\u0438 Google Play.",
+    "private_group_mobile_only": "\u041f\u043e\u043a\u0443\u043f\u043a\u0430 \u0431\u0443\u0434\u0435\u0442 \u0432 \u043c\u043e\u0431\u0438\u043b\u044c\u043d\u043e\u043c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0438 \u0447\u0435\u0440\u0435\u0437 Apple \u0438\u043b\u0438 Google Play. \u041d\u0430 \u043a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u0435 \u044d\u0442\u0430 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u0442\u043e\u043b\u044c\u043a\u043e \u0438\u043d\u0444\u043e\u0440\u043c\u0438\u0440\u0443\u0435\u0442.",
+    "private_group_feature_1": "\u0410\u0434\u043c\u0438\u043d-\u043f\u0430\u043d\u0435\u043b\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u043d\u043e\u0439 \u0432\u0430\u043c\u0438 \u0433\u0440\u0443\u043f\u043f\u044b.",
+    "private_group_feature_2": "\u0421\u0441\u044b\u043b\u043a\u0430-\u043f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435 \u0438 \u043a\u043e\u0434 \u0434\u043e\u0441\u0442\u0443\u043f\u0430 \u0434\u043b\u044f \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.",
+    "private_group_feature_3": "\u041e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0439 \u0440\u0435\u0439\u0442\u0438\u043d\u0433, \u043e\u0442\u0447\u0435\u0442\u044b \u0438 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u044b \u0433\u0440\u0443\u043f\u043f\u044b.",
+    "private_group_capacity_note": "\u0414\u043b\u044f \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0441\u0442\u0438 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0443 \u043a\u0430\u0436\u0434\u043e\u0439 \u0433\u0440\u0443\u043f\u043f\u044b \u0435\u0441\u0442\u044c \u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043b\u0438\u043c\u0438\u0442 {limit} \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.",
+    "private_group_my_groups": "\u041c\u043e\u0438 \u043f\u0440\u0438\u0432\u0430\u0442\u043d\u044b\u0435 \u0433\u0440\u0443\u043f\u043f\u044b",
+    "private_group_no_groups": "\u0423 \u0432\u0430\u0441 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0439 \u043f\u0440\u0438\u0432\u0430\u0442\u043d\u043e\u0439 \u0433\u0440\u0443\u043f\u043f\u044b.",
+    "private_group_app_hint": "\u041a\u043e\u0433\u0434\u0430 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u0431\u0443\u0434\u0435\u0442 \u043e\u043f\u0443\u0431\u043b\u0438\u043a\u043e\u0432\u0430\u043d\u043e, \u0430\u043a\u0442\u0438\u0432\u0438\u0440\u0443\u0439\u0442\u0435 \u0433\u0440\u0443\u043f\u043f\u0443 \u0441 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u044f\u0439\u0442\u0435 \u0435\u044e \u0437\u0434\u0435\u0441\u044c.",
+    "private_group_admin_panel": "\u041f\u0430\u043d\u0435\u043b\u044c \u0433\u0440\u0443\u043f\u043f\u044b",
+    "private_group_participants": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438",
+    "private_group_status": "\u0421\u0442\u0430\u0442\u0443\u0441 \u043f\u043b\u0430\u0442\u0435\u0436\u0430",
+    "private_group_active": "\u0410\u043a\u0442\u0438\u0432\u043d\u043e",
+    "private_group_pending": "\u041e\u0436\u0438\u0434\u0430\u0435\u0442\u0441\u044f",
+    "private_group_free": "\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e",
+    "private_group_learn_more": "\u041f\u043e\u0434\u0440\u043e\u0431\u043d\u0435\u0435",
+    "private_group_invite": "\u041f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435",
+    "inactive": "\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u043d\u043e",
+    "back": "\u041d\u0430\u0437\u0430\u0434",
+    "admin_label": "\u0410\u0434\u043c\u0438\u043d",
+    "remove_participant_confirm": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u0438\u0437 \u044d\u0442\u043e\u0439 \u0433\u0440\u0443\u043f\u043f\u044b?",
+    "round_label_with_number": "{stage} - \u0422\u0443\u0440 {round}",
+})
+
+TRANSLATIONS["ja"].update({
+    "nav_private_group": "\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7",
+    "private_group_title": "\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7",
+    "private_group_hero": "\u81ea\u5206\u306e\u4e88\u60f3\u30b0\u30eb\u30fc\u30d7\u3092\u7ba1\u7406\u3067\u304d\u308b\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7\u3092\u4f5c\u6210\u3057\u307e\u3059\u3002",
+    "private_group_price": "2026\u5e74\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7\u306e\u4e00\u56de\u9650\u308a\u306e\u652f\u6255\u3044\u3002",
+    "private_group_price_usd": "\u7c73\u30c9\u30eb\u3067\u306e\u6982\u7b97\u4e00\u62ec\u4fa1\u683c",
+    "private_group_local_price": "\u30cf\u30a4\u30e9\u30a4\u30c8\u4e2d\u306e\u4ee3\u8868\u306b\u57fa\u3065\u304f\u6982\u7b97\u901a\u8ca8",
+    "private_group_price_note": "\u91d1\u984d\u306f\u6982\u7b97\u3067\u3059\u3002\u6700\u7d42\u4fa1\u683c\u306f\u8cfc\u5165\u6642\u306b Apple \u307e\u305f\u306f Google Play \u306b\u8868\u793a\u3055\u308c\u307e\u3059\u3002",
+    "private_group_mobile_only": "\u8cfc\u5165\u306f\u30e2\u30d0\u30a4\u30eb\u30a2\u30d7\u30ea\u5185\u3067 Apple \u307e\u305f\u306f Google Play \u3092\u901a\u3058\u3066\u884c\u3044\u307e\u3059\u3002\u30d1\u30bd\u30b3\u30f3\u3067\u306f\u3053\u306e\u30da\u30fc\u30b8\u306f\u6848\u5185\u7528\u3067\u3059\u3002",
+    "private_group_feature_1": "\u4f5c\u6210\u3057\u305f\u30b0\u30eb\u30fc\u30d7\u3060\u3051\u3092\u7ba1\u7406\u3067\u304d\u308b\u7ba1\u7406\u753b\u9762\u3002",
+    "private_group_feature_2": "\u53c2\u52a0\u8005\u7528\u306e\u62db\u5f85\u30ea\u30f3\u30af\u3068\u30a2\u30af\u30bb\u30b9\u30b3\u30fc\u30c9\u3002",
+    "private_group_feature_3": "\u30b0\u30eb\u30fc\u30d7\u5c02\u7528\u30e9\u30f3\u30ad\u30f3\u30b0\u3001\u30ec\u30dd\u30fc\u30c8\u3001\u4e88\u60f3\u306e\u78ba\u8a8d\u3002",
+    "private_group_capacity_note": "\u30b5\u30fc\u30d0\u30fc\u5b89\u5b9a\u6027\u306e\u305f\u3081\u3001\u5404\u30b0\u30eb\u30fc\u30d7\u306e\u521d\u671f\u6280\u8853\u4e0a\u9650\u306f {limit} \u4eba\u3067\u3059\u3002",
+    "private_group_my_groups": "\u81ea\u5206\u306e\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7",
+    "private_group_no_groups": "\u307e\u3060\u6709\u52b9\u306a\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7\u3092\u7ba1\u7406\u3057\u3066\u3044\u307e\u305b\u3093\u3002",
+    "private_group_app_hint": "\u30a2\u30d7\u30ea\u516c\u958b\u5f8c\u3001\u30b9\u30de\u30db\u3067\u30b0\u30eb\u30fc\u30d7\u3092\u6709\u52b9\u5316\u3057\u3001\u3053\u3053\u3067\u7ba1\u7406\u3067\u304d\u307e\u3059\u3002",
+    "private_group_admin_panel": "\u30b0\u30eb\u30fc\u30d7\u7ba1\u7406\u753b\u9762",
+    "private_group_participants": "\u53c2\u52a0\u8005",
+    "private_group_status": "\u652f\u6255\u3044\u72b6\u614b",
+    "private_group_active": "\u6709\u52b9",
+    "private_group_pending": "\u4fdd\u7559\u4e2d",
+    "private_group_free": "\u7121\u6599",
+    "private_group_learn_more": "\u8a73\u7d30",
+    "private_group_invite": "\u62db\u5f85",
+    "inactive": "\u7121\u52b9",
+    "back": "\u623b\u308b",
+    "admin_label": "\u7ba1\u7406\u8005",
+    "remove_participant_confirm": "\u3053\u306e\u53c2\u52a0\u8005\u3092\u30b0\u30eb\u30fc\u30d7\u304b\u3089\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
+    "round_label_with_number": "{stage} - \u7b2c {round} \u30e9\u30a6\u30f3\u30c9",
+})
+
+
 def _repair_mojibake(value):
     if not isinstance(value, str):
         return value
@@ -2569,6 +2832,18 @@ def rodada_key_label(jogos):
     return key, label
 
 
+def rodada_label_traduzida(rodada, idioma=None):
+    jogos = rodada.get("jogos") or []
+    if not jogos:
+        return rodada.get("label", "")
+    primeiro = jogos[0]
+    stage = fase_label_traduzida(primeiro.fase, idioma)
+    numero = primeiro.rodada if primeiro.rodada is not None else 0
+    if numero:
+        return tr("round_label_with_number", idioma, stage=stage, round=numero)
+    return stage
+
+
 def rodadas_fechadas_com_resultado():
     jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.fase, Jogo.rodada, Jogo.data_jogo).all()
     grupos = {}
@@ -2608,6 +2883,8 @@ def montar_relatorio_rodada(user, competidor, rodada):
     top5_etapa = ranking_etapa[:5]
     top5_geral = ranking_geral[:5]
     jogos_linhas = []
+    rodada_label = rodada_label_traduzida(rodada, user.idioma)
+    points_label = tr("points", user.idioma)
 
     for jogo in rodada["jogos"]:
         resultado = jogo.resultado
@@ -2616,23 +2893,23 @@ def montar_relatorio_rodada(user, competidor, rodada):
             f"- {time_nome_traduzido(jogo.time_a, user.idioma)} "
             f"{resultado.gols_a} x {resultado.gols_b} "
             f"{time_nome_traduzido(jogo.time_b, user.idioma)}: "
-            f"{pont.pontos if pont else 0} ponto(s)"
+            f"{pont.pontos if pont else 0} {points_label}"
         )
 
     top_etapa_linhas = [
-        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
+        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} {points_label}"
         for item in top5_etapa
     ]
     top_geral_linhas = [
-        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
+        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} {points_label}"
         for item in top5_geral
     ]
     invite_url = convite_url(user)
-    subject = tr("round_report_subject", user.idioma, round_label=rodada["label"])
+    subject = tr("round_report_subject", user.idioma, round_label=rodada_label)
     text = (
         tr("hello_name", user.idioma, name=user.nome)
         + "\n\n"
-        + tr("round_report_heading", user.idioma, round_label=rodada["label"])
+        + tr("round_report_heading", user.idioma, round_label=rodada_label)
         + "\n"
         + tr("your_round_points", user.idioma, points=pontos_rodada)
         + "\n"
@@ -2661,7 +2938,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
     )
     html = (
         f"<p>{escape(tr('hello_name', user.idioma, name=user.nome))}</p>"
-        f"<h2>{escape(rodada['label'])}</h2>"
+        f"<h2>{escape(rodada_label)}</h2>"
         f"<p>{escape(tr('your_round_points', user.idioma, points=pontos_rodada))}</p>"
         f"<p>{escape(tr('exact_scores_round', user.idioma, count=placares))}</p>"
         f"<p>{escape(tr('your_stage_position', user.idioma, stage_label=etapa_label, position=posicao_etapa or '-'))}</p>"
@@ -2669,9 +2946,9 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"<h3>{escape(tr('round_games', user.idioma))}</h3><ul>"
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
         + f"</ul><h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3><ol>"
-        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_etapa)
+        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_etapa)
         + f"</ol><h3>{escape(tr('top5_overall', user.idioma))}</h3><ol>"
-        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_geral)
+        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_geral)
         + f"</ol><p>{escape(tr('access_app_details', user.idioma))}</p>"
         + f"<p>{escape(tr('invite_friend_line', user.idioma))}<br><a href=\"{invite_url}\">{invite_url}</a></p>"
     )
