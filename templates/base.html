@@ -28,21 +28,21 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav me-auto">
         {% if user %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-house"></i> Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_jogos') }}"><i class="bi bi-calendar3"></i> Jogos</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('palpites') }}"><i class="bi bi-pencil-square"></i> Palpites</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('ranking_geral') }}"><i class="bi bi-bar-chart"></i> Ranking</a></li>
-         <li class="nav-item"><a class="nav-link" href="{{ url_for('regras') }}"><i class="bi bi-journal-text"></i> Regras</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-house"></i> {{ tr('nav_home') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_jogos') }}"><i class="bi bi-calendar3"></i> {{ tr('nav_games') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('palpites') }}"><i class="bi bi-pencil-square"></i> {{ tr('nav_predictions') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('ranking_geral') }}"><i class="bi bi-bar-chart"></i> {{ tr('nav_ranking') }}</a></li>
+         <li class="nav-item"><a class="nav-link" href="{{ url_for('regras') }}"><i class="bi bi-journal-text"></i> {{ tr('nav_rules') }}</a></li>
         {% if user.eh_admin %}
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> Competidores</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> {{ tr('nav_competitors') }}</a></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Admin</a>
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> {{ tr('nav_admin') }}</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{{ url_for('listar_resultados') }}"><i class="bi bi-check2-circle"></i> Resultados</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> Competidores</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('listar_grupos') }}"><i class="bi bi-collection"></i> Grupos</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_resultados') }}"><i class="bi bi-check2-circle"></i> {{ tr('nav_results') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> {{ tr('nav_competitors') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_grupos') }}"><i class="bi bi-collection"></i> {{ tr('nav_groups') }}</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{{ url_for('simulacao') }}"><i class="bi bi-clock-history"></i> Simulação</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('simulacao') }}"><i class="bi bi-clock-history"></i> {{ tr('nav_simulation') }}</a></li>
             </ul>
           </li>
         {% endif %}
@@ -73,18 +73,18 @@
               <i class="bi bi-person-circle"></i> {{ user.apelido or user.nome }}
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{{ url_for('palpites') }}">Meus palpites</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('palpites') }}">{{ tr('my_predictions') }}</a></li>
               {% if user.grupo %}
               <li><hr class="dropdown-divider"></li>
-              <li><span class="dropdown-item text-muted"><small>Grupo: <strong>{{ user.grupo.nome }}</strong></small></span></li>
+              <li><span class="dropdown-item text-muted"><small>{{ tr('group_label') }}: <strong>{{ user.grupo.nome }}</strong></small></span></li>
               {% endif %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sair</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('logout') }}">{{ tr('logout') }}</a></li>
             </ul>
           </div>
         {% else %}
-          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Login</a>
-          <a href="{{ url_for('registro') }}" class="btn btn-light btn-sm">Cadastro</a>
+          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">{{ tr('sign_in') }}</a>
+          <a href="{{ url_for('registro') }}" class="btn btn-light btn-sm">{{ tr('register') }}</a>
         {% endif %}
       </div>
     </div>
@@ -105,9 +105,9 @@
 
 <footer class="text-center text-muted py-3 mt-5 border-top">
   <small>
-    Bolão Copa do Mundo FIFA 2026 &mdash; Todos os horários em Brasília (BRT/UTC-3)
+    {{ tr('footer_note') }}
     <span class="mx-2">|</span>
-    <a href="{{ url_for('solicitar_exclusao_dados') }}">Solicitar exclusão de conta e dados</a>
+    <a href="{{ url_for('solicitar_exclusao_dados') }}">{{ tr('account_deletion') }}</a>
   </small>
 </footer>
 

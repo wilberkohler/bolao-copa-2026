@@ -84,6 +84,76 @@ TRANSLATIONS = {
         "save_password": "Salvar senha",
         "saving": "Salvando...",
         "back_to_login": "Voltar ao login",
+        "nav_home": "Início",
+        "nav_games": "Jogos",
+        "nav_predictions": "Palpites",
+        "nav_ranking": "Ranking",
+        "nav_rules": "Regras",
+        "nav_competitors": "Competidores",
+        "nav_admin": "Admin",
+        "nav_results": "Resultados",
+        "nav_groups": "Grupos",
+        "nav_simulation": "Simulação",
+        "my_predictions": "Meus palpites",
+        "group_label": "Grupo",
+        "logout": "Sair",
+        "account_deletion": "Solicitar exclusão de conta e dados",
+        "footer_note": "Bolão Copa do Mundo FIFA 2026 — Todos os horários em Brasília (BRT/UTC-3)",
+        "dashboard": "Dashboard",
+        "invite_friend": "Convidar amigo",
+        "copy_invite": "Copiar convite",
+        "copied": "Copiado",
+        "confirm_email_title": "Confirme seu e-mail.",
+        "confirm_email_needed": "A confirmação é necessária para receber os relatórios automáticos das rodadas (verifique spam).",
+        "resend_confirmation": "Reenviar confirmação",
+        "competitors": "Competidores",
+        "games": "Jogos",
+        "completed": "Realizados",
+        "pending": "Pendentes",
+        "predictions_sent": "Palpites Enviados",
+        "predictions_pending": "Palpites Pendentes",
+        "current_podium": "Pódio Atual",
+        "overall_ranking": "Ranking geral",
+        "stage": "Etapa",
+        "overall": "Geral",
+        "points": "pontos",
+        "no_results_yet": "Nenhum resultado lançado ainda.",
+        "next_game": "Próximo Jogo",
+        "no_scheduled_game": "Nenhum jogo agendado.",
+        "next_deadline": "Próximo Prazo",
+        "deadline_for": "Prazo para:",
+        "no_upcoming_deadline": "Sem prazo iminente.",
+        "upcoming_games": "Próximos Jogos",
+        "date": "Data",
+        "time_brt": "Hora (BRT)",
+        "phase": "Fase",
+        "team_a": "Time A",
+        "team_b": "Time B",
+        "location": "Local",
+        "game_status": "Status Jogo",
+        "my_prediction": "Meu Palpite",
+        "prediction_deadline": "Prazo Palpite",
+        "scored": "Pontuado",
+        "result": "Resultado",
+        "in_progress": "Em andamento",
+        "locked": "Bloqueado",
+        "scheduled": "Agendado",
+        "no_prediction": "Sem palpite",
+        "no_upcoming_games": "Nenhum jogo próximo encontrado.",
+        "stage_groups": "Fase de Grupos",
+        "stage_knockout": "Mata-mata ate a Final",
+        "round_report_subject": "Relatório da {round_label} - Bolão Copa 2026",
+        "hello_name": "Olá, {name}!",
+        "round_report_heading": "Relatório da {round_label}:",
+        "your_round_points": "Seus pontos na rodada: {points}",
+        "exact_scores_round": "Placares exatos na rodada: {count}",
+        "your_stage_position": "Sua posição na etapa ({stage_label}): {position}",
+        "your_overall_position": "Sua posição no ranking geral: {position}",
+        "round_games": "Jogos da rodada:",
+        "top5_stage": "Top 5 da etapa - {stage_label}:",
+        "top5_overall": "Top 5 geral:",
+        "access_app_details": "Acesse o app para ver todos os detalhes.",
+        "invite_friend_line": "Convide um amigo para participar:",
         "confirm_email_subject": "Confirme seu e-mail - Bolão Copa 2026",
         "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
         "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
@@ -134,6 +204,76 @@ TRANSLATIONS = {
         "save_password": "Save password",
         "saving": "Saving...",
         "back_to_login": "Back to sign in",
+        "nav_home": "Home",
+        "nav_games": "Games",
+        "nav_predictions": "Predictions",
+        "nav_ranking": "Ranking",
+        "nav_rules": "Rules",
+        "nav_competitors": "Competitors",
+        "nav_admin": "Admin",
+        "nav_results": "Results",
+        "nav_groups": "Groups",
+        "nav_simulation": "Simulation",
+        "my_predictions": "My predictions",
+        "group_label": "Group",
+        "logout": "Sign out",
+        "account_deletion": "Request account and data deletion",
+        "footer_note": "FIFA World Cup Pool 2026 — All times in Brasília (BRT/UTC-3)",
+        "dashboard": "Dashboard",
+        "invite_friend": "Invite a friend",
+        "copy_invite": "Copy invite",
+        "copied": "Copied",
+        "confirm_email_title": "Confirm your email.",
+        "confirm_email_needed": "Confirmation is required to receive automatic round reports (check spam).",
+        "resend_confirmation": "Resend confirmation",
+        "competitors": "Competitors",
+        "games": "Games",
+        "completed": "Completed",
+        "pending": "Pending",
+        "predictions_sent": "Predictions Sent",
+        "predictions_pending": "Pending Predictions",
+        "current_podium": "Current Podium",
+        "overall_ranking": "Overall ranking",
+        "stage": "Stage",
+        "overall": "Overall",
+        "points": "points",
+        "no_results_yet": "No results entered yet.",
+        "next_game": "Next Game",
+        "no_scheduled_game": "No scheduled game.",
+        "next_deadline": "Next Deadline",
+        "deadline_for": "Deadline for:",
+        "no_upcoming_deadline": "No upcoming deadline.",
+        "upcoming_games": "Upcoming Games",
+        "date": "Date",
+        "time_brt": "Time (BRT)",
+        "phase": "Stage",
+        "team_a": "Team A",
+        "team_b": "Team B",
+        "location": "Location",
+        "game_status": "Game Status",
+        "my_prediction": "My Prediction",
+        "prediction_deadline": "Prediction Deadline",
+        "scored": "Scored",
+        "result": "Result",
+        "in_progress": "In progress",
+        "locked": "Locked",
+        "scheduled": "Scheduled",
+        "no_prediction": "No prediction",
+        "no_upcoming_games": "No upcoming games found.",
+        "stage_groups": "Group Stage",
+        "stage_knockout": "Knockout Stage through the Final",
+        "round_report_subject": "Report for {round_label} - World Cup Pool 2026",
+        "hello_name": "Hello, {name}!",
+        "round_report_heading": "Report for {round_label}:",
+        "your_round_points": "Your points this round: {points}",
+        "exact_scores_round": "Exact scores this round: {count}",
+        "your_stage_position": "Your position in this stage ({stage_label}): {position}",
+        "your_overall_position": "Your overall ranking position: {position}",
+        "round_games": "Round games:",
+        "top5_stage": "Top 5 for this stage - {stage_label}:",
+        "top5_overall": "Overall Top 5:",
+        "access_app_details": "Open the app to see all details.",
+        "invite_friend_line": "Invite a friend to join:",
         "confirm_email_subject": "Confirm your email - World Cup Pool 2026",
         "confirm_email_text": "Hello, {name}!\n\nConfirm your email to receive round reports from World Cup Pool 2026:\n{url}\n\nIf you did not create this account, ignore this message.",
         "confirm_email_html": "<p>Hello, {name}!</p><p>Confirm your email to receive round reports from World Cup Pool 2026.</p><p><a href=\"{url}\">Confirm email</a></p><p>If you did not create this account, ignore this message.</p>",
@@ -184,6 +324,76 @@ TRANSLATIONS = {
         "save_password": "Guardar contraseña",
         "saving": "Guardando...",
         "back_to_login": "Volver al inicio de sesión",
+        "nav_home": "Inicio",
+        "nav_games": "Partidos",
+        "nav_predictions": "Pronósticos",
+        "nav_ranking": "Ranking",
+        "nav_rules": "Reglas",
+        "nav_competitors": "Competidores",
+        "nav_admin": "Admin",
+        "nav_results": "Resultados",
+        "nav_groups": "Grupos",
+        "nav_simulation": "Simulación",
+        "my_predictions": "Mis pronósticos",
+        "group_label": "Grupo",
+        "logout": "Salir",
+        "account_deletion": "Solicitar eliminación de cuenta y datos",
+        "footer_note": "Quiniela Mundial FIFA 2026 — Todos los horarios en Brasilia (BRT/UTC-3)",
+        "dashboard": "Panel",
+        "invite_friend": "Invitar a un amigo",
+        "copy_invite": "Copiar invitación",
+        "copied": "Copiado",
+        "confirm_email_title": "Confirma tu correo.",
+        "confirm_email_needed": "La confirmación es necesaria para recibir los informes automáticos de las rondas (revisa spam).",
+        "resend_confirmation": "Reenviar confirmación",
+        "competitors": "Competidores",
+        "games": "Partidos",
+        "completed": "Finalizados",
+        "pending": "Pendientes",
+        "predictions_sent": "Pronósticos Enviados",
+        "predictions_pending": "Pronósticos Pendientes",
+        "current_podium": "Podio Actual",
+        "overall_ranking": "Ranking general",
+        "stage": "Etapa",
+        "overall": "General",
+        "points": "puntos",
+        "no_results_yet": "Aún no hay resultados cargados.",
+        "next_game": "Próximo Partido",
+        "no_scheduled_game": "No hay partidos programados.",
+        "next_deadline": "Próximo Plazo",
+        "deadline_for": "Plazo para:",
+        "no_upcoming_deadline": "Sin plazo próximo.",
+        "upcoming_games": "Próximos Partidos",
+        "date": "Fecha",
+        "time_brt": "Hora (BRT)",
+        "phase": "Fase",
+        "team_a": "Equipo A",
+        "team_b": "Equipo B",
+        "location": "Lugar",
+        "game_status": "Estado del Partido",
+        "my_prediction": "Mi Pronóstico",
+        "prediction_deadline": "Plazo del Pronóstico",
+        "scored": "Puntuado",
+        "result": "Resultado",
+        "in_progress": "En curso",
+        "locked": "Bloqueado",
+        "scheduled": "Programado",
+        "no_prediction": "Sin pronóstico",
+        "no_upcoming_games": "No se encontraron próximos partidos.",
+        "stage_groups": "Fase de Grupos",
+        "stage_knockout": "Eliminatorias hasta la Final",
+        "round_report_subject": "Informe de {round_label} - Quiniela Mundial 2026",
+        "hello_name": "Hola, {name}!",
+        "round_report_heading": "Informe de {round_label}:",
+        "your_round_points": "Tus puntos en la ronda: {points}",
+        "exact_scores_round": "Marcadores exactos en la ronda: {count}",
+        "your_stage_position": "Tu posición en la etapa ({stage_label}): {position}",
+        "your_overall_position": "Tu posición en el ranking general: {position}",
+        "round_games": "Partidos de la ronda:",
+        "top5_stage": "Top 5 de la etapa - {stage_label}:",
+        "top5_overall": "Top 5 general:",
+        "access_app_details": "Abre la app para ver todos los detalles.",
+        "invite_friend_line": "Invita a un amigo a participar:",
         "confirm_email_subject": "Confirma tu correo - Quiniela Mundial 2026",
         "confirm_email_text": "Hola, {name}!\n\nConfirma tu correo para recibir los informes de las rondas de la Quiniela Mundial 2026:\n{url}\n\nSi no creaste esta cuenta, ignora este mensaje.",
         "confirm_email_html": "<p>Hola, {name}!</p><p>Confirma tu correo para recibir los informes de las rondas de la Quiniela Mundial 2026.</p><p><a href=\"{url}\">Confirmar correo</a></p><p>Si no creaste esta cuenta, ignora este mensaje.</p>",
@@ -256,6 +466,14 @@ def tr(key, idioma=None, **kwargs):
     idioma = normalizar_idioma(idioma) or getattr(g, "idioma", None) or DEFAULT_LANGUAGE
     text = TRANSLATIONS.get(idioma, {}).get(key) or TRANSLATIONS[DEFAULT_LANGUAGE].get(key) or key
     return text.format(**kwargs) if kwargs else text
+
+
+def etapa_label_traduzida(etapa_key, idioma=None):
+    if etapa_key == "grupos":
+        return tr("stage_groups", idioma)
+    if etapa_key == "mata_mata":
+        return tr("stage_knockout", idioma)
+    return tr("overall", idioma)
 
 
 def find_user_by_email(email):
@@ -613,8 +831,8 @@ def rodadas_fechadas_com_resultado():
 
 def etapa_ranking_para_rodada(rodada):
     if any(jogo.mata_mata for jogo in rodada["jogos"]):
-        return "mata_mata", RANKING_ETAPAS["mata_mata"]
-    return "grupos", RANKING_ETAPAS["grupos"]
+        return "mata_mata"
+    return "grupos"
 
 
 def montar_relatorio_rodada(user, competidor, rodada):
@@ -625,7 +843,8 @@ def montar_relatorio_rodada(user, competidor, rodada):
     ).all()
     pontos_rodada = sum(p.pontos for p in pontuacoes)
     placares = sum(1 for p in pontuacoes if p.placar_exato)
-    etapa_key, etapa_label = etapa_ranking_para_rodada(rodada)
+    etapa_key = etapa_ranking_para_rodada(rodada)
+    etapa_label = etapa_label_traduzida(etapa_key, user.idioma)
     ranking_etapa = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, etapa=etapa_key)
     ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
     posicao_etapa = next((item["posicao"] for item in ranking_etapa if item["competidor"].id == competidor.id), None)
@@ -651,38 +870,52 @@ def montar_relatorio_rodada(user, competidor, rodada):
         for item in top5_geral
     ]
     invite_url = convite_url(user)
-    subject = f"Relatório da {rodada['label']} - Bolão Copa 2026"
+    subject = tr("round_report_subject", user.idioma, round_label=rodada["label"])
     text = (
-        f"Olá, {user.nome}!\n\n"
-        f"Relatório da {rodada['label']}:\n"
-        f"Seus pontos na rodada: {pontos_rodada}\n"
-        f"Placares exatos na rodada: {placares}\n"
-        f"Sua posição na etapa ({etapa_label}): {posicao_etapa or '-'}\n"
-        f"Sua posição no ranking geral: {posicao_geral or '-'}\n\n"
-        "Jogos da rodada:\n"
+        tr("hello_name", user.idioma, name=user.nome)
+        + "\n\n"
+        + tr("round_report_heading", user.idioma, round_label=rodada["label"])
+        + "\n"
+        + tr("your_round_points", user.idioma, points=pontos_rodada)
+        + "\n"
+        + tr("exact_scores_round", user.idioma, count=placares)
+        + "\n"
+        + tr("your_stage_position", user.idioma, stage_label=etapa_label, position=posicao_etapa or "-")
+        + "\n"
+        + tr("your_overall_position", user.idioma, position=posicao_geral or "-")
+        + "\n\n"
+        + tr("round_games", user.idioma)
+        + "\n"
         + "\n".join(jogos_linhas)
-        + f"\n\nTop 5 da etapa - {etapa_label}:\n"
+        + "\n\n"
+        + tr("top5_stage", user.idioma, stage_label=etapa_label)
+        + "\n"
         + "\n".join(top_etapa_linhas)
-        + "\n\nTop 5 geral:\n"
+        + "\n\n"
+        + tr("top5_overall", user.idioma)
+        + "\n"
         + "\n".join(top_geral_linhas)
-        + "\n\nAcesse o app para ver todos os detalhes."
-        + f"\n\nConvide um amigo para participar:\n{invite_url}"
+        + "\n\n"
+        + tr("access_app_details", user.idioma)
+        + "\n\n"
+        + tr("invite_friend_line", user.idioma)
+        + f"\n{invite_url}"
     )
     html = (
-        f"<p>Olá, {escape(user.nome)}!</p>"
+        f"<p>{escape(tr('hello_name', user.idioma, name=user.nome))}</p>"
         f"<h2>{escape(rodada['label'])}</h2>"
-        f"<p><strong>Seus pontos na rodada:</strong> {pontos_rodada}</p>"
-        f"<p><strong>Placares exatos na rodada:</strong> {placares}</p>"
-        f"<p><strong>Sua posição na etapa ({escape(etapa_label)}):</strong> {posicao_etapa or '-'}</p>"
-        f"<p><strong>Sua posição no ranking geral:</strong> {posicao_geral or '-'}</p>"
-        "<h3>Jogos da rodada</h3><ul>"
+        f"<p>{escape(tr('your_round_points', user.idioma, points=pontos_rodada))}</p>"
+        f"<p>{escape(tr('exact_scores_round', user.idioma, count=placares))}</p>"
+        f"<p>{escape(tr('your_stage_position', user.idioma, stage_label=etapa_label, position=posicao_etapa or '-'))}</p>"
+        f"<p>{escape(tr('your_overall_position', user.idioma, position=posicao_geral or '-'))}</p>"
+        f"<h3>{escape(tr('round_games', user.idioma))}</h3><ul>"
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
-        + f"</ul><h3>Top 5 da etapa - {escape(etapa_label)}</h3><ol>"
+        + f"</ul><h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3><ol>"
         + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_etapa)
-        + "</ol><h3>Top 5 geral</h3><ol>"
+        + f"</ol><h3>{escape(tr('top5_overall', user.idioma))}</h3><ol>"
         + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_geral)
-        + "</ol><p>Acesse o app para ver todos os detalhes.</p>"
-        + f"<p>Convide um amigo para participar:<br><a href=\"{invite_url}\">{invite_url}</a></p>"
+        + f"</ol><p>{escape(tr('access_app_details', user.idioma))}</p>"
+        + f"<p>{escape(tr('invite_friend_line', user.idioma))}<br><a href=\"{invite_url}\">{invite_url}</a></p>"
     )
     return subject, text, html
 
@@ -1065,7 +1298,7 @@ def api_dashboard():
         "podium_geral": podium_geral,
         "podium_etapa": podium_etapa,
         "podium_etapa_key": etapa_podium,
-        "podium_etapa_label": RANKING_ETAPAS[etapa_podium],
+        "podium_etapa_label": etapa_label_traduzida(etapa_podium),
         "proximos_jogos": [_jogo_payload(j) for j in proximos],
     })
 
@@ -1213,7 +1446,7 @@ def api_ranking():
     return jsonify({
         "ok": True,
         "etapa": etapa if not fase else "fase",
-        "etapa_label": fase or RANKING_ETAPAS[etapa],
+        "etapa_label": fase or etapa_label_traduzida(etapa),
         "ranking": [
             {
                 "posicao": item["posicao"],
@@ -1698,7 +1931,7 @@ def dashboard():
                            lider=lider,
                            podium=podium,
                            podium_view=podium_view,
-                           podium_etapa_label=RANKING_ETAPAS[etapa_podium],
+                           podium_etapa_label=etapa_label_traduzida(etapa_podium),
                            podium_etapa_key=etapa_podium,
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
@@ -2252,7 +2485,7 @@ def ranking_geral():
     return render_template("ranking/geral.html",
                            ranking=ranking,
                            etapa=etapa,
-                           etapa_label=RANKING_ETAPAS[etapa],
+                           etapa_label=etapa_label_traduzida(etapa),
                            ranking_etapas=RANKING_ETAPAS)
 
 

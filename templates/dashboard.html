@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}{{ tr('dashboard') }}{% endblock %}
 {% block content %}
 
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-  <h4 class="mb-0"><i class="bi bi-house-fill text-success"></i> Dashboard</h4>
+  <h4 class="mb-0"><i class="bi bi-house-fill text-success"></i> {{ tr('dashboard') }}</h4>
   <div class="d-flex flex-wrap gap-2">
     <a class="btn btn-sm btn-outline-success"
        href="https://wa.me/?text={{ invite_text|urlencode }}"
        target="_blank"
        rel="noopener">
-      <i class="bi bi-whatsapp" aria-hidden="true"></i> Convidar amigo
+      <i class="bi bi-whatsapp" aria-hidden="true"></i> {{ tr('invite_friend') }}
     </a>
     <button type="button"
             class="btn btn-sm btn-outline-secondary js-copy-invite"
             data-invite="{{ invite_text }}">
-      <i class="bi bi-link-45deg" aria-hidden="true"></i> Copiar convite
+      <i class="bi bi-link-45deg" aria-hidden="true"></i> {{ tr('copy_invite') }}
     </button>
   </div>
 </div>
@@ -22,11 +22,11 @@
 {% if user and not user.email_confirmado %}
 <div class="alert alert-warning d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2" role="alert">
   <div>
-    <strong>Confirme seu e-mail.</strong>
-    A confirmação é necessária para receber os relatórios automáticos das rodadas (verifique spam).
+    <strong>{{ tr('confirm_email_title') }}</strong>
+    {{ tr('confirm_email_needed') }}
   </div>
   <form method="post" action="{{ url_for('reenviar_confirmacao_email') }}">
-    <button type="submit" class="btn btn-sm btn-outline-dark">Reenviar confirmação</button>
+    <button type="submit" class="btn btn-sm btn-outline-dark">{{ tr('resend_confirmation') }}</button>
   </form>
 </div>
 {% endif %}
@@ -35,7 +35,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Competidores</div>
+        <div class="card-title">{{ tr('competitors') }}</div>
         <div class="display-6 text-success">{{ total_competidores }}</div>
       </div>
     </div>
@@ -43,7 +43,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Jogos</div>
+        <div class="card-title">{{ tr('games') }}</div>
         <div class="display-6 text-success">{{ total_jogos }}</div>
       </div>
     </div>
@@ -51,7 +51,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Realizados</div>
+        <div class="card-title">{{ tr('completed') }}</div>
         <div class="display-6 text-primary">{{ jogos_realizados }}</div>
       </div>
     </div>
@@ -59,7 +59,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Pendentes</div>
+        <div class="card-title">{{ tr('pending') }}</div>
         <div class="display-6 text-warning">{{ jogos_pendentes }}</div>
       </div>
     </div>
@@ -67,7 +67,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Palpites Enviados</div>
+        <div class="card-title">{{ tr('predictions_sent') }}</div>
         <div class="display-6 text-info">{{ palpites_enviados }}</div>
       </div>
     </div>
@@ -75,7 +75,7 @@
   <div class="col-6 col-md-3 col-lg-2">
     <div class="card card-stat shadow-sm h-100">
       <div class="card-body">
-        <div class="card-title">Palpites Pendentes</div>
+        <div class="card-title">{{ tr('predictions_pending') }}</div>
         <div class="display-6 text-danger">{{ palpites_pendentes }}</div>
       </div>
     </div>
@@ -85,20 +85,20 @@
 <div class="row g-3 mb-4">
   <div class="col-md-4">
     <div class="card shadow-sm border-warning h-100">
-      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> Pódio Atual</div>
+      <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> {{ tr('current_podium') }}</div>
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
           <span class="small text-muted">
-            {% if podium_view == 'geral' %}Ranking geral{% else %}{{ podium_etapa_label }}{% endif %}
+            {% if podium_view == 'geral' %}{{ tr('overall_ranking') }}{% else %}{{ podium_etapa_label }}{% endif %}
           </span>
           <div class="btn-group btn-group-sm" role="group" aria-label="Selecionar podium">
             <a href="{{ url_for('dashboard') }}"
                class="btn {% if podium_view != 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
-              Etapa
+              {{ tr('stage') }}
             </a>
             <a href="{{ url_for('dashboard', podium='geral') }}"
                class="btn {% if podium_view == 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
-              Geral
+              {{ tr('overall') }}
             </a>
           </div>
         </div>
@@ -108,60 +108,60 @@
               <div class="podium-place podium-place-{{ r.posicao }}">
                 <div class="podium-rank">#{{ r.posicao }}</div>
                 <div class="podium-name mt-2">{{ r.competidor.apelido }}</div>
-                <div class="small text-muted">{{ r.pontos }} pontos</div>
+                <div class="small text-muted">{{ r.pontos }} {{ tr('points') }}</div>
               </div>
             {% endfor %}
           </div>
         {% else %}
-          <p class="text-muted">Nenhum resultado lançado ainda.</p>
+          <p class="text-muted">{{ tr('no_results_yet') }}</p>
         {% endif %}
       </div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card shadow-sm border-success h-100">
-      <div class="card-header bg-success text-white fw-bold"><i class="bi bi-play-circle"></i> Próximo Jogo</div>
+      <div class="card-header bg-success text-white fw-bold"><i class="bi bi-play-circle"></i> {{ tr('next_game') }}</div>
       <div class="card-body">
         {% if proximo_jogo %}
           <h6>{{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</h6>
           <p class="mb-0 text-muted">{{ proximo_jogo.data_jogo.strftime('%d/%m/%Y') }} &bull; {{ proximo_jogo.hora_brasilia }} BRT</p>
           <small class="text-muted">{{ proximo_jogo.estadio }}, {{ proximo_jogo.cidade }}</small>
         {% else %}
-          <p class="text-muted">Nenhum jogo agendado.</p>
+          <p class="text-muted">{{ tr('no_scheduled_game') }}</p>
         {% endif %}
       </div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card shadow-sm border-danger h-100">
-      <div class="card-header bg-danger text-white fw-bold"><i class="bi bi-clock"></i> Próximo Prazo</div>
+      <div class="card-header bg-danger text-white fw-bold"><i class="bi bi-clock"></i> {{ tr('next_deadline') }}</div>
       <div class="card-body">
         {% if proximo_prazo %}
           <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
-          <p class="mb-0 text-muted">Prazo para: {{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</p>
+          <p class="mb-0 text-muted">{{ tr('deadline_for') }} {{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</p>
         {% else %}
-          <p class="text-muted">Sem prazo iminente.</p>
+          <p class="text-muted">{{ tr('no_upcoming_deadline') }}</p>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 
-<h5 class="mb-2"><i class="bi bi-calendar3"></i> Próximos Jogos</h5>
+<h5 class="mb-2"><i class="bi bi-calendar3"></i> {{ tr('upcoming_games') }}</h5>
 <div class="table-responsive">
   <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">
     <thead class="table-success">
       <tr>
-        <th>Data</th>
-        <th>Hora (BRT)</th>
-        <th>Fase</th>
-        <th>Grupo</th>
-        <th>Time A</th>
-        <th>Time B</th>
-        <th>Local</th>
-        <th>Status Jogo</th>
-        {% if competidor_logado %}<th>Meu Palpite</th>{% endif %}
-        <th>Prazo Palpite</th>
+        <th>{{ tr('date') }}</th>
+        <th>{{ tr('time_brt') }}</th>
+        <th>{{ tr('phase') }}</th>
+        <th>{{ tr('group_label') }}</th>
+        <th>{{ tr('team_a') }}</th>
+        <th>{{ tr('team_b') }}</th>
+        <th>{{ tr('location') }}</th>
+        <th>{{ tr('game_status') }}</th>
+        {% if competidor_logado %}<th>{{ tr('my_prediction') }}</th>{% endif %}
+        <th>{{ tr('prediction_deadline') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -177,11 +177,11 @@
         <td>{{ j.cidade }}</td>
         <td>
           {% set st = j.status %}
-          {% if st == 'Pontuado' %}<span class="badge badge-pontuado">Pontuado</span>
-          {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">Resultado</span>
-          {% elif st == 'Em andamento' %}<span class="badge badge-andamento">Em andamento</span>
-          {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">Bloqueado</span>
-          {% else %}<span class="badge bg-success">Agendado</span>
+          {% if st == 'Pontuado' %}<span class="badge badge-pontuado">{{ tr('scored') }}</span>
+          {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">{{ tr('result') }}</span>
+          {% elif st == 'Em andamento' %}<span class="badge badge-andamento">{{ tr('in_progress') }}</span>
+          {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">{{ tr('locked') }}</span>
+          {% else %}<span class="badge bg-success">{{ tr('scheduled') }}</span>
           {% endif %}
         </td>
         {% if competidor_logado %}
@@ -189,9 +189,9 @@
           {% if item.palpite %}
             <span class="badge badge-enviado">{{ item.palpite.palpite_gols_a }} x {{ item.palpite.palpite_gols_b }}</span>
           {% elif item.prazo_aberto %}
-            <a href="{{ url_for('palpites') }}" class="badge badge-sem-palpite text-decoration-none">Sem palpite</a>
+            <a href="{{ url_for('palpites') }}" class="badge badge-sem-palpite text-decoration-none">{{ tr('no_prediction') }}</a>
           {% else %}
-            <span class="badge badge-bloqueado">Bloqueado</span>
+            <span class="badge badge-bloqueado">{{ tr('locked') }}</span>
           {% endif %}
         </td>
         {% endif %}
@@ -202,7 +202,7 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="10" class="text-center text-muted">Nenhum jogo próximo encontrado.</td></tr>
+      <tr><td colspan="10" class="text-center text-muted">{{ tr('no_upcoming_games') }}</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -214,7 +214,7 @@
       if (!navigator.clipboard || !text) return;
       navigator.clipboard.writeText(text).then(function () {
         var original = button.innerHTML;
-        button.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> Copiado';
+        button.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> {{ tr('copied') }}';
         button.disabled = true;
         window.setTimeout(function () {
           button.innerHTML = original;
