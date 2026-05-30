@@ -40,6 +40,158 @@ SUPPORTED_LANGUAGES = {
     "es": "Español",
 }
 DEFAULT_LANGUAGE = "pt-BR"
+TRANSLATIONS = {
+    "pt-BR": {
+        "language_label": "Idioma",
+        "login_title": "Login - Bolão Copa 2026",
+        "app_name": "Bolão Copa 2026",
+        "system_subtitle": "Sistema de Palpites",
+        "email": "E-mail",
+        "password": "Senha",
+        "sign_in": "Entrar",
+        "signing_in": "Entrando...",
+        "forgot_password": "Esqueci minha senha",
+        "no_account": "Ainda não tem conta?",
+        "register_here": "Cadastre-se aqui",
+        "logged_out": "Você saiu.",
+        "register_title": "Cadastro - Bolão Copa 2026",
+        "register_heading": "Cadastro - Bolão Copa 2026",
+        "name": "Nome",
+        "nickname": "Apelido",
+        "required": "*",
+        "nickname_placeholder": "Como você quer ser chamado?",
+        "group": "Grupo",
+        "optional": "(opcional)",
+        "no_group": "-- Sem grupo --",
+        "private": "privado",
+        "group_help": "Escolha um grupo aberto. Grupos privados exigem código.",
+        "private_group_code": "Código do grupo privado",
+        "private_group_code_placeholder": "Necessário apenas para grupos privados",
+        "register": "Cadastrar",
+        "registering": "Cadastrando...",
+        "has_account": "Já tem conta?",
+        "sign_in_here": "Entre aqui",
+        "recover_password_title": "Recuperar senha - Bolão Copa 2026",
+        "recover_password": "Recuperar senha",
+        "recover_password_subtitle": "Informe seu e-mail de cadastro",
+        "send_link": "Enviar link",
+        "sending": "Enviando...",
+        "remembered_password": "Lembrou a senha?",
+        "new_password_title": "Nova senha - Bolão Copa 2026",
+        "new_password_heading": "Criar nova senha",
+        "new_password": "Nova senha",
+        "confirm_new_password": "Confirmar nova senha",
+        "save_password": "Salvar senha",
+        "saving": "Salvando...",
+        "back_to_login": "Voltar ao login",
+        "confirm_email_subject": "Confirme seu e-mail - Bolão Copa 2026",
+        "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
+        "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
+        "reset_password_subject": "Redefina sua senha - Bolão Copa 2026",
+        "reset_password_text": "Olá, {name}!\n\nRecebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.\nAcesse este link em até 1 hora para criar uma nova senha:\n{url}\n\nSe você não solicitou esta alteração, ignore esta mensagem.",
+        "reset_password_html": "<p>Olá, {name}!</p><p>Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.</p><p><a href=\"{url}\">Criar nova senha</a></p><p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>",
+    },
+    "en": {
+        "language_label": "Language",
+        "login_title": "Sign in - World Cup Pool 2026",
+        "app_name": "World Cup Pool 2026",
+        "system_subtitle": "Prediction System",
+        "email": "Email",
+        "password": "Password",
+        "sign_in": "Sign in",
+        "signing_in": "Signing in...",
+        "forgot_password": "Forgot password?",
+        "no_account": "Don't have an account?",
+        "register_here": "Register here",
+        "logged_out": "You have signed out.",
+        "register_title": "Register - World Cup Pool 2026",
+        "register_heading": "Register - World Cup Pool 2026",
+        "name": "Name",
+        "nickname": "Nickname",
+        "required": "*",
+        "nickname_placeholder": "What should we call you?",
+        "group": "Group",
+        "optional": "(optional)",
+        "no_group": "-- No group --",
+        "private": "private",
+        "group_help": "Choose an open group. Private groups require a code.",
+        "private_group_code": "Private group code",
+        "private_group_code_placeholder": "Required only for private groups",
+        "register": "Register",
+        "registering": "Registering...",
+        "has_account": "Already have an account?",
+        "sign_in_here": "Sign in here",
+        "recover_password_title": "Recover password - World Cup Pool 2026",
+        "recover_password": "Recover password",
+        "recover_password_subtitle": "Enter your account email",
+        "send_link": "Send link",
+        "sending": "Sending...",
+        "remembered_password": "Remembered your password?",
+        "new_password_title": "New password - World Cup Pool 2026",
+        "new_password_heading": "Create a new password",
+        "new_password": "New password",
+        "confirm_new_password": "Confirm new password",
+        "save_password": "Save password",
+        "saving": "Saving...",
+        "back_to_login": "Back to sign in",
+        "confirm_email_subject": "Confirm your email - World Cup Pool 2026",
+        "confirm_email_text": "Hello, {name}!\n\nConfirm your email to receive round reports from World Cup Pool 2026:\n{url}\n\nIf you did not create this account, ignore this message.",
+        "confirm_email_html": "<p>Hello, {name}!</p><p>Confirm your email to receive round reports from World Cup Pool 2026.</p><p><a href=\"{url}\">Confirm email</a></p><p>If you did not create this account, ignore this message.</p>",
+        "reset_password_subject": "Reset your password - World Cup Pool 2026",
+        "reset_password_text": "Hello, {name}!\n\nWe received a request to reset your World Cup Pool 2026 password.\nUse this link within 1 hour to create a new password:\n{url}\n\nIf you did not request this change, ignore this message.",
+        "reset_password_html": "<p>Hello, {name}!</p><p>We received a request to reset your World Cup Pool 2026 password.</p><p><a href=\"{url}\">Create new password</a></p><p>This link expires in 1 hour. If you did not request this change, ignore this message.</p>",
+    },
+    "es": {
+        "language_label": "Idioma",
+        "login_title": "Iniciar sesión - Quiniela Mundial 2026",
+        "app_name": "Quiniela Mundial 2026",
+        "system_subtitle": "Sistema de Pronósticos",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "sign_in": "Iniciar sesión",
+        "signing_in": "Ingresando...",
+        "forgot_password": "Olvidé mi contraseña",
+        "no_account": "¿Aún no tienes cuenta?",
+        "register_here": "Regístrate aquí",
+        "logged_out": "Has cerrado sesión.",
+        "register_title": "Registro - Quiniela Mundial 2026",
+        "register_heading": "Registro - Quiniela Mundial 2026",
+        "name": "Nombre",
+        "nickname": "Apodo",
+        "required": "*",
+        "nickname_placeholder": "¿Cómo quieres que te llamemos?",
+        "group": "Grupo",
+        "optional": "(opcional)",
+        "no_group": "-- Sin grupo --",
+        "private": "privado",
+        "group_help": "Elige un grupo abierto. Los grupos privados requieren código.",
+        "private_group_code": "Código del grupo privado",
+        "private_group_code_placeholder": "Necesario solo para grupos privados",
+        "register": "Registrarse",
+        "registering": "Registrando...",
+        "has_account": "¿Ya tienes cuenta?",
+        "sign_in_here": "Entra aquí",
+        "recover_password_title": "Recuperar contraseña - Quiniela Mundial 2026",
+        "recover_password": "Recuperar contraseña",
+        "recover_password_subtitle": "Ingresa el correo de tu cuenta",
+        "send_link": "Enviar enlace",
+        "sending": "Enviando...",
+        "remembered_password": "¿Recordaste tu contraseña?",
+        "new_password_title": "Nueva contraseña - Quiniela Mundial 2026",
+        "new_password_heading": "Crear nueva contraseña",
+        "new_password": "Nueva contraseña",
+        "confirm_new_password": "Confirmar nueva contraseña",
+        "save_password": "Guardar contraseña",
+        "saving": "Guardando...",
+        "back_to_login": "Volver al inicio de sesión",
+        "confirm_email_subject": "Confirma tu correo - Quiniela Mundial 2026",
+        "confirm_email_text": "Hola, {name}!\n\nConfirma tu correo para recibir los informes de las rondas de la Quiniela Mundial 2026:\n{url}\n\nSi no creaste esta cuenta, ignora este mensaje.",
+        "confirm_email_html": "<p>Hola, {name}!</p><p>Confirma tu correo para recibir los informes de las rondas de la Quiniela Mundial 2026.</p><p><a href=\"{url}\">Confirmar correo</a></p><p>Si no creaste esta cuenta, ignora este mensaje.</p>",
+        "reset_password_subject": "Restablece tu contraseña - Quiniela Mundial 2026",
+        "reset_password_text": "Hola, {name}!\n\nRecibimos una solicitud para restablecer tu contraseña de la Quiniela Mundial 2026.\nUsa este enlace dentro de 1 hora para crear una nueva contraseña:\n{url}\n\nSi no solicitaste este cambio, ignora este mensaje.",
+        "reset_password_html": "<p>Hola, {name}!</p><p>Recibimos una solicitud para restablecer tu contraseña de la Quiniela Mundial 2026.</p><p><a href=\"{url}\">Crear nueva contraseña</a></p><p>Este enlace expira en 1 hora. Si no solicitaste este cambio, ignora este mensaje.</p>",
+    },
+}
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 app = Flask(__name__)
@@ -98,6 +250,12 @@ def idioma_atual():
     if getattr(g, "user", None) and normalizar_idioma(g.user.idioma):
         return normalizar_idioma(g.user.idioma)
     return detectar_idioma_navegador()
+
+
+def tr(key, idioma=None, **kwargs):
+    idioma = normalizar_idioma(idioma) or getattr(g, "idioma", None) or DEFAULT_LANGUAGE
+    text = TRANSLATIONS.get(idioma, {}).get(key) or TRANSLATIONS[DEFAULT_LANGUAGE].get(key) or key
+    return text.format(**kwargs) if kwargs else text
 
 
 def find_user_by_email(email):
@@ -161,38 +319,18 @@ def send_email_message(to_email, subject, text_body, html_body=None):
 def send_email_confirmation(user):
     token = make_email_token(user)
     confirm_url = url_for("confirmar_email", token=token, _external=True)
-    subject = "Confirme seu e-mail - Bolão Copa 2026"
-    text = (
-        f"Olá, {user.nome}!\n\n"
-        "Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026:\n"
-        f"{confirm_url}\n\n"
-        "Se você não fez este cadastro, ignore esta mensagem."
-    )
-    html = f"""
-    <p>Olá, {escape(user.nome)}!</p>
-    <p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p>
-    <p><a href="{confirm_url}">Confirmar e-mail</a></p>
-    <p>Se você não fez este cadastro, ignore esta mensagem.</p>
-    """
+    subject = tr("confirm_email_subject", user.idioma)
+    text = tr("confirm_email_text", user.idioma, name=user.nome, url=confirm_url)
+    html = tr("confirm_email_html", user.idioma, name=escape(user.nome), url=confirm_url)
     return send_email_message(user.email, subject, text, html)
 
 
 def send_password_reset_email(user):
     token = make_password_reset_token(user)
     reset_url = url_for("redefinir_senha", token=token, _external=True)
-    subject = "Redefina sua senha - Bolão Copa 2026"
-    text = (
-        f"Olá, {user.nome}!\n\n"
-        "Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.\n"
-        f"Acesse este link em até 1 hora para criar uma nova senha:\n{reset_url}\n\n"
-        "Se você não solicitou esta alteração, ignore esta mensagem."
-    )
-    html = f"""
-    <p>Olá, {escape(user.nome)}!</p>
-    <p>Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.</p>
-    <p><a href="{reset_url}">Criar nova senha</a></p>
-    <p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>
-    """
+    subject = tr("reset_password_subject", user.idioma)
+    text = tr("reset_password_text", user.idioma, name=user.nome, url=reset_url)
+    html = tr("reset_password_html", user.idioma, name=escape(user.nome), url=reset_url)
     return send_email_message(user.email, subject, text, html)
 
 
@@ -1106,6 +1244,7 @@ def inject_globals():
         agora_br=agora_br(),
         current_language=getattr(g, "idioma", DEFAULT_LANGUAGE),
         supported_languages=SUPPORTED_LANGUAGES,
+        tr=tr,
     )
 
 

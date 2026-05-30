@@ -51,7 +51,8 @@
       <div class="d-flex align-items-center gap-2">
         <div class="dropdown">
           <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-            {{ current_language|default('pt-BR') }}
+            <i class="bi bi-globe2" aria-hidden="true"></i>
+            {{ tr('language_label') }}: {{ supported_languages.get(current_language, current_language)|default('Português') }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             {% for code, label in supported_languages.items() %}

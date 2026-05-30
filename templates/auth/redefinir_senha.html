@@ -7,7 +7,7 @@
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
-  <title>Nova senha - Bolão Copa 2026</title>
+  <title>{{ tr('new_password_title') }}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260529-1">
@@ -24,9 +24,27 @@
 <main class="reset-container">
   <div class="card">
     <div class="card-body p-4 p-sm-5">
+      <div class="dropdown text-end mb-2">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="bi bi-globe2" aria-hidden="true"></i>
+          {{ tr('language_label') }}: {{ supported_languages.get(current_language, current_language)|default('Português') }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          {% for code, label in supported_languages.items() %}
+          <li>
+            <form method="post" action="{{ url_for('alterar_idioma', idioma=code) }}">
+              <input type="hidden" name="next" value="{{ request.full_path }}">
+              <button type="submit" class="dropdown-item {% if code == current_language %}active{% endif %}">
+                {{ label }}
+              </button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
       <div class="text-center mb-4">
         <h1 class="display-6 mb-2" aria-hidden="true"><i class="bi bi-shield-lock-fill text-success"></i></h1>
-        <h2 class="h4">Criar nova senha</h2>
+        <h2 class="h4">{{ tr('new_password_heading') }}</h2>
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -40,21 +58,21 @@
 
       <form method="post" class="js-submit-once">
         <div class="mb-3">
-          <label for="senha" class="form-label fw-bold">Nova senha</label>
+          <label for="senha" class="form-label fw-bold">{{ tr('new_password') }}</label>
           <input type="password" id="senha" name="senha" class="form-control" autocomplete="new-password" minlength="6" required autofocus>
         </div>
         <div class="mb-4">
-          <label for="confirmar_senha" class="form-label fw-bold">Confirmar nova senha</label>
+          <label for="confirmar_senha" class="form-label fw-bold">{{ tr('confirm_new_password') }}</label>
           <input type="password" id="confirmar_senha" name="confirmar_senha" class="form-control" autocomplete="new-password" minlength="6" required>
         </div>
-        <button type="submit" class="btn btn-reset w-100 mb-3" data-loading-text="Salvando...">
-          <i class="bi bi-check-lg" aria-hidden="true"></i> Salvar senha
+        <button type="submit" class="btn btn-reset w-100 mb-3" data-loading-text="{{ tr('saving') }}">
+          <i class="bi bi-check-lg" aria-hidden="true"></i> {{ tr('save_password') }}
         </button>
       </form>
 
       <hr>
       <p class="text-center text-muted mb-0">
-        <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">Voltar ao login</a>
+        <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">{{ tr('back_to_login') }}</a>
       </p>
     </div>
   </div>

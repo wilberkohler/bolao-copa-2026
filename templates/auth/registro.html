@@ -7,7 +7,7 @@
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
-  <title>Cadastro - Bolão Copa 2026</title>
+  <title>{{ tr('register_title') }}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260529-1">
@@ -26,7 +26,8 @@
     <div class="card-body p-4 p-sm-5">
       <div class="dropdown text-end mb-2">
         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-          {{ current_language|default('pt-BR') }}
+          <i class="bi bi-globe2" aria-hidden="true"></i>
+          {{ tr('language_label') }}: {{ supported_languages.get(current_language, current_language)|default('Português') }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           {% for code, label in supported_languages.items() %}
@@ -43,7 +44,7 @@
       </div>
       <div class="text-center mb-4">
         <h1 class="display-6 mb-2" aria-hidden="true"><i class="bi bi-person-plus-fill text-success"></i></h1>
-        <h2 class="h4">Cadastro - Bolão Copa 2026</h2>
+        <h2 class="h4">{{ tr('register_heading') }}</h2>
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -57,45 +58,45 @@
 
       <form method="post" class="js-submit-once">
         <div class="mb-3">
-          <label for="nome" class="form-label fw-bold">Nome <span class="text-danger">*</span></label>
+          <label for="nome" class="form-label fw-bold">{{ tr('name') }} <span class="text-danger">{{ tr('required') }}</span></label>
           <input type="text" id="nome" name="nome" class="form-control" value="{{ request.form.get('nome', '') }}" autocomplete="name" required>
         </div>
         <div class="mb-3">
-          <label for="email" class="form-label fw-bold">E-mail <span class="text-danger">*</span></label>
+          <label for="email" class="form-label fw-bold">{{ tr('email') }} <span class="text-danger">{{ tr('required') }}</span></label>
           <input type="email" id="email" name="email" class="form-control" value="{{ request.form.get('email', '') }}" autocomplete="email" required>
         </div>
         <div class="mb-3">
-          <label for="apelido" class="form-label fw-bold">Apelido <span class="text-danger">*</span></label>
-          <input type="text" id="apelido" name="apelido" class="form-control" value="{{ request.form.get('apelido', '') }}" placeholder="Como você quer ser chamado?" autocomplete="nickname" required>
+          <label for="apelido" class="form-label fw-bold">{{ tr('nickname') }} <span class="text-danger">{{ tr('required') }}</span></label>
+          <input type="text" id="apelido" name="apelido" class="form-control" value="{{ request.form.get('apelido', '') }}" placeholder="{{ tr('nickname_placeholder') }}" autocomplete="nickname" required>
         </div>
         <div class="mb-3">
-          <label for="senha" class="form-label fw-bold">Senha <span class="text-danger">*</span></label>
+          <label for="senha" class="form-label fw-bold">{{ tr('password') }} <span class="text-danger">{{ tr('required') }}</span></label>
           <input type="password" id="senha" name="senha" class="form-control" autocomplete="new-password" minlength="6" required>
         </div>
         <div class="mb-3">
-          <label for="grupo_id" class="form-label fw-bold">Grupo <span class="text-muted">(opcional)</span></label>
+          <label for="grupo_id" class="form-label fw-bold">{{ tr('group') }} <span class="text-muted">{{ tr('optional') }}</span></label>
           <select id="grupo_id" name="grupo_id" class="form-select" aria-describedby="grupo-ajuda">
-            <option value="">-- Sem grupo --</option>
+            <option value="">{{ tr('no_group') }}</option>
             {% for g in grupos %}
               <option value="{{ g.id }}" data-requer-codigo="{{ '1' if g.requer_codigo else '0' }}" {% if (request.form.get('grupo_id') or request.args.get('grupo_id')) == g.id|string %}selected{% endif %}>
-                {{ g.nome }}{% if g.requer_codigo %} (privado){% endif %}
+                {{ g.nome }}{% if g.requer_codigo %} ({{ tr('private') }}){% endif %}
               </option>
             {% endfor %}
           </select>
-          <small id="grupo-ajuda" class="text-muted">Escolha um grupo aberto. Grupos privados exigem código.</small>
+          <small id="grupo-ajuda" class="text-muted">{{ tr('group_help') }}</small>
         </div>
         <div class="mb-4">
-          <label for="codigo_grupo" class="form-label fw-bold">Código do grupo privado</label>
-          <input type="text" id="codigo_grupo" name="codigo_grupo" class="form-control" value="{{ request.form.get('codigo_grupo', '') }}" placeholder="Necessário apenas para grupos privados" autocomplete="off" disabled>
+          <label for="codigo_grupo" class="form-label fw-bold">{{ tr('private_group_code') }}</label>
+          <input type="text" id="codigo_grupo" name="codigo_grupo" class="form-control" value="{{ request.form.get('codigo_grupo', '') }}" placeholder="{{ tr('private_group_code_placeholder') }}" autocomplete="off" disabled>
         </div>
-        <button type="submit" class="btn btn-register w-100 mb-3" data-loading-text="Cadastrando...">
-          <i class="bi bi-check-lg" aria-hidden="true"></i> Cadastrar
+        <button type="submit" class="btn btn-register w-100 mb-3" data-loading-text="{{ tr('registering') }}">
+          <i class="bi bi-check-lg" aria-hidden="true"></i> {{ tr('register') }}
         </button>
       </form>
 
       <hr>
       <p class="text-center text-muted mb-0">
-        Já tem conta? <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">Entre aqui</a>
+        {{ tr('has_account') }} <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">{{ tr('sign_in_here') }}</a>
       </p>
     </div>
   </div>

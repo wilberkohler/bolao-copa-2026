@@ -7,7 +7,7 @@
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
-  <title>Recuperar senha - Bolão Copa 2026</title>
+  <title>{{ tr('recover_password_title') }}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260529-1">
@@ -26,7 +26,8 @@
     <div class="card-body p-4 p-sm-5">
       <div class="dropdown text-end mb-2">
         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-          {{ current_language|default('pt-BR') }}
+          <i class="bi bi-globe2" aria-hidden="true"></i>
+          {{ tr('language_label') }}: {{ supported_languages.get(current_language, current_language)|default('Português') }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           {% for code, label in supported_languages.items() %}
@@ -43,8 +44,8 @@
       </div>
       <div class="text-center mb-4">
         <h1 class="display-6 mb-2" aria-hidden="true"><i class="bi bi-key-fill text-success"></i></h1>
-        <h2 class="h4">Recuperar senha</h2>
-        <p class="text-muted">Informe seu e-mail de cadastro</p>
+        <h2 class="h4">{{ tr('recover_password') }}</h2>
+        <p class="text-muted">{{ tr('recover_password_subtitle') }}</p>
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -58,17 +59,17 @@
 
       <form method="post" class="js-submit-once">
         <div class="mb-4">
-          <label for="email" class="form-label fw-bold">E-mail</label>
+          <label for="email" class="form-label fw-bold">{{ tr('email') }}</label>
           <input type="email" id="email" name="email" class="form-control" value="{{ email|default('', true) }}" autocomplete="email" required autofocus>
         </div>
-        <button type="submit" class="btn btn-reset w-100 mb-3" data-loading-text="Enviando...">
-          <i class="bi bi-envelope-check" aria-hidden="true"></i> Enviar link
+        <button type="submit" class="btn btn-reset w-100 mb-3" data-loading-text="{{ tr('sending') }}">
+          <i class="bi bi-envelope-check" aria-hidden="true"></i> {{ tr('send_link') }}
         </button>
       </form>
 
       <hr>
       <p class="text-center text-muted mb-0">
-        Lembrou a senha? <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">Entre aqui</a>
+        {{ tr('remembered_password') }} <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none text-success text-nowrap">{{ tr('sign_in_here') }}</a>
       </p>
     </div>
   </div>
