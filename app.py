@@ -41,6 +41,7 @@ SUPPORTED_LANGUAGES = {
     "fr": "Français",
     "de": "Deutsch",
     "it": "Italiano",
+    "ja": "日本語",
     "ar": "العربية",
     "zh": "中文",
     "ru": "Русский",
@@ -53,6 +54,7 @@ DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE = {
     "fr": "FRA",
     "de": "GER",
     "it": "ITA",
+    "ja": "JPN",
     "ar": "KSA",
     "zh": "KOR",
     "ru": "KAZ",
@@ -64,6 +66,7 @@ LANGUAGE_BADGES = {
     "fr": "FR",
     "de": "DE",
     "it": "IT",
+    "ja": "日本",
     "ar": "AR",
     "zh": "中文",
     "ru": "RU",
@@ -312,6 +315,20 @@ TEAM_TRANSLATIONS = {
         "Bósnia e Herzegovina": "Босния и Герцеговина", "Suíça": "Швейцария", "Malaui": "Малави",
         "Coreia do Sul": "Южная Корея", "Filipinas": "Филиппины", "Costa Rica": "Коста-Рика",
         "Haiti": "Гаити", "Escócia": "Шотландия", "Turquia": "Турция", "Venezuela": "Венесуэла",
+    },
+    "ja": {
+        'México': 'メキシコ', 'África do Sul': '南アフリカ', 'Argentina': 'アルゼンチン', 'Argélia': 'アルジェリア',
+        'Espanha': 'スペイン', 'Cabo Verde': 'カーボベルデ', 'Portugal': 'ポルトガル', 'Congo DR': 'コンゴ民主共和国',
+        'Estados Unidos': 'アメリカ合衆国', 'Paraguai': 'パラグアイ', 'Uruguai': 'ウルグアイ', 'Angola': 'アンゴラ',
+        'Brasil': 'ブラジル', 'Marrocos': 'モロッコ', 'Japão': '日本', 'Croácia': 'クロアチア',
+        'Alemanha': 'ドイツ', 'Curaçao': 'キュラソー', 'Chile': 'チリ', 'Austrália': 'オーストラリア',
+        'França': 'フランス', 'Senegal': 'セネガル', 'Bélgica': 'ベルギー', 'Equador': 'エクアドル',
+        'Inglaterra': 'イングランド', 'Sérvia': 'セルビア', 'Holanda': 'オランダ', 'Zimbábue': 'ジンバブエ',
+        'Colômbia': 'コロンビア', 'Nova Zelândia': 'ニュージーランド', 'Itália': 'イタリア', 'Cazaquistão': 'カザフスタン',
+        'Dinamarca': 'デンマーク', 'Arábia Saudita': 'サウジアラビア', 'Canadá': 'カナダ', 'Bósnia e Herzegovina': 'ボスニア・ヘルツェゴビナ',
+        'Suíça': 'スイス', 'Malaui': 'マラウイ', 'Coreia do Sul': '韓国', 'Filipinas': 'フィリピン',
+        'Costa Rica': 'コスタリカ', 'Haiti': 'ハイチ', 'Escócia': 'スコットランド', 'Turquia': 'トルコ',
+        'Venezuela': 'ベネズエラ',
     },
 }
 
@@ -1658,6 +1675,61 @@ TRANSLATIONS["ru"] = {**TRANSLATIONS["en"], **{
 }}
 
 
+TRANSLATIONS["ja"] = {**TRANSLATIONS["en"], **{
+    "language_label": "\u8a00\u8a9e",
+    "app_name": "2026\u5e74\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7\u4e88\u60f3",
+    "system_subtitle": "\u8a66\u5408\u4e88\u60f3\u30b7\u30b9\u30c6\u30e0",
+    "sign_in": "\u30ed\u30b0\u30a4\u30f3",
+    "forgot_password": "\u30d1\u30b9\u30ef\u30fc\u30c9\u3092\u5fd8\u308c\u305f\u5834\u5408",
+    "register": "\u767b\u9332",
+    "nav_home": "\u30db\u30fc\u30e0",
+    "nav_games": "\u8a66\u5408",
+    "nav_predictions": "\u4e88\u60f3",
+    "nav_ranking": "\u30e9\u30f3\u30ad\u30f3\u30b0",
+    "nav_rules": "\u30eb\u30fc\u30eb",
+    "nav_results": "\u7d50\u679c",
+    "nav_groups": "\u30b0\u30eb\u30fc\u30d7",
+    "my_predictions": "\u81ea\u5206\u306e\u4e88\u60f3",
+    "logout": "\u30ed\u30b0\u30a2\u30a6\u30c8",
+    "dashboard": "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+    "highlight_team": "\u6ce8\u76ee\u30c1\u30fc\u30e0",
+    "highlight_team_auto": "\u8a00\u8a9e\u306b\u57fa\u3065\u304f\u81ea\u52d5\u9078\u629e\uff08{team}\uff09",
+    "save_highlight_team": "\u9069\u7528",
+    "games": "\u8a66\u5408",
+    "completed": "\u5b8c\u4e86",
+    "pending": "\u672a\u5b8c\u4e86",
+    "stage": "\u30b9\u30c6\u30fc\u30b8",
+    "overall": "\u7dcf\u5408",
+    "points": "\u30dd\u30a4\u30f3\u30c8",
+    "date": "\u65e5\u4ed8",
+    "time_brt": "\u6642\u9593 (BRT)",
+    "phase": "\u30d5\u30a7\u30fc\u30ba",
+    "team_a": "\u30c1\u30fc\u30e0 A",
+    "team_b": "\u30c1\u30fc\u30e0 B",
+    "stadium": "\u30b9\u30bf\u30b8\u30a2\u30e0",
+    "city": "\u90fd\u5e02",
+    "yes": "\u306f\u3044",
+    "no": "\u3044\u3044\u3048",
+    "status": "\u30b9\u30c6\u30fc\u30bf\u30b9",
+    "scheduled": "\u4e88\u5b9a",
+    "open_for_predictions": "\u4e88\u60f3\u53ef\u80fd",
+    "scored": "\u63a1\u70b9\u6e08\u307f",
+    "result": "\u7d50\u679c",
+    "predictions_title": "\u4e88\u60f3",
+    "save_predictions": "\u4e88\u60f3\u3092\u4fdd\u5b58",
+    "stage_groups": "\u30b0\u30eb\u30fc\u30d7\u30b9\u30c6\u30fc\u30b8",
+    "stage_knockout": "\u6c7a\u52dd\u307e\u3067\u306e\u30ce\u30c3\u30af\u30a2\u30a6\u30c8",
+    "world_cup_group": "\u30b0\u30eb\u30fc\u30d7 {group}",
+    "rules_title": "\u30eb\u30fc\u30eb",
+    "rules_heading": "\u30eb\u30fc\u30eb\u3068\u5b9f\u7528\u60c5\u5831",
+    "rules_subtitle": "\u70b9\u6570\u3001\u7de0\u5207\u3001\u30bf\u30a4\u30d6\u30ec\u30fc\u30af\u6761\u4ef6\u306e\u8981\u7d04\u3002",
+    "winner": "\u52dd\u8005",
+    "loser": "\u6557\u8005",
+    "confirm_email_subject": "\u30e1\u30fc\u30eb\u3092\u78ba\u8a8d\u3057\u3066\u304f\u3060\u3055\u3044 - 2026\u5e74\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7\u4e88\u60f3",
+    "reset_password_subject": "\u30d1\u30b9\u30ef\u30fc\u30c9\u518d\u8a2d\u5b9a - 2026\u5e74\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7\u4e88\u60f3",
+}}
+
+
 def _repair_mojibake(value):
     if not isinstance(value, str):
         return value
@@ -1667,7 +1739,7 @@ def _repair_mojibake(value):
         return value
 
 
-for _lang in ("fr", "de", "it", "ar", "zh", "ru"):
+for _lang in ("fr", "de", "it", "ar", "zh", "ru", "ja"):
     TRANSLATIONS[_lang] = {key: _repair_mojibake(value) for key, value in TRANSLATIONS[_lang].items()}
 
 
@@ -1725,11 +1797,13 @@ def normalizar_idioma(idioma):
         return "zh"
     if idioma_lower.startswith("ru"):
         return "ru"
+    if idioma_lower.startswith("ja"):
+        return "ja"
     return idioma if idioma in SUPPORTED_LANGUAGES else None
 
 
 def detectar_idioma_navegador():
-    matches = ["pt-BR", "pt", "en", "es", "fr", "de", "it", "ar", "zh", "ru"]
+    matches = ["pt-BR", "pt", "en", "es", "fr", "de", "it", "ar", "zh", "ru", "ja"]
     match = request.accept_languages.best_match(matches)
     return normalizar_idioma(match) or DEFAULT_LANGUAGE
 
