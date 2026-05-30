@@ -4,6 +4,51 @@ body { background: #f4f6f9; }
 .card-stat .card-title { font-size: .85rem; text-transform: uppercase; color: #6c757d; }
 .card-stat .display-6 { font-size: 2rem; font-weight: 700; }
 
+/* Seletor de idiomas */
+.language-button {
+	display: inline-flex;
+	align-items: center;
+	gap: .45rem;
+	border-color: rgba(255,255,255,.75);
+	box-shadow: 0 .15rem .35rem rgba(0,0,0,.12);
+}
+.language-badge,
+.language-option-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.1rem;
+	height: 1.55rem;
+	border-radius: .35rem;
+	background: #e8f5ee;
+	color: #0b6b34;
+	font-size: .72rem;
+	font-weight: 800;
+	letter-spacing: 0;
+}
+.language-menu {
+	min-width: 18rem;
+	padding: .45rem;
+}
+.language-option {
+	display: flex;
+	align-items: center;
+	gap: .65rem;
+	border-radius: .45rem;
+	padding: .5rem .6rem;
+}
+.language-option.active {
+	background: #198754;
+	color: #fff;
+}
+.language-option.active .language-option-badge {
+	background: #fff;
+	color: #198754;
+}
+.language-option-label {
+	font-weight: 600;
+}
+
 /* Status badges */
 .badge-aberto { background-color: #198754; }
 .badge-enviado { background-color: #0d6efd; }

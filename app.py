@@ -40,6 +40,10 @@ SUPPORTED_LANGUAGES = {
     "es": "Español",
     "fr": "Français",
     "de": "Deutsch",
+    "it": "Italiano",
+    "ar": "العربية",
+    "zh": "中文",
+    "ru": "Русский",
 }
 DEFAULT_LANGUAGE = "pt-BR"
 DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE = {
@@ -48,6 +52,21 @@ DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE = {
     "es": "ESP",
     "fr": "FRA",
     "de": "GER",
+    "it": "ITA",
+    "ar": "KSA",
+    "zh": "KOR",
+    "ru": "KAZ",
+}
+LANGUAGE_BADGES = {
+    "pt-BR": "BR",
+    "en": "EN",
+    "es": "ES",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT",
+    "ar": "AR",
+    "zh": "中文",
+    "ru": "RU",
 }
 TEAM_TRANSLATIONS = {
     "en": {
@@ -237,6 +256,62 @@ TEAM_TRANSLATIONS = {
         "Escócia": "Schottland",
         "Turquia": "Türkei",
         "Venezuela": "Venezuela",
+    },
+    "it": {
+        "México": "Messico", "África do Sul": "Sudafrica", "Argentina": "Argentina", "Argélia": "Algeria",
+        "Espanha": "Spagna", "Cabo Verde": "Capo Verde", "Portugal": "Portogallo", "Congo DR": "RD Congo",
+        "Estados Unidos": "Stati Uniti", "Paraguai": "Paraguay", "Uruguai": "Uruguay", "Angola": "Angola",
+        "Brasil": "Brasile", "Marrocos": "Marocco", "Japão": "Giappone", "Croácia": "Croazia",
+        "Alemanha": "Germania", "Curaçao": "Curaçao", "Chile": "Cile", "Austrália": "Australia",
+        "França": "Francia", "Senegal": "Senegal", "Bélgica": "Belgio", "Equador": "Ecuador",
+        "Inglaterra": "Inghilterra", "Sérvia": "Serbia", "Holanda": "Paesi Bassi", "Zimbábue": "Zimbabwe",
+        "Colômbia": "Colombia", "Nova Zelândia": "Nuova Zelanda", "Itália": "Italia", "Cazaquistão": "Kazakistan",
+        "Dinamarca": "Danimarca", "Arábia Saudita": "Arabia Saudita", "Canadá": "Canada",
+        "Bósnia e Herzegovina": "Bosnia ed Erzegovina", "Suíça": "Svizzera", "Malaui": "Malawi",
+        "Coreia do Sul": "Corea del Sud", "Filipinas": "Filippine", "Costa Rica": "Costa Rica",
+        "Haiti": "Haiti", "Escócia": "Scozia", "Turquia": "Turchia", "Venezuela": "Venezuela",
+    },
+    "ar": {
+        "México": "المكسيك", "África do Sul": "جنوب أفريقيا", "Argentina": "الأرجنتين", "Argélia": "الجزائر",
+        "Espanha": "إسبانيا", "Cabo Verde": "الرأس الأخضر", "Portugal": "البرتغال", "Congo DR": "الكونغو الديمقراطية",
+        "Estados Unidos": "الولايات المتحدة", "Paraguai": "باراغواي", "Uruguai": "أوروغواي", "Angola": "أنغولا",
+        "Brasil": "البرازيل", "Marrocos": "المغرب", "Japão": "اليابان", "Croácia": "كرواتيا",
+        "Alemanha": "ألمانيا", "Curaçao": "كوراساو", "Chile": "تشيلي", "Austrália": "أستراليا",
+        "França": "فرنسا", "Senegal": "السنغال", "Bélgica": "بلجيكا", "Equador": "الإكوادور",
+        "Inglaterra": "إنجلترا", "Sérvia": "صربيا", "Holanda": "هولندا", "Zimbábue": "زيمبابوي",
+        "Colômbia": "كولومبيا", "Nova Zelândia": "نيوزيلندا", "Itália": "إيطاليا", "Cazaquistão": "كازاخستان",
+        "Dinamarca": "الدنمارك", "Arábia Saudita": "السعودية", "Canadá": "كندا",
+        "Bósnia e Herzegovina": "البوسنة والهرسك", "Suíça": "سويسرا", "Malaui": "مالاوي",
+        "Coreia do Sul": "كوريا الجنوبية", "Filipinas": "الفلبين", "Costa Rica": "كوستاريكا",
+        "Haiti": "هايتي", "Escócia": "اسكتلندا", "Turquia": "تركيا", "Venezuela": "فنزويلا",
+    },
+    "zh": {
+        "México": "墨西哥", "África do Sul": "南非", "Argentina": "阿根廷", "Argélia": "阿尔及利亚",
+        "Espanha": "西班牙", "Cabo Verde": "佛得角", "Portugal": "葡萄牙", "Congo DR": "刚果民主共和国",
+        "Estados Unidos": "美国", "Paraguai": "巴拉圭", "Uruguai": "乌拉圭", "Angola": "安哥拉",
+        "Brasil": "巴西", "Marrocos": "摩洛哥", "Japão": "日本", "Croácia": "克罗地亚",
+        "Alemanha": "德国", "Curaçao": "库拉索", "Chile": "智利", "Austrália": "澳大利亚",
+        "França": "法国", "Senegal": "塞内加尔", "Bélgica": "比利时", "Equador": "厄瓜多尔",
+        "Inglaterra": "英格兰", "Sérvia": "塞尔维亚", "Holanda": "荷兰", "Zimbábue": "津巴布韦",
+        "Colômbia": "哥伦比亚", "Nova Zelândia": "新西兰", "Itália": "意大利", "Cazaquistão": "哈萨克斯坦",
+        "Dinamarca": "丹麦", "Arábia Saudita": "沙特阿拉伯", "Canadá": "加拿大",
+        "Bósnia e Herzegovina": "波黑", "Suíça": "瑞士", "Malaui": "马拉维",
+        "Coreia do Sul": "韩国", "Filipinas": "菲律宾", "Costa Rica": "哥斯达黎加",
+        "Haiti": "海地", "Escócia": "苏格兰", "Turquia": "土耳其", "Venezuela": "委内瑞拉",
+    },
+    "ru": {
+        "México": "Мексика", "África do Sul": "Южная Африка", "Argentina": "Аргентина", "Argélia": "Алжир",
+        "Espanha": "Испания", "Cabo Verde": "Кабо-Верде", "Portugal": "Португалия", "Congo DR": "ДР Конго",
+        "Estados Unidos": "США", "Paraguai": "Парагвай", "Uruguai": "Уругвай", "Angola": "Ангола",
+        "Brasil": "Бразилия", "Marrocos": "Марокко", "Japão": "Япония", "Croácia": "Хорватия",
+        "Alemanha": "Германия", "Curaçao": "Кюрасао", "Chile": "Чили", "Austrália": "Австралия",
+        "França": "Франция", "Senegal": "Сенегал", "Bélgica": "Бельгия", "Equador": "Эквадор",
+        "Inglaterra": "Англия", "Sérvia": "Сербия", "Holanda": "Нидерланды", "Zimbábue": "Зимбабве",
+        "Colômbia": "Колумбия", "Nova Zelândia": "Новая Зеландия", "Itália": "Италия", "Cazaquistão": "Казахстан",
+        "Dinamarca": "Дания", "Arábia Saudita": "Саудовская Аравия", "Canadá": "Канада",
+        "Bósnia e Herzegovina": "Босния и Герцеговина", "Suíça": "Швейцария", "Malaui": "Малави",
+        "Coreia do Sul": "Южная Корея", "Filipinas": "Филиппины", "Costa Rica": "Коста-Рика",
+        "Haiti": "Гаити", "Escócia": "Шотландия", "Turquia": "Турция", "Venezuela": "Венесуэла",
     },
 }
 
@@ -1366,6 +1441,222 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "reset_password_html": "<p>Hallo, {name}!</p><p>Wir haben eine Anfrage zum ZurÃ¼cksetzen Ihres Passworts erhalten.</p><p><a href=\"{url}\">Neues Passwort erstellen</a></p><p>Dieser Link lÃ¤uft in 1 Stunde ab. Wenn Sie diese Ã„nderung nicht angefordert haben, ignorieren Sie diese Nachricht.</p>",
 }}
 
+TRANSLATIONS["it"] = {**TRANSLATIONS["en"], **{
+    "language_label": "Lingua",
+    "app_name": "Pronostici Mondiali 2026",
+    "system_subtitle": "Sistema di pronostici",
+    "sign_in": "Accedi",
+    "forgot_password": "Password dimenticata?",
+    "register": "Registrati",
+    "nav_home": "Home",
+    "nav_games": "Partite",
+    "nav_predictions": "Pronostici",
+    "nav_ranking": "Classifica",
+    "nav_rules": "Regole",
+    "nav_results": "Risultati",
+    "nav_groups": "Gruppi",
+    "my_predictions": "I miei pronostici",
+    "logout": "Esci",
+    "dashboard": "Dashboard",
+    "highlight_team": "Selezione in evidenza",
+    "highlight_team_auto": "Automatico per lingua ({team})",
+    "save_highlight_team": "Applica",
+    "games": "Partite",
+    "completed": "Completate",
+    "pending": "In sospeso",
+    "stage": "Fase",
+    "overall": "Generale",
+    "points": "punti",
+    "date": "Data",
+    "time_brt": "Ora (BRT)",
+    "phase": "Fase",
+    "team_a": "Squadra A",
+    "team_b": "Squadra B",
+    "stadium": "Stadio",
+    "city": "Città",
+    "yes": "Sì",
+    "no": "No",
+    "status": "Stato",
+    "scheduled": "Programmata",
+    "open_for_predictions": "Aperta ai pronostici",
+    "scored": "Punteggiata",
+    "result": "Risultato",
+    "predictions_title": "Pronostici",
+    "save_predictions": "Salva pronostici",
+    "stage_groups": "Fase a gironi",
+    "stage_knockout": "Fase a eliminazione fino alla finale",
+    "world_cup_group": "Gruppo {group}",
+    "rules_title": "Regole",
+    "rules_heading": "Regole e informazioni utili",
+    "rules_subtitle": "Riepilogo rapido di punteggi, scadenze e criteri di spareggio.",
+    "winner": "Vincitore",
+    "loser": "Perdente",
+    "confirm_email_subject": "Conferma la tua e-mail - Pronostici Mondiali 2026",
+    "reset_password_subject": "Reimposta la password - Pronostici Mondiali 2026",
+}}
+
+TRANSLATIONS["ar"] = {**TRANSLATIONS["en"], **{
+    "language_label": "اللغة",
+    "app_name": "توقعات كأس العالم 2026",
+    "system_subtitle": "نظام التوقعات",
+    "sign_in": "تسجيل الدخول",
+    "forgot_password": "نسيت كلمة المرور؟",
+    "register": "تسجيل",
+    "nav_home": "الرئيسية",
+    "nav_games": "المباريات",
+    "nav_predictions": "التوقعات",
+    "nav_ranking": "الترتيب",
+    "nav_rules": "القواعد",
+    "nav_results": "النتائج",
+    "nav_groups": "المجموعات",
+    "my_predictions": "توقعاتي",
+    "logout": "خروج",
+    "dashboard": "لوحة التحكم",
+    "highlight_team": "المنتخب المميز",
+    "highlight_team_auto": "تلقائي حسب اللغة ({team})",
+    "save_highlight_team": "تطبيق",
+    "games": "المباريات",
+    "completed": "مكتملة",
+    "pending": "معلقة",
+    "stage": "المرحلة",
+    "overall": "عام",
+    "points": "نقاط",
+    "date": "التاريخ",
+    "time_brt": "الوقت (BRT)",
+    "phase": "المرحلة",
+    "team_a": "الفريق أ",
+    "team_b": "الفريق ب",
+    "stadium": "الملعب",
+    "city": "المدينة",
+    "yes": "نعم",
+    "no": "لا",
+    "status": "الحالة",
+    "scheduled": "مجدولة",
+    "open_for_predictions": "مفتوحة للتوقعات",
+    "scored": "تم احتسابها",
+    "result": "النتيجة",
+    "predictions_title": "التوقعات",
+    "save_predictions": "حفظ التوقعات",
+    "stage_groups": "دور المجموعات",
+    "stage_knockout": "الأدوار الإقصائية حتى النهائي",
+    "world_cup_group": "المجموعة {group}",
+    "rules_title": "القواعد",
+    "rules_heading": "القواعد والمعلومات المفيدة",
+    "rules_subtitle": "ملخص سريع للنقاط والمواعيد ومعايير كسر التعادل.",
+    "winner": "الفائز",
+    "loser": "الخاسر",
+    "confirm_email_subject": "أكد بريدك الإلكتروني - توقعات كأس العالم 2026",
+    "reset_password_subject": "إعادة تعيين كلمة المرور - توقعات كأس العالم 2026",
+}}
+
+TRANSLATIONS["zh"] = {**TRANSLATIONS["en"], **{
+    "language_label": "语言",
+    "app_name": "2026世界杯竞猜",
+    "system_subtitle": "竞猜系统",
+    "sign_in": "登录",
+    "forgot_password": "忘记密码？",
+    "register": "注册",
+    "nav_home": "首页",
+    "nav_games": "比赛",
+    "nav_predictions": "预测",
+    "nav_ranking": "排名",
+    "nav_rules": "规则",
+    "nav_results": "结果",
+    "nav_groups": "小组",
+    "my_predictions": "我的预测",
+    "logout": "退出",
+    "dashboard": "控制面板",
+    "highlight_team": "高亮球队",
+    "highlight_team_auto": "按语言自动选择（{team}）",
+    "save_highlight_team": "应用",
+    "games": "比赛",
+    "completed": "已完成",
+    "pending": "待处理",
+    "stage": "阶段",
+    "overall": "总计",
+    "points": "分",
+    "date": "日期",
+    "time_brt": "时间 (BRT)",
+    "phase": "阶段",
+    "team_a": "球队 A",
+    "team_b": "球队 B",
+    "stadium": "体育场",
+    "city": "城市",
+    "yes": "是",
+    "no": "否",
+    "status": "状态",
+    "scheduled": "已安排",
+    "open_for_predictions": "可预测",
+    "scored": "已计分",
+    "result": "结果",
+    "predictions_title": "预测",
+    "save_predictions": "保存预测",
+    "stage_groups": "小组赛",
+    "stage_knockout": "淘汰赛至决赛",
+    "world_cup_group": "{group}组",
+    "rules_title": "规则",
+    "rules_heading": "规则和实用信息",
+    "rules_subtitle": "积分、截止时间和排名规则的快速摘要。",
+    "winner": "胜者",
+    "loser": "负者",
+    "confirm_email_subject": "确认您的邮箱 - 2026世界杯竞猜",
+    "reset_password_subject": "重置密码 - 2026世界杯竞猜",
+}}
+
+TRANSLATIONS["ru"] = {**TRANSLATIONS["en"], **{
+    "language_label": "Язык",
+    "app_name": "Прогнозы ЧМ-2026",
+    "system_subtitle": "Система прогнозов",
+    "sign_in": "Войти",
+    "forgot_password": "Забыли пароль?",
+    "register": "Регистрация",
+    "nav_home": "Главная",
+    "nav_games": "Матчи",
+    "nav_predictions": "Прогнозы",
+    "nav_ranking": "Рейтинг",
+    "nav_rules": "Правила",
+    "nav_results": "Результаты",
+    "nav_groups": "Группы",
+    "my_predictions": "Мои прогнозы",
+    "logout": "Выйти",
+    "dashboard": "Панель",
+    "highlight_team": "Выделенная сборная",
+    "highlight_team_auto": "Автоматически по языку ({team})",
+    "save_highlight_team": "Применить",
+    "games": "Матчи",
+    "completed": "Завершено",
+    "pending": "Ожидает",
+    "stage": "Этап",
+    "overall": "Общий",
+    "points": "очки",
+    "date": "Дата",
+    "time_brt": "Время (BRT)",
+    "phase": "Этап",
+    "team_a": "Команда A",
+    "team_b": "Команда B",
+    "stadium": "Стадион",
+    "city": "Город",
+    "yes": "Да",
+    "no": "Нет",
+    "status": "Статус",
+    "scheduled": "Запланировано",
+    "open_for_predictions": "Открыто для прогнозов",
+    "scored": "Начислено",
+    "result": "Результат",
+    "predictions_title": "Прогнозы",
+    "save_predictions": "Сохранить прогнозы",
+    "stage_groups": "Групповой этап",
+    "stage_knockout": "Плей-офф до финала",
+    "world_cup_group": "Группа {group}",
+    "rules_title": "Правила",
+    "rules_heading": "Правила и полезная информация",
+    "rules_subtitle": "Краткое описание очков, сроков и правил тай-брейка.",
+    "winner": "Победитель",
+    "loser": "Проигравший",
+    "confirm_email_subject": "Подтвердите e-mail - Прогнозы ЧМ-2026",
+    "reset_password_subject": "Сброс пароля - Прогнозы ЧМ-2026",
+}}
+
 
 def _repair_mojibake(value):
     if not isinstance(value, str):
@@ -1376,7 +1667,7 @@ def _repair_mojibake(value):
         return value
 
 
-for _lang in ("fr", "de"):
+for _lang in ("fr", "de", "it", "ar", "zh", "ru"):
     TRANSLATIONS[_lang] = {key: _repair_mojibake(value) for key, value in TRANSLATIONS[_lang].items()}
 
 
@@ -1426,11 +1717,19 @@ def normalizar_idioma(idioma):
         return "fr"
     if idioma_lower.startswith("de"):
         return "de"
+    if idioma_lower.startswith("it"):
+        return "it"
+    if idioma_lower.startswith("ar"):
+        return "ar"
+    if idioma_lower.startswith("zh") or idioma_lower.startswith("cn"):
+        return "zh"
+    if idioma_lower.startswith("ru"):
+        return "ru"
     return idioma if idioma in SUPPORTED_LANGUAGES else None
 
 
 def detectar_idioma_navegador():
-    matches = ["pt-BR", "pt", "en", "es", "fr", "de"]
+    matches = ["pt-BR", "pt", "en", "es", "fr", "de", "it", "ar", "zh", "ru"]
     match = request.accept_languages.best_match(matches)
     return normalizar_idioma(match) or DEFAULT_LANGUAGE
 
@@ -1535,11 +1834,14 @@ def opcoes_time_destaque():
     except Exception:
         return []
 
+    codigo_real_re = re.compile(r"^[A-Z]{3}$")
     opcoes = {}
     for time_a, sigla_a, time_b, sigla_b in jogos:
-        if sigla_a:
+        sigla_a = (sigla_a or "").strip().upper()
+        sigla_b = (sigla_b or "").strip().upper()
+        if sigla_a and codigo_real_re.match(sigla_a):
             opcoes[sigla_a.strip().upper()] = time_a
-        if sigla_b:
+        if sigla_b and codigo_real_re.match(sigla_b):
             opcoes[sigla_b.strip().upper()] = time_b
 
     return [
@@ -2562,6 +2864,7 @@ def inject_globals():
         agora_br=agora_br(),
         current_language=getattr(g, "idioma", DEFAULT_LANGUAGE),
         supported_languages=SUPPORTED_LANGUAGES,
+        language_badges=LANGUAGE_BADGES,
         tr=tr,
         fase_label_traduzida=fase_label_traduzida,
         grupo_label_traduzido=grupo_label_traduzido,
