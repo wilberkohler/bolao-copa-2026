@@ -40,6 +40,103 @@ SUPPORTED_LANGUAGES = {
     "es": "Español",
 }
 DEFAULT_LANGUAGE = "pt-BR"
+TEAM_TRANSLATIONS = {
+    "en": {
+        "México": "Mexico",
+        "África do Sul": "South Africa",
+        "Argentina": "Argentina",
+        "Argélia": "Algeria",
+        "Espanha": "Spain",
+        "Cabo Verde": "Cape Verde",
+        "Portugal": "Portugal",
+        "Congo DR": "DR Congo",
+        "Estados Unidos": "United States",
+        "Paraguai": "Paraguay",
+        "Uruguai": "Uruguay",
+        "Angola": "Angola",
+        "Brasil": "Brazil",
+        "Marrocos": "Morocco",
+        "Japão": "Japan",
+        "Croácia": "Croatia",
+        "Alemanha": "Germany",
+        "Curaçao": "Curacao",
+        "Chile": "Chile",
+        "Austrália": "Australia",
+        "França": "France",
+        "Senegal": "Senegal",
+        "Bélgica": "Belgium",
+        "Equador": "Ecuador",
+        "Inglaterra": "England",
+        "Sérvia": "Serbia",
+        "Holanda": "Netherlands",
+        "Zimbábue": "Zimbabwe",
+        "Colômbia": "Colombia",
+        "Nova Zelândia": "New Zealand",
+        "Itália": "Italy",
+        "Cazaquistão": "Kazakhstan",
+        "Dinamarca": "Denmark",
+        "Arábia Saudita": "Saudi Arabia",
+        "Canadá": "Canada",
+        "Bósnia e Herzegovina": "Bosnia and Herzegovina",
+        "Suíça": "Switzerland",
+        "Malaui": "Malawi",
+        "Coreia do Sul": "South Korea",
+        "Filipinas": "Philippines",
+        "Costa Rica": "Costa Rica",
+        "Haiti": "Haiti",
+        "Escócia": "Scotland",
+        "Turquia": "Turkey",
+        "Venezuela": "Venezuela",
+    },
+    "es": {
+        "México": "México",
+        "África do Sul": "Sudáfrica",
+        "Argentina": "Argentina",
+        "Argélia": "Argelia",
+        "Espanha": "España",
+        "Cabo Verde": "Cabo Verde",
+        "Portugal": "Portugal",
+        "Congo DR": "RD Congo",
+        "Estados Unidos": "Estados Unidos",
+        "Paraguai": "Paraguay",
+        "Uruguai": "Uruguay",
+        "Angola": "Angola",
+        "Brasil": "Brasil",
+        "Marrocos": "Marruecos",
+        "Japão": "Japón",
+        "Croácia": "Croacia",
+        "Alemanha": "Alemania",
+        "Curaçao": "Curazao",
+        "Chile": "Chile",
+        "Austrália": "Australia",
+        "França": "Francia",
+        "Senegal": "Senegal",
+        "Bélgica": "Bélgica",
+        "Equador": "Ecuador",
+        "Inglaterra": "Inglaterra",
+        "Sérvia": "Serbia",
+        "Holanda": "Países Bajos",
+        "Zimbábue": "Zimbabue",
+        "Colômbia": "Colombia",
+        "Nova Zelândia": "Nueva Zelanda",
+        "Itália": "Italia",
+        "Cazaquistão": "Kazajistán",
+        "Dinamarca": "Dinamarca",
+        "Arábia Saudita": "Arabia Saudita",
+        "Canadá": "Canadá",
+        "Bósnia e Herzegovina": "Bosnia y Herzegovina",
+        "Suíça": "Suiza",
+        "Malaui": "Malaui",
+        "Coreia do Sul": "Corea del Sur",
+        "Filipinas": "Filipinas",
+        "Costa Rica": "Costa Rica",
+        "Haiti": "Haití",
+        "Escócia": "Escocia",
+        "Turquia": "Turquía",
+        "Venezuela": "Venezuela",
+    },
+}
+
 TRANSLATIONS = {
     "pt-BR": {
         "language_label": "Idioma",
@@ -130,6 +227,15 @@ TRANSLATIONS = {
         "team_a": "Time A",
         "team_b": "Time B",
         "location": "Local",
+        "stadium": "Estádio",
+        "city": "Cidade",
+        "knockout_short": "M-M",
+        "knockout": "Mata-mata",
+        "yes": "Sim",
+        "no": "Não",
+        "prediction_deadline_short": "Prazo Palpite",
+        "action": "Ação",
+        "total_games": "Total: {count} jogo(s)",
         "game_status": "Status Jogo",
         "my_prediction": "Meu Palpite",
         "prediction_deadline": "Prazo Palpite",
@@ -138,6 +244,8 @@ TRANSLATIONS = {
         "in_progress": "Em andamento",
         "locked": "Bloqueado",
         "scheduled": "Agendado",
+        "open_for_predictions": "Aberto para palpites",
+        "cancelled_changed": "Cancelado/Alterado",
         "no_prediction": "Sem palpite",
         "no_upcoming_games": "Nenhum jogo próximo encontrado.",
         "stage_groups": "Fase de Grupos",
@@ -172,6 +280,8 @@ TRANSLATIONS = {
         "exact_score": "Placar exato",
         "winner_plus_margin": "Vencedor + saldo",
         "winner_correct": "Vencedor correto",
+        "winner": "Vencedor",
+        "loser": "Perdedor",
         "goals_correct": "Acertou gols",
         "missed": "Não acertou",
         "qualified_correct": "Classificado correto",
@@ -339,6 +449,15 @@ TRANSLATIONS = {
         "team_a": "Team A",
         "team_b": "Team B",
         "location": "Location",
+        "stadium": "Stadium",
+        "city": "City",
+        "knockout_short": "KO",
+        "knockout": "Knockout",
+        "yes": "Yes",
+        "no": "No",
+        "prediction_deadline_short": "Prediction Deadline",
+        "action": "Action",
+        "total_games": "Total: {count} game(s)",
         "game_status": "Game Status",
         "my_prediction": "My Prediction",
         "prediction_deadline": "Prediction Deadline",
@@ -347,6 +466,8 @@ TRANSLATIONS = {
         "in_progress": "In progress",
         "locked": "Locked",
         "scheduled": "Scheduled",
+        "open_for_predictions": "Open for predictions",
+        "cancelled_changed": "Cancelled/Changed",
         "no_prediction": "No prediction",
         "no_upcoming_games": "No upcoming games found.",
         "stage_groups": "Group Stage",
@@ -381,6 +502,8 @@ TRANSLATIONS = {
         "exact_score": "Exact score",
         "winner_plus_margin": "Winner + margin",
         "winner_correct": "Correct winner",
+        "winner": "Winner",
+        "loser": "Loser",
         "goals_correct": "Correct goals",
         "missed": "No hit",
         "qualified_correct": "Correct qualifier",
@@ -548,6 +671,15 @@ TRANSLATIONS = {
         "team_a": "Equipo A",
         "team_b": "Equipo B",
         "location": "Lugar",
+        "stadium": "Estadio",
+        "city": "Ciudad",
+        "knockout_short": "Elim.",
+        "knockout": "Eliminatoria",
+        "yes": "Sí",
+        "no": "No",
+        "prediction_deadline_short": "Plazo del Pronóstico",
+        "action": "Acción",
+        "total_games": "Total: {count} partido(s)",
         "game_status": "Estado del Partido",
         "my_prediction": "Mi Pronóstico",
         "prediction_deadline": "Plazo del Pronóstico",
@@ -556,6 +688,8 @@ TRANSLATIONS = {
         "in_progress": "En curso",
         "locked": "Bloqueado",
         "scheduled": "Programado",
+        "open_for_predictions": "Abierto para pronósticos",
+        "cancelled_changed": "Cancelado/Modificado",
         "no_prediction": "Sin pronóstico",
         "no_upcoming_games": "No se encontraron próximos partidos.",
         "stage_groups": "Fase de Grupos",
@@ -590,6 +724,8 @@ TRANSLATIONS = {
         "exact_score": "Marcador exacto",
         "winner_plus_margin": "Ganador + diferencia",
         "winner_correct": "Ganador correcto",
+        "winner": "Ganador",
+        "loser": "Perdedor",
         "goals_correct": "Goles correctos",
         "missed": "No acertó",
         "qualified_correct": "Clasificado correcto",
@@ -764,6 +900,37 @@ def grupo_label_traduzido(grupo, idioma=None):
     if not grupo or grupo == "Outros":
         return tr("other_group", idioma)
     return tr("world_cup_group", idioma, group=grupo)
+
+
+def status_jogo_traduzido(status, idioma=None):
+    status_original = (status or "").strip()
+    normalizado = status_original.lower()
+    mapa = {
+        "pontuado": "scored",
+        "resultado lançado": "result",
+        "em andamento": "in_progress",
+        "bloqueado para palpites": "locked",
+        "aberto para palpites": "open_for_predictions",
+        "aberto para palpite": "open",
+        "agendado": "scheduled",
+        "cancelado/alterado": "cancelled_changed",
+    }
+    key = mapa.get(normalizado)
+    return tr(key, idioma) if key else status_original
+
+
+def time_nome_traduzido(nome, idioma=None):
+    nome_original = (nome or "").strip()
+    idioma = normalizar_idioma(idioma) or getattr(g, "idioma", None) or DEFAULT_LANGUAGE
+    if not nome_original or idioma == DEFAULT_LANGUAGE:
+        return nome_original
+
+    if nome_original.startswith("Vencedor "):
+        return tr("winner", idioma) + nome_original[len("Vencedor"):]
+    if nome_original.startswith("Perdedor "):
+        return tr("loser", idioma) + nome_original[len("Perdedor"):]
+
+    return TEAM_TRANSLATIONS.get(idioma, {}).get(nome_original, nome_original)
 
 
 def find_user_by_email(email):
@@ -1147,7 +1314,9 @@ def montar_relatorio_rodada(user, competidor, rodada):
         resultado = jogo.resultado
         pont = next((p for p in pontuacoes if p.jogo_id == jogo.id), None)
         jogos_linhas.append(
-            f"- {jogo.time_a} {resultado.gols_a} x {resultado.gols_b} {jogo.time_b}: "
+            f"- {time_nome_traduzido(jogo.time_a, user.idioma)} "
+            f"{resultado.gols_a} x {resultado.gols_b} "
+            f"{time_nome_traduzido(jogo.time_b, user.idioma)}: "
             f"{pont.pontos if pont else 0} ponto(s)"
         )
 
@@ -1770,6 +1939,8 @@ def inject_globals():
         tr=tr,
         fase_label_traduzida=fase_label_traduzida,
         grupo_label_traduzido=grupo_label_traduzido,
+        status_jogo_traduzido=status_jogo_traduzido,
+        time_nome_traduzido=time_nome_traduzido,
     )
 
 

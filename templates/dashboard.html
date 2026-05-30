@@ -123,7 +123,7 @@
       <div class="card-header bg-success text-white fw-bold"><i class="bi bi-play-circle"></i> {{ tr('next_game') }}</div>
       <div class="card-body">
         {% if proximo_jogo %}
-          <h6>{{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</h6>
+          <h6>{{ time_nome_traduzido(proximo_jogo.time_a) }} x {{ time_nome_traduzido(proximo_jogo.time_b) }}</h6>
           <p class="mb-0 text-muted">{{ proximo_jogo.data_jogo.strftime('%d/%m/%Y') }} &bull; {{ proximo_jogo.hora_brasilia }} BRT</p>
           <small class="text-muted">{{ proximo_jogo.estadio }}, {{ proximo_jogo.cidade }}</small>
         {% else %}
@@ -138,7 +138,7 @@
       <div class="card-body">
         {% if proximo_prazo %}
           <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
-          <p class="mb-0 text-muted">{{ tr('deadline_for') }} {{ proximo_jogo.time_a }} x {{ proximo_jogo.time_b }}</p>
+          <p class="mb-0 text-muted">{{ tr('deadline_for') }} {{ time_nome_traduzido(proximo_jogo.time_a) }} x {{ time_nome_traduzido(proximo_jogo.time_b) }}</p>
         {% else %}
           <p class="text-muted">{{ tr('no_upcoming_deadline') }}</p>
         {% endif %}
@@ -172,8 +172,8 @@
         <td>{{ j.hora_brasilia }}</td>
         <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
         <td>{{ grupo_label_traduzido(j.grupo) if j.grupo else '-' }}</td>
-        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong></td>
-        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong></td>
+        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong></td>
+        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_b) }}</strong></td>
         <td>{{ j.cidade }}</td>
         <td>
           {% set st = j.status %}

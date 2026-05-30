@@ -30,7 +30,7 @@
         <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
         <td>{{ j.hora_brasilia }}</td>
         <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
-        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
+        <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
         <td>
           {% if item.editavel %}
             <input type="hidden" name="jogo_id" value="{{ j.id }}">
@@ -50,17 +50,17 @@
             <span>{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</span>
           {% endif %}
         </td>
-        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+        <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ time_nome_traduzido(j.time_b) }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
         <td>
           {% if j.mata_mata %}
             {% if item.editavel %}
               <select name="classificado_{{ j.id }}" class="form-select form-select-sm" style="min-width:140px">
                 <option value="">-- {{ tr('qualified_correct') }} --</option>
-                <option value="{{ j.time_a }}" {% if p and p.palpite_classificado == j.time_a %}selected{% endif %}>{{ j.time_a }}</option>
-                <option value="{{ j.time_b }}" {% if p and p.palpite_classificado == j.time_b %}selected{% endif %}>{{ j.time_b }}</option>
+                <option value="{{ j.time_a }}" {% if p and p.palpite_classificado == j.time_a %}selected{% endif %}>{{ time_nome_traduzido(j.time_a) }}</option>
+                <option value="{{ j.time_b }}" {% if p and p.palpite_classificado == j.time_b %}selected{% endif %}>{{ time_nome_traduzido(j.time_b) }}</option>
               </select>
             {% else %}
-              {{ p.palpite_classificado if p else '-' }}
+              {{ time_nome_traduzido(p.palpite_classificado) if p and p.palpite_classificado else '-' }}
             {% endif %}
           {% else %}
             <span class="text-muted">-</span>
@@ -70,7 +70,7 @@
           {% if j.resultado %}
             <div class="fw-bold">{{ j.resultado.gols_a }} x {{ j.resultado.gols_b }}</div>
             {% if j.resultado.classificado %}
-              <small class="text-muted">{{ tr('qualified_correct') }}: {{ j.resultado.classificado }}</small>
+              <small class="text-muted">{{ tr('qualified_correct') }}: {{ time_nome_traduzido(j.resultado.classificado) }}</small>
             {% endif %}
           {% else %}
             <span class="text-muted">{{ tr('waiting') }}</span>

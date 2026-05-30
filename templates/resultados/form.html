@@ -6,14 +6,14 @@
     <div class="card shadow-sm">
       <div class="card-header bg-success text-white fw-bold">
         <i class="bi bi-check2-circle"></i>
-        Jogo #{{ jogo.numero_partida }} &mdash; {{ jogo.time_a }} x {{ jogo.time_b }}
+        Jogo #{{ jogo.numero_partida }} &mdash; {{ time_nome_traduzido(jogo.time_a) }} x {{ time_nome_traduzido(jogo.time_b) }}
         <br><small class="fw-normal">{{ jogo.data_jogo.strftime('%d/%m/%Y') }} | {{ jogo.hora_brasilia }} BRT | {{ fase_label_traduzida(jogo.fase) }}</small>
       </div>
       <div class="card-body">
         <form method="post">
           <div class="row align-items-end">
             <div class="col mb-3 text-center {% if jogo.time_a == 'Brasil' or jogo.sigla_time_a == 'BRA' %}team-brasil{% endif %}">
-              <label class="form-label fw-bold">{{ jogo.time_a }}</label>
+              <label class="form-label fw-bold">{{ time_nome_traduzido(jogo.time_a) }}</label>
               <input type="number" name="gols_a" class="form-control form-control-lg text-center"
                      min="0" max="30" required
                      value="{{ resultado.gols_a if resultado else '' }}">
@@ -22,7 +22,7 @@
               <div class="fs-2 fw-bold text-muted mt-3">x</div>
             </div>
             <div class="col mb-3 text-center {% if jogo.time_b == 'Brasil' or jogo.sigla_time_b == 'BRA' %}team-brasil{% endif %}">
-              <label class="form-label fw-bold">{{ jogo.time_b }}</label>
+              <label class="form-label fw-bold">{{ time_nome_traduzido(jogo.time_b) }}</label>
               <input type="number" name="gols_b" class="form-control form-control-lg text-center"
                      min="0" max="30" required
                      value="{{ resultado.gols_b if resultado else '' }}">
@@ -36,11 +36,11 @@
               <option value="">-- Selecione o classificado --</option>
               <option value="{{ jogo.time_a }}"
                 {% if resultado and resultado.classificado == jogo.time_a %}selected{% endif %}>
-                {{ jogo.time_a }}
+                {{ time_nome_traduzido(jogo.time_a) }}
               </option>
               <option value="{{ jogo.time_b }}"
                 {% if resultado and resultado.classificado == jogo.time_b %}selected{% endif %}>
-                {{ jogo.time_b }}
+                {{ time_nome_traduzido(jogo.time_b) }}
               </option>
             </select>
           </div>
@@ -85,7 +85,7 @@
             <tr>
               <td>{{ p.competidor.apelido }}</td>
               <td>{{ p.palpite_gols_a }} x {{ p.palpite_gols_b }}</td>
-              <td>{{ p.palpite_classificado or '-' }}</td>
+              <td>{{ time_nome_traduzido(p.palpite_classificado) if p.palpite_classificado else '-' }}</td>
               <td>
                 {% if pont %}
                   <strong class="{% if pont.pontos >= 7 %}pts-alto{% elif pont.pontos >= 3 %}pts-medio{% else %}pts-baixo{% endif %}">

@@ -1,35 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Jogos{% endblock %}
+{% block title %}{{ tr('nav_games') }}{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h4><i class="bi bi-calendar3 text-success"></i> Jogos da Copa 2026</h4>
+  <h4><i class="bi bi-calendar3 text-success"></i> {{ tr('nav_games') }} - Copa 2026</h4>
 </div>
-
-{# Filtros removidos: as abas por grupo agora organizam a tela. #}
-{#
-<form class="row g-2 mb-3" method="get">
-  <div class="col-auto">
-    <select name="fase" class="form-select form-select-sm">
-      <option value="">Todas as fases</option>
-      {% for f in fases %}
-        <option value="{{ f }}" {% if f == fase_filtro %}selected{% endif %}>{{ f }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-auto">
-    <select name="status" class="form-select form-select-sm">
-      <option value="">Todos os status</option>
-      {% for s in status_list %}
-        <option value="{{ s }}" {% if s == status_filtro %}selected{% endif %}>{{ s }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-auto">
-    <button type="submit" class="btn btn-success btn-sm">Filtrar</button>
-    <a href="{{ url_for('listar_jogos') }}" class="btn btn-outline-secondary btn-sm">Limpar</a>
-  </div>
-</form>
-#}
 
 {% if jogos_por_grupo %}
   <ul class="nav nav-tabs mb-3" role="tablist">
@@ -61,12 +35,12 @@
                 <th>{{ tr('time_brt') }}</th>
                 <th>{{ tr('team_a') }}</th>
                 <th>{{ tr('team_b') }}</th>
-                <th>Estádio</th>
-                <th>Cidade</th>
-                <th>M-M</th>
-                <th>Status</th>
-                <th>Prazo Palpite</th>
-                <th>Ação</th>
+                <th>{{ tr('stadium') }}</th>
+                <th>{{ tr('city') }}</th>
+                <th title="{{ tr('knockout') }}">{{ tr('knockout_short') }}</th>
+                <th>{{ tr('status') }}</th>
+                <th>{{ tr('prediction_deadline_short') }}</th>
+                <th>{{ tr('action') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -76,26 +50,32 @@
                 <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
                 <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
                 <td>{{ j.hora_brasilia }}</td>
-                <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
-                <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_b }}</strong><br><small class="text-muted">{{ j.sigla_time_b }}</small></td>
+                <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}">
+                  <strong>{{ time_nome_traduzido(j.time_a) }}</strong><br>
+                  <small class="text-muted">{{ j.sigla_time_a }}</small>
+                </td>
+                <td class="{% if j.time_b == 'Brasil' or j.sigla_time_b == 'BRA' %}team-brasil{% endif %}">
+                  <strong>{{ time_nome_traduzido(j.time_b) }}</strong><br>
+                  <small class="text-muted">{{ j.sigla_time_b }}</small>
+                </td>
                 <td><small>{{ j.estadio }}</small></td>
                 <td><small>{{ j.cidade }}, {{ j.pais }}</small></td>
                 <td>
                   {% if j.mata_mata %}
-                    <span class="badge bg-danger">Sim</span>
+                    <span class="badge bg-danger">{{ tr('yes') }}</span>
                   {% else %}
-                    <span class="badge bg-light text-dark">Não</span>
+                    <span class="badge bg-light text-dark">{{ tr('no') }}</span>
                   {% endif %}
                 </td>
                 <td>
                   {% set st = j.status %}
-                  {% if st == 'Pontuado' %}<span class="badge badge-pontuado">{{ st }}</span>
-                  {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">{{ st }}</span>
-                  {% elif st == 'Em andamento' %}<span class="badge badge-andamento">{{ st }}</span>
-                  {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">{{ st }}</span>
-                  {% elif st == 'Aberto para palpites' %}<span class="badge badge-aberto">{{ st }}</span>
-                  {% elif st == 'Cancelado/Alterado' %}<span class="badge bg-danger">{{ st }}</span>
-                  {% else %}<span class="badge bg-secondary">{{ st }}</span>
+                  {% if st == 'Pontuado' %}<span class="badge badge-pontuado">{{ status_jogo_traduzido(st) }}</span>
+                  {% elif st == 'Resultado Lançado' %}<span class="badge badge-resultado">{{ status_jogo_traduzido(st) }}</span>
+                  {% elif st == 'Em andamento' %}<span class="badge badge-andamento">{{ status_jogo_traduzido(st) }}</span>
+                  {% elif st == 'Bloqueado para palpites' %}<span class="badge badge-bloqueado">{{ status_jogo_traduzido(st) }}</span>
+                  {% elif st == 'Aberto para palpites' %}<span class="badge badge-aberto">{{ status_jogo_traduzido(st) }}</span>
+                  {% elif st == 'Cancelado/Alterado' %}<span class="badge bg-danger">{{ status_jogo_traduzido(st) }}</span>
+                  {% else %}<span class="badge bg-secondary">{{ status_jogo_traduzido(st) }}</span>
                   {% endif %}
                 </td>
                 <td>
@@ -115,8 +95,8 @@
     {% endfor %}
   </div>
 {% else %}
-  <div class="alert alert-light border text-muted">Nenhum jogo encontrado.</div>
+  <div class="alert alert-light border text-muted">{{ tr('no_games_found') }}</div>
 {% endif %}
 
-<small class="text-muted">Total: {{ jogos|length }} jogo(s)</small>
+<small class="text-muted">{{ tr('total_games', count=jogos|length) }}</small>
 {% endblock %}
