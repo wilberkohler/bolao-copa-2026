@@ -153,7 +153,7 @@
     <h5 class="mb-0"><i class="bi bi-diagram-3"></i> {{ tr('knockout_bracket') }}</h5>
     <small class="text-muted">{{ tr('knockout_bracket_hint') }}</small>
   </div>
-  <div class="bracket-board shadow-sm">
+  <div class="bracket-board bracket-tree shadow-sm">
     {% for fase in knockout_bracket %}
       <div class="bracket-round">
         <div class="bracket-round-title">{{ fase.label }}</div>
@@ -161,7 +161,7 @@
           {% for partida in fase.jogos %}
             <article class="bracket-match">
               <div class="bracket-match-meta">
-                <span>#{{ partida.numero }}</span>
+                <strong>#{{ "%02d"|format(partida.numero) }}</strong>
                 <span>{{ partida.data }} &bull; {{ partida.hora }}</span>
               </div>
               <div class="bracket-team {% if is_time_destacado(partida.sigla_a) %}team-destaque{% endif %}">
@@ -175,11 +175,15 @@
               {% if partida.score %}
                 <div class="bracket-result">
                   <strong>{{ partida.score }}</strong>
-                  {% if partida.classificado %}
-                    <span>{{ tr('classified') }}: {{ partida.classificado }}</span>
-                  {% endif %}
                 </div>
               {% endif %}
+              <div class="bracket-winner">
+                {% if partida.classificado %}
+                  {{ partida.classificado }}
+                {% else %}
+                  {{ tr('winner') }} {{ "%02d"|format(partida.numero) }}
+                {% endif %}
+              </div>
             </article>
           {% endfor %}
         </div>
