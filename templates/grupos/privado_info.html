@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ tr('private_group_title') }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10 col-xl-9">
+    <div class="bg-white border rounded shadow-sm p-4 mb-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+        <div>
+          <h3 class="fw-bold mb-2"><i class="bi bi-shield-lock-fill text-success"></i> {{ tr('private_group_title') }}</h3>
+          <p class="lead mb-2">{{ tr('private_group_hero') }}</p>
+          <p class="mb-0 text-muted">{{ tr('private_group_mobile_only') }}</p>
+        </div>
+        <div class="text-md-end">
+          <div class="display-6 fw-bold text-success">R$ 49,90</div>
+          <div class="small text-muted">{{ tr('private_group_price') }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="bg-white border rounded shadow-sm p-3 h-100">
+          <i class="bi bi-person-gear fs-3 text-success"></i>
+          <p class="fw-semibold mt-2 mb-0">{{ tr('private_group_feature_1') }}</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-white border rounded shadow-sm p-3 h-100">
+          <i class="bi bi-link-45deg fs-3 text-success"></i>
+          <p class="fw-semibold mt-2 mb-0">{{ tr('private_group_feature_2') }}</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-white border rounded shadow-sm p-3 h-100">
+          <i class="bi bi-bar-chart-line fs-3 text-success"></i>
+          <p class="fw-semibold mt-2 mb-0">{{ tr('private_group_feature_3') }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-light border">
+      <i class="bi bi-speedometer2 text-success"></i>
+      {{ tr('private_group_capacity_note', limit=limite_participantes) }}
+    </div>
+
+    {% if user %}
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('meus_grupos_privados') }}" class="btn btn-success">
+          <i class="bi bi-collection"></i> {{ tr('private_group_my_groups') }}
+        </a>
+      </div>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-success">{{ tr('sign_in') }}</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

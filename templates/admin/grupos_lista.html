@@ -13,6 +13,7 @@
         <th>#</th>
         <th>Nome</th>
         <th>Tipo</th>
+        <th>Pagamento</th>
         <th>Descricao</th>
         <th>Criado por</th>
         <th>Usuarios</th>
@@ -34,6 +35,21 @@
           {% if g.requer_codigo %}
             <span class="badge bg-warning text-dark">Com codigo</span>
           {% endif %}
+          {% if g.tipo == 'privado_pago' %}
+            <span class="badge bg-primary">Privado pago</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if g.status_pagamento == 'ativo' %}
+            <span class="badge bg-success">Ativo</span>
+          {% elif g.status_pagamento == 'pendente' %}
+            <span class="badge bg-warning text-dark">Pendente</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ g.status_pagamento or 'gratuito' }}</span>
+          {% endif %}
+          {% if g.limite_participantes %}
+            <div class="small text-muted">Limite: {{ g.limite_participantes }}</div>
+          {% endif %}
         </td>
         <td>{{ g.descricao or '-' }}</td>
         <td>{{ g.criado_por.nome if g.criado_por else '-' }}</td>
@@ -48,7 +64,7 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="7" class="text-center text-muted">Nenhum grupo cadastrado.</td></tr>
+      <tr><td colspan="8" class="text-center text-muted">Nenhum grupo cadastrado.</td></tr>
       {% endfor %}
     </tbody>
   </table>

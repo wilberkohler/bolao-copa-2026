@@ -29,6 +29,9 @@ ADMIN_EMAIL = "wilber.kohler@naest.com.br"
 WK3_GROUP_NAME = "WK3"
 WK3_GROUP_CODE = os.environ.get("WK3_GROUP_CODE", "WK3")
 PUBLIC_GROUP_COUNT = int(os.environ.get("PUBLIC_GROUP_COUNT", "100"))
+PRIVATE_GROUP_PRICE_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_CENTS", "4990"))
+PRIVATE_GROUP_PARTICIPANT_LIMIT = int(os.environ.get("PRIVATE_GROUP_PARTICIPANT_LIMIT", "150"))
+PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "grupo_privado_copa_2026")
 RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
@@ -385,6 +388,7 @@ TRANSLATIONS = {
         "nav_admin": "Admin",
         "nav_results": "Resultados",
         "nav_groups": "Grupos",
+        "nav_private_group": "Grupo privado",
         "nav_simulation": "Simulação",
         "my_predictions": "Meus palpites",
         "group_label": "Grupo",
@@ -468,6 +472,23 @@ TRANSLATIONS = {
         "top5_overall": "Top 5 geral:",
         "access_app_details": "Acesse o app para ver todos os detalhes.",
         "invite_friend_line": "Convide um amigo para participar:",
+        "private_group_title": "Grupo privado",
+        "private_group_hero": "Crie um grupo privado para administrar seu proprio bolao.",
+        "private_group_price": "Pagamento unico de R$ 49,90 pela Copa 2026.",
+        "private_group_mobile_only": "A contratacao sera feita pelo aplicativo para celular, usando Apple ou Google Play. No computador, esta pagina serve apenas como orientacao.",
+        "private_group_feature_1": "Painel administrativo limitado ao grupo criado por voce.",
+        "private_group_feature_2": "Convite por link e codigo de acesso para participantes.",
+        "private_group_feature_3": "Ranking exclusivo, relatorios e acompanhamento dos palpites do grupo.",
+        "private_group_capacity_note": "Para proteger a estabilidade do servidor, cada grupo tem limite tecnico inicial de {limit} participantes.",
+        "private_group_my_groups": "Meus grupos privados",
+        "private_group_no_groups": "Voce ainda nao administra um grupo privado ativo.",
+        "private_group_app_hint": "Quando o app estiver publicado, ative o grupo pelo celular e depois acompanhe por aqui.",
+        "private_group_admin_panel": "Painel do grupo",
+        "private_group_participants": "Participantes",
+        "private_group_status": "Status do pagamento",
+        "private_group_active": "Ativo",
+        "private_group_pending": "Pendente",
+        "private_group_free": "Gratuito",
         "predictions_title": "Palpites",
         "goals_a": "Gols A",
         "goals_b": "Gols B",
@@ -610,6 +631,7 @@ TRANSLATIONS = {
         "nav_admin": "Admin",
         "nav_results": "Results",
         "nav_groups": "Groups",
+        "nav_private_group": "Private group",
         "nav_simulation": "Simulation",
         "my_predictions": "My predictions",
         "group_label": "Group",
@@ -693,6 +715,23 @@ TRANSLATIONS = {
         "top5_overall": "Overall Top 5:",
         "access_app_details": "Open the app to see all details.",
         "invite_friend_line": "Invite a friend to join:",
+        "private_group_title": "Private group",
+        "private_group_hero": "Create a private group to manage your own pool.",
+        "private_group_price": "One-time payment of R$ 49.90 for the 2026 World Cup.",
+        "private_group_mobile_only": "Purchase will be available in the mobile app through Apple or Google Play. On desktop, this page is informational only.",
+        "private_group_feature_1": "Admin panel limited to the group you created.",
+        "private_group_feature_2": "Invite link and access code for participants.",
+        "private_group_feature_3": "Exclusive ranking, reports, and prediction tracking for the group.",
+        "private_group_capacity_note": "To protect server stability, each group has an initial technical limit of {limit} participants.",
+        "private_group_my_groups": "My private groups",
+        "private_group_no_groups": "You do not manage an active private group yet.",
+        "private_group_app_hint": "Once the mobile app is published, activate the group on your phone and manage it here.",
+        "private_group_admin_panel": "Group panel",
+        "private_group_participants": "Participants",
+        "private_group_status": "Payment status",
+        "private_group_active": "Active",
+        "private_group_pending": "Pending",
+        "private_group_free": "Free",
         "predictions_title": "Predictions",
         "goals_a": "Goals A",
         "goals_b": "Goals B",
@@ -835,6 +874,7 @@ TRANSLATIONS = {
         "nav_admin": "Admin",
         "nav_results": "Resultados",
         "nav_groups": "Grupos",
+        "nav_private_group": "Grupo privado",
         "nav_simulation": "Simulación",
         "my_predictions": "Mis pronósticos",
         "group_label": "Grupo",
@@ -2042,6 +2082,22 @@ def ensure_group_publication_columns():
         statements.append("ALTER TABLE grupos ADD COLUMN codigo_acesso_hash VARCHAR(255)")
     if "criado_pelo_sistema" not in existing:
         statements.append(f"ALTER TABLE grupos ADD COLUMN criado_pelo_sistema {bool_type} DEFAULT {bool_false}")
+    if "tipo" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN tipo VARCHAR(30) DEFAULT 'publico'")
+    if "status_pagamento" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN status_pagamento VARCHAR(30) DEFAULT 'gratuito'")
+    if "limite_participantes" not in existing:
+        statements.append(f"ALTER TABLE grupos ADD COLUMN limite_participantes INTEGER DEFAULT {PRIVATE_GROUP_PARTICIPANT_LIMIT}")
+    if "preco_centavos" not in existing:
+        statements.append(f"ALTER TABLE grupos ADD COLUMN preco_centavos INTEGER DEFAULT {PRIVATE_GROUP_PRICE_CENTS}")
+    if "plataforma_pagamento" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN plataforma_pagamento VARCHAR(30)")
+    if "produto_pagamento" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN produto_pagamento VARCHAR(100)")
+    if "compra_token_hash" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN compra_token_hash VARCHAR(255)")
+    if "ativado_em" not in existing:
+        statements.append("ALTER TABLE grupos ADD COLUMN ativado_em TIMESTAMP")
 
     if not statements:
         return
@@ -2087,7 +2143,34 @@ def grupo_publico_payload(grupo):
         "descricao": grupo.descricao,
         "publico": bool(grupo.publico),
         "requer_codigo": bool(grupo.requer_codigo),
+        "tipo": grupo.tipo or "publico",
+        "status_pagamento": grupo.status_pagamento or "gratuito",
     }
+
+
+def grupo_pagamento_ativo(grupo):
+    status = (getattr(grupo, "status_pagamento", None) or "gratuito").lower()
+    return status in {"gratuito", "ativo"}
+
+
+def grupo_privado_pago(grupo):
+    return (getattr(grupo, "tipo", None) or "").lower() == "privado_pago"
+
+
+def usuario_admin_do_grupo(user, grupo):
+    if is_authorized_admin(user):
+        return True
+    return bool(user and grupo and grupo.criado_por_id == user.id and grupo_pagamento_ativo(grupo))
+
+
+def grupos_privados_do_usuario(user):
+    if not user:
+        return []
+    return (Grupo.query
+            .filter(Grupo.criado_por_id == user.id)
+            .filter(Grupo.tipo == "privado_pago")
+            .order_by(Grupo.created_at.desc())
+            .all())
 
 
 def grupos_para_cadastro():
@@ -2112,6 +2195,14 @@ def convite_url(user=None):
         return f"{base_url}/registro"
 
 
+def convite_grupo_url(grupo_id):
+    try:
+        return url_for("registro", grupo_id=grupo_id, _external=True)
+    except RuntimeError:
+        base_url = os.environ.get("APP_PUBLIC_URL", "https://bolao2026-9jgh.onrender.com").rstrip("/")
+        return f"{base_url}/registro?grupo_id={grupo_id}"
+
+
 def validar_grupo_cadastro(grupo_id, codigo_grupo=""):
     if not grupo_id:
         return None, None
@@ -2124,6 +2215,13 @@ def validar_grupo_cadastro(grupo_id, codigo_grupo=""):
     grupo = Grupo.query.get(grupo_id_int)
     if not grupo or not grupo.publico:
         return None, "Grupo indisponivel para cadastro."
+
+    if not grupo_pagamento_ativo(grupo):
+        return None, "Grupo privado ainda nao esta ativo."
+
+    limite = grupo.limite_participantes or PRIVATE_GROUP_PARTICIPANT_LIMIT
+    if grupo_privado_pago(grupo) and len(grupo.usuarios) >= limite:
+        return None, "Este grupo privado atingiu o limite de participantes."
 
     if grupo.requer_codigo and not grupo.check_codigo_acesso(codigo_grupo):
         return None, "Codigo do grupo privado invalido."
@@ -2142,6 +2240,12 @@ def seed_public_groups():
             if grupo.publico is None:
                 grupo.publico = True
                 changed = True
+            if not grupo.tipo:
+                grupo.tipo = "publico"
+                changed = True
+            if not grupo.status_pagamento:
+                grupo.status_pagamento = "gratuito"
+                changed = True
             continue
 
         db.session.add(Grupo(
@@ -2150,6 +2254,8 @@ def seed_public_groups():
             publico=True,
             requer_codigo=False,
             criado_pelo_sistema=True,
+            tipo="publico",
+            status_pagamento="gratuito",
         ))
         changed = True
 
@@ -2161,6 +2267,8 @@ def seed_public_groups():
             publico=True,
             requer_codigo=True,
             criado_pelo_sistema=True,
+            tipo="publico",
+            status_pagamento="gratuito",
         )
         grupo_wk3.set_codigo_acesso(WK3_GROUP_CODE)
         db.session.add(grupo_wk3)
@@ -2174,6 +2282,12 @@ def seed_public_groups():
             changed = True
         if not grupo_wk3.codigo_acesso_hash and WK3_GROUP_CODE:
             grupo_wk3.set_codigo_acesso(WK3_GROUP_CODE)
+            changed = True
+        if not grupo_wk3.tipo:
+            grupo_wk3.tipo = "publico"
+            changed = True
+        if not grupo_wk3.status_pagamento:
+            grupo_wk3.status_pagamento = "gratuito"
             changed = True
 
     if changed:
@@ -2644,6 +2758,18 @@ def api_login():
 def api_grupos():
     grupos = grupos_para_cadastro()
     return jsonify({"ok": True, "grupos": [grupo_publico_payload(grupo) for grupo in grupos]})
+
+
+@app.route("/api/v1/grupos-privados/config")
+def api_grupos_privados_config():
+    return jsonify({
+        "ok": True,
+        "product_id": PRIVATE_GROUP_PRODUCT_ID,
+        "price_cents": PRIVATE_GROUP_PRICE_CENTS,
+        "currency": "BRL",
+        "participant_limit": PRIVATE_GROUP_PARTICIPANT_LIMIT,
+        "mobile_store_only": True,
+    })
 
 
 @app.route("/api/v1/registro", methods=["POST"])
@@ -3230,6 +3356,63 @@ def logout():
 # ---------------------------------------------------------------------------
 # GRUPOS (admin)
 # ---------------------------------------------------------------------------
+@app.route("/grupo-privado")
+def grupo_privado_info():
+    grupos_usuario = grupos_privados_do_usuario(g.user) if getattr(g, "user", None) else []
+    return render_template(
+        "grupos/privado_info.html",
+        grupos_usuario=grupos_usuario,
+        preco_centavos=PRIVATE_GROUP_PRICE_CENTS,
+        limite_participantes=PRIVATE_GROUP_PARTICIPANT_LIMIT,
+    )
+
+
+@app.route("/meu-grupo")
+@login_required
+def meus_grupos_privados():
+    grupos_usuario = grupos_privados_do_usuario(g.user)
+    return render_template(
+        "grupos/meus_grupos.html",
+        grupos_usuario=grupos_usuario,
+        limite_participantes=PRIVATE_GROUP_PARTICIPANT_LIMIT,
+    )
+
+
+@app.route("/meu-grupo/<int:gid>")
+@login_required
+def painel_grupo_privado(gid):
+    grupo = Grupo.query.get_or_404(gid)
+    if not usuario_admin_do_grupo(g.user, grupo) or not grupo_privado_pago(grupo):
+        flash("Voce nao tem permissao para administrar este grupo.", "danger")
+        return redirect(url_for("meus_grupos_privados"))
+    participantes = User.query.filter_by(grupo_id=grupo.id).order_by(User.nome).all()
+    return render_template(
+        "grupos/painel_privado.html",
+        grupo=grupo,
+        participantes=participantes,
+        convite=convite_grupo_url(grupo.id),
+    )
+
+
+@app.route("/meu-grupo/<int:gid>/participantes/<int:user_id>/remover", methods=["POST"])
+@login_required
+def remover_participante_grupo_privado(gid, user_id):
+    grupo = Grupo.query.get_or_404(gid)
+    if not usuario_admin_do_grupo(g.user, grupo) or not grupo_privado_pago(grupo):
+        flash("Voce nao tem permissao para administrar este grupo.", "danger")
+        return redirect(url_for("meus_grupos_privados"))
+    participante = User.query.get_or_404(user_id)
+    if participante.id == g.user.id:
+        flash("O administrador nao pode remover a si mesmo do grupo por aqui.", "warning")
+        return redirect(url_for("painel_grupo_privado", gid=grupo.id))
+    if participante.grupo_id == grupo.id:
+        participante.grupo_id = None
+        participante.updated_at = datetime.utcnow()
+        db.session.commit()
+        flash("Participante removido do grupo.", "success")
+    return redirect(url_for("painel_grupo_privado", gid=grupo.id))
+
+
 @app.route("/grupos")
 @admin_required
 def listar_grupos():
@@ -3246,6 +3429,9 @@ def novo_grupo():
         publico = request.form.get("publico") == "on"
         requer_codigo = request.form.get("requer_codigo") == "on"
         codigo_acesso = request.form.get("codigo_acesso", "").strip()
+        tipo = request.form.get("tipo", "publico")
+        status_pagamento = request.form.get("status_pagamento", "gratuito")
+        limite_participantes = request.form.get("limite_participantes", "").strip()
         
         if not nome:
             flash("Nome é obrigatório.", "danger")
@@ -3258,13 +3444,24 @@ def novo_grupo():
         if requer_codigo and not codigo_acesso:
             flash("Informe um codigo para grupos privados.", "danger")
             return render_template("admin/grupos_form.html", grupo=None)
+        try:
+            limite_participantes = int(limite_participantes or PRIVATE_GROUP_PARTICIPANT_LIMIT)
+        except ValueError:
+            flash("Limite de participantes invalido.", "danger")
+            return render_template("admin/grupos_form.html", grupo=None)
 
         grupo = Grupo(
             nome=nome,
             descricao=descricao or None,
             publico=publico,
             requer_codigo=requer_codigo,
-            criado_por_id=g.user.id
+            criado_por_id=g.user.id,
+            tipo=tipo,
+            status_pagamento=status_pagamento,
+            limite_participantes=limite_participantes,
+            preco_centavos=PRIVATE_GROUP_PRICE_CENTS,
+            produto_pagamento=PRIVATE_GROUP_PRODUCT_ID if tipo == "privado_pago" else None,
+            ativado_em=datetime.utcnow() if status_pagamento == "ativo" else None,
         )
         if requer_codigo:
             grupo.set_codigo_acesso(codigo_acesso)
@@ -3285,6 +3482,19 @@ def editar_grupo(gid):
         grupo.descricao = request.form.get("descricao", "").strip() or None
         grupo.publico = request.form.get("publico") == "on"
         grupo.requer_codigo = request.form.get("requer_codigo") == "on"
+        grupo.tipo = request.form.get("tipo", grupo.tipo or "publico")
+        novo_status = request.form.get("status_pagamento", grupo.status_pagamento or "gratuito")
+        limite_participantes = request.form.get("limite_participantes", "").strip()
+        try:
+            grupo.limite_participantes = int(limite_participantes or grupo.limite_participantes or PRIVATE_GROUP_PARTICIPANT_LIMIT)
+        except ValueError:
+            flash("Limite de participantes invalido.", "danger")
+            return render_template("admin/grupos_form.html", grupo=grupo)
+        if grupo.status_pagamento != "ativo" and novo_status == "ativo":
+            grupo.ativado_em = datetime.utcnow()
+        grupo.status_pagamento = novo_status
+        grupo.preco_centavos = grupo.preco_centavos or PRIVATE_GROUP_PRICE_CENTS
+        grupo.produto_pagamento = PRIVATE_GROUP_PRODUCT_ID if grupo.tipo == "privado_pago" else None
         codigo_acesso = request.form.get("codigo_acesso", "").strip()
         if grupo.requer_codigo and codigo_acesso:
             grupo.set_codigo_acesso(codigo_acesso)

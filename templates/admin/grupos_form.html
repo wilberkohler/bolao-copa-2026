@@ -31,6 +31,30 @@
                    {% if grupo and grupo.requer_codigo %}checked{% endif %}>
             <label class="form-check-label" for="requer_codigo">Exigir codigo de acesso</label>
           </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Tipo</label>
+              <select name="tipo" class="form-select">
+                {% set tipo_atual = grupo.tipo if grupo else 'publico' %}
+                <option value="publico" {% if tipo_atual == 'publico' %}selected{% endif %}>Publico/gratuito</option>
+                <option value="privado_pago" {% if tipo_atual == 'privado_pago' %}selected{% endif %}>Privado pago</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Status pagamento</label>
+              <select name="status_pagamento" class="form-select">
+                {% set status_atual = grupo.status_pagamento if grupo else 'gratuito' %}
+                <option value="gratuito" {% if status_atual == 'gratuito' %}selected{% endif %}>Gratuito</option>
+                <option value="pendente" {% if status_atual == 'pendente' %}selected{% endif %}>Pendente</option>
+                <option value="ativo" {% if status_atual == 'ativo' %}selected{% endif %}>Ativo</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Limite participantes</label>
+              <input type="number" min="1" name="limite_participantes" class="form-control"
+                     value="{{ grupo.limite_participantes if grupo and grupo.limite_participantes else 150 }}">
+            </div>
+          </div>
           <div class="mb-3">
             <label class="form-label fw-bold">Codigo de acesso</label>
             <input type="text" name="codigo_acesso" class="form-control" placeholder="{% if grupo and grupo.requer_codigo %}Deixe em branco para manter o codigo atual{% else %}Ex.: WK3{% endif %}">

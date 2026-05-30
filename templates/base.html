@@ -33,6 +33,7 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('palpites') }}"><i class="bi bi-pencil-square"></i> {{ tr('nav_predictions') }}</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('ranking_geral') }}"><i class="bi bi-bar-chart"></i> {{ tr('nav_ranking') }}</a></li>
          <li class="nav-item"><a class="nav-link" href="{{ url_for('regras') }}"><i class="bi bi-journal-text"></i> {{ tr('nav_rules') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('grupo_privado_info') }}"><i class="bi bi-shield-lock"></i> {{ tr('nav_private_group') }}</a></li>
         {% if user.eh_admin %}
         <li class="nav-item"><a class="nav-link" href="{{ url_for('listar_competidores') }}"><i class="bi bi-people"></i> {{ tr('nav_competitors') }}</a></li>
           <li class="nav-item dropdown">
