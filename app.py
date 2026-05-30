@@ -109,9 +109,9 @@ def send_email_message(to_email, subject, text_body, html_body=None):
     message["Subject"] = subject
     message["From"] = from_email
     message["To"] = to_email
-    message.set_content(text_body)
+    message.set_content(text_body, charset="utf-8")
     if html_body:
-        message.add_alternative(html_body, subtype="html")
+        message.add_alternative(html_body, subtype="html", charset="utf-8")
 
     smtp_cls = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
     with smtp_cls(host, port, timeout=30) as smtp:
