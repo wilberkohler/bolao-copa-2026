@@ -11,8 +11,14 @@
           <p class="mb-0 text-muted">{{ tr('private_group_mobile_only') }}</p>
         </div>
         <div class="text-md-end">
-          <div class="display-6 fw-bold text-success">R$ 49,90</div>
-          <div class="small text-muted">{{ tr('private_group_price') }}</div>
+          <div class="display-6 fw-bold text-success">{{ preco_contexto.usd }}</div>
+          <div class="small text-muted">{{ tr('private_group_price_usd') }}</div>
+          <div class="mt-2 fs-5 fw-semibold">{{ preco_contexto.local }}</div>
+          <div class="small text-muted">
+            {{ tr('private_group_local_price') }}:
+            {{ preco_contexto.team_name }} ({{ preco_contexto.local_currency }})
+          </div>
+          <div class="small text-muted mt-2">{{ tr('private_group_price_note') }}</div>
         </div>
       </div>
     </div>

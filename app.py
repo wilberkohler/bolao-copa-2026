@@ -30,6 +30,7 @@ WK3_GROUP_NAME = "WK3"
 WK3_GROUP_CODE = os.environ.get("WK3_GROUP_CODE", "WK3")
 PUBLIC_GROUP_COUNT = int(os.environ.get("PUBLIC_GROUP_COUNT", "100"))
 PRIVATE_GROUP_PRICE_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_CENTS", "4990"))
+PRIVATE_GROUP_PRICE_USD_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_USD_CENTS", "999"))
 PRIVATE_GROUP_PARTICIPANT_LIMIT = int(os.environ.get("PRIVATE_GROUP_PARTICIPANT_LIMIT", "150"))
 PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "grupo_privado_copa_2026")
 RANKING_ETAPAS = {
@@ -109,6 +110,34 @@ TEAM_TIMEZONES = {
     "USA": "America/New_York",
     "VEN": "America/Caracas",
     "ZIM": "Africa/Harare",
+}
+TEAM_CURRENCIES = {
+    "ALG": "DZD", "ANG": "AOA", "ARG": "ARS", "AUS": "AUD", "BEL": "EUR",
+    "BIH": "BAM", "BRA": "BRL", "CAN": "CAD", "CHI": "CLP", "COD": "CDF",
+    "COL": "COP", "CPV": "CVE", "CRC": "CRC", "CRO": "EUR", "CUW": "ANG",
+    "DEN": "DKK", "ECU": "USD", "ENG": "GBP", "ESP": "EUR", "EUA": "USD",
+    "FRA": "EUR", "GER": "EUR", "HAI": "HTG", "ITA": "EUR", "JPN": "JPY",
+    "KAZ": "KZT", "KOR": "KRW", "KSA": "SAR", "MAR": "MAD", "MEX": "MXN",
+    "MWI": "MWK", "NED": "EUR", "NZL": "NZD", "PAR": "PYG", "PHI": "PHP",
+    "POR": "EUR", "RSA": "ZAR", "SCO": "GBP", "SEN": "XOF", "SRB": "RSD",
+    "SUI": "CHF", "TUR": "TRY", "URU": "UYU", "USA": "USD", "VEN": "VES",
+    "ZIM": "USD",
+}
+APPROX_CURRENCY_PER_USD = {
+    "USD": 1.0, "BRL": 5.0, "EUR": 0.92, "GBP": 0.79, "JPY": 155.0,
+    "MXN": 17.0, "CAD": 1.37, "AUD": 1.52, "ARS": 900.0, "CLP": 940.0,
+    "COP": 3900.0, "UYU": 39.0, "PYG": 7300.0, "VES": 36.0, "ZAR": 18.5,
+    "MAD": 10.0, "DZD": 135.0, "AOA": 850.0, "CDF": 2800.0, "CVE": 102.0,
+    "XOF": 605.0, "MWK": 1730.0, "DKK": 6.85, "CHF": 0.90, "BAM": 1.80,
+    "RSD": 108.0, "TRY": 32.0, "KZT": 450.0, "KRW": 1350.0, "SAR": 3.75,
+    "PHP": 56.0, "NZD": 1.65, "CRC": 520.0, "ANG": 1.79, "HTG": 132.0,
+}
+CURRENCY_SYMBOLS = {
+    "USD": "US$", "BRL": "R$", "EUR": "€", "GBP": "£", "JPY": "¥",
+    "CAD": "C$", "AUD": "A$", "MXN": "MX$", "ARS": "AR$", "CLP": "CLP$",
+    "COP": "COL$", "UYU": "$U", "PYG": "₲", "VES": "Bs.", "ZAR": "R",
+    "CHF": "CHF", "DKK": "kr.", "TRY": "₺", "KRW": "₩", "SAR": "﷼",
+    "PHP": "₱", "NZD": "NZ$", "CRC": "₡",
 }
 LANGUAGE_BADGES = {
     "pt-BR": "BR",
@@ -522,7 +551,10 @@ TRANSLATIONS = {
         "invite_friend_line": "Convide um amigo para participar:",
         "private_group_title": "Grupo privado",
         "private_group_hero": "Crie um grupo privado para administrar seu proprio bolao.",
-        "private_group_price": "Pagamento unico de R$ 49,90 pela Copa 2026.",
+        "private_group_price": "Pagamento unico pela Copa 2026.",
+        "private_group_price_usd": "Pagamento unico estimado em dolar",
+        "private_group_local_price": "Moeda aproximada da selecao em destaque",
+        "private_group_price_note": "Valores aproximados. O preco final sera exibido pela Apple ou Google Play no momento da compra.",
         "private_group_mobile_only": "A contratacao sera feita pelo aplicativo para celular, usando Apple ou Google Play. No computador, esta pagina serve apenas como orientacao.",
         "private_group_feature_1": "Painel administrativo limitado ao grupo criado por voce.",
         "private_group_feature_2": "Convite por link e codigo de acesso para participantes.",
@@ -765,7 +797,10 @@ TRANSLATIONS = {
         "invite_friend_line": "Invite a friend to join:",
         "private_group_title": "Private group",
         "private_group_hero": "Create a private group to manage your own pool.",
-        "private_group_price": "One-time payment of R$ 49.90 for the 2026 World Cup.",
+        "private_group_price": "One-time payment for the 2026 World Cup.",
+        "private_group_price_usd": "Estimated one-time price in USD",
+        "private_group_local_price": "Approximate currency for the highlighted team",
+        "private_group_price_note": "Approximate values. The final price will be shown by Apple or Google Play at purchase time.",
         "private_group_mobile_only": "Purchase will be available in the mobile app through Apple or Google Play. On desktop, this page is informational only.",
         "private_group_feature_1": "Admin panel limited to the group you created.",
         "private_group_feature_2": "Invite link and access code for participants.",
@@ -2020,6 +2055,31 @@ def nome_time_por_sigla(sigla):
     return sigla
 
 
+def _format_money(amount, currency):
+    currency = (currency or "USD").upper()
+    symbol = CURRENCY_SYMBOLS.get(currency, currency)
+    zero_decimal = currency in {"JPY", "KRW", "CLP", "COP", "PYG", "XOF", "RSD"}
+    if zero_decimal:
+        formatted = f"{amount:,.0f}".replace(",", ".")
+    else:
+        formatted = f"{amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{symbol} {formatted}" if symbol.isalpha() else f"{symbol}{formatted}"
+
+
+def preco_grupo_privado_context(user=None):
+    codigo = codigo_time_destacado(user)
+    local_currency = TEAM_CURRENCIES.get(codigo, "USD")
+    usd_amount = PRIVATE_GROUP_PRICE_USD_CENTS / 100
+    local_rate = APPROX_CURRENCY_PER_USD.get(local_currency, 1.0)
+    return {
+        "usd": _format_money(usd_amount, "USD"),
+        "local": _format_money(usd_amount * local_rate, local_currency),
+        "local_currency": local_currency,
+        "team_code": codigo,
+        "team_name": nome_time_por_sigla(codigo),
+    }
+
+
 def timezone_time_destacado(user=None):
     codigo = codigo_time_destacado(user)
     timezone_name = TEAM_TIMEZONES.get(codigo, "America/Sao_Paulo")
@@ -2890,11 +2950,14 @@ def api_grupos():
 
 @app.route("/api/v1/grupos-privados/config")
 def api_grupos_privados_config():
+    price = preco_grupo_privado_context(g.user)
     return jsonify({
         "ok": True,
         "product_id": PRIVATE_GROUP_PRODUCT_ID,
-        "price_cents": PRIVATE_GROUP_PRICE_CENTS,
-        "currency": "BRL",
+        "price_usd_cents": PRIVATE_GROUP_PRICE_USD_CENTS,
+        "currency": "USD",
+        "local_currency": price["local_currency"],
+        "price_display": price,
         "participant_limit": PRIVATE_GROUP_PARTICIPANT_LIMIT,
         "mobile_store_only": True,
     })
@@ -3492,10 +3555,11 @@ def logout():
 @app.route("/grupo-privado")
 def grupo_privado_info():
     grupos_usuario = grupos_privados_do_usuario(g.user) if getattr(g, "user", None) else []
+    preco_contexto = preco_grupo_privado_context(g.user)
     return render_template(
         "grupos/privado_info.html",
         grupos_usuario=grupos_usuario,
-        preco_centavos=PRIVATE_GROUP_PRICE_CENTS,
+        preco_contexto=preco_contexto,
         limite_participantes=PRIVATE_GROUP_PARTICIPANT_LIMIT,
     )
 
