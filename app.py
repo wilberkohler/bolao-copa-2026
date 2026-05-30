@@ -142,6 +142,14 @@ TRANSLATIONS = {
         "no_upcoming_games": "Nenhum jogo próximo encontrado.",
         "stage_groups": "Fase de Grupos",
         "stage_knockout": "Mata-mata ate a Final",
+        "phase_round_32": "Rodada de 32",
+        "phase_round_16": "Oitavas de Final",
+        "phase_quarterfinals": "Quartas de Final",
+        "phase_semifinal": "Semifinal",
+        "phase_third_place": "Terceiro Lugar",
+        "phase_final": "Final",
+        "world_cup_group": "Grupo {group}",
+        "other_group": "Outros",
         "round_report_subject": "Relatório da {round_label} - Bolão Copa 2026",
         "hello_name": "Olá, {name}!",
         "round_report_heading": "Relatório da {round_label}:",
@@ -343,6 +351,14 @@ TRANSLATIONS = {
         "no_upcoming_games": "No upcoming games found.",
         "stage_groups": "Group Stage",
         "stage_knockout": "Knockout Stage through the Final",
+        "phase_round_32": "Round of 32",
+        "phase_round_16": "Round of 16",
+        "phase_quarterfinals": "Quarterfinals",
+        "phase_semifinal": "Semifinal",
+        "phase_third_place": "Third Place",
+        "phase_final": "Final",
+        "world_cup_group": "Group {group}",
+        "other_group": "Other",
         "round_report_subject": "Report for {round_label} - World Cup Pool 2026",
         "hello_name": "Hello, {name}!",
         "round_report_heading": "Report for {round_label}:",
@@ -544,6 +560,14 @@ TRANSLATIONS = {
         "no_upcoming_games": "No se encontraron próximos partidos.",
         "stage_groups": "Fase de Grupos",
         "stage_knockout": "Eliminatorias hasta la Final",
+        "phase_round_32": "Ronda de 32",
+        "phase_round_16": "Octavos de Final",
+        "phase_quarterfinals": "Cuartos de Final",
+        "phase_semifinal": "Semifinal",
+        "phase_third_place": "Tercer Puesto",
+        "phase_final": "Final",
+        "world_cup_group": "Grupo {group}",
+        "other_group": "Otros",
         "round_report_subject": "Informe de {round_label} - Quiniela Mundial 2026",
         "hello_name": "Hola, {name}!",
         "round_report_heading": "Informe de {round_label}:",
@@ -717,6 +741,29 @@ def etapa_label_traduzida(etapa_key, idioma=None):
     if etapa_key == "mata_mata":
         return tr("stage_knockout", idioma)
     return tr("overall", idioma)
+
+
+def fase_label_traduzida(fase, idioma=None):
+    fase_original = (fase or "").strip()
+    normalizada = fase_original.lower()
+    mapa = {
+        "fase de grupos": "stage_groups",
+        "rodada de 32": "phase_round_32",
+        "oitavas de final": "phase_round_16",
+        "quartas de final": "phase_quarterfinals",
+        "semifinal": "phase_semifinal",
+        "terceiro lugar": "phase_third_place",
+        "final": "phase_final",
+    }
+    key = mapa.get(normalizada)
+    return tr(key, idioma) if key else fase_original
+
+
+def grupo_label_traduzido(grupo, idioma=None):
+    grupo = (grupo or "").strip()
+    if not grupo or grupo == "Outros":
+        return tr("other_group", idioma)
+    return tr("world_cup_group", idioma, group=grupo)
 
 
 def find_user_by_email(email):
@@ -1041,7 +1088,7 @@ def group_items_by_world_cup_group(items, item_to_jogo):
         {
             "id": f"grupo-{idx}",
             "nome": grupo,
-            "label": f"Grupo {grupo}" if grupo != "Outros" else "Outros",
+            "label": grupo_label_traduzido(grupo),
             "itens": grupos_map[grupo],
         }
         for idx, grupo in enumerate(grupos_ordenados)
@@ -1721,6 +1768,8 @@ def inject_globals():
         current_language=getattr(g, "idioma", DEFAULT_LANGUAGE),
         supported_languages=SUPPORTED_LANGUAGES,
         tr=tr,
+        fase_label_traduzida=fase_label_traduzida,
+        grupo_label_traduzido=grupo_label_traduzido,
     )
 
 

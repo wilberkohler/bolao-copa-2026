@@ -8,7 +8,7 @@
     <select name="fase" class="form-select">
       <option value="">-- Selecione uma fase --</option>
       {% for f in fases %}
-        <option value="{{ f }}" {% if f == fase %}selected{% endif %}>{{ f }}</option>
+        <option value="{{ f }}" {% if f == fase %}selected{% endif %}>{{ fase_label_traduzida(f) }}</option>
       {% endfor %}
     </select>
   </div>
@@ -18,7 +18,7 @@
 </form>
 
 {% if fase %}
-<h5 class="mb-3">{{ fase }}</h5>
+<h5 class="mb-3">{{ fase_label_traduzida(fase) }}</h5>
 <div class="table-responsive">
   <table class="table table-hover table-bordered bg-white shadow-sm">
     <thead class="table-success">

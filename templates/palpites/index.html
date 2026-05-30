@@ -29,7 +29,7 @@
       <tr class="{% if not item.editavel %}row-jogo-encerrado{% elif not p %}row-sem-palpite{% endif %}">
         <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
         <td>{{ j.hora_brasilia }}</td>
-        <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+        <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
         <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
         <td>
           {% if item.editavel %}

@@ -56,11 +56,11 @@
             <thead class="table-success">
               <tr>
                 <th>#</th>
-                <th>Fase</th>
-                <th>Data</th>
-                <th>Hora BRT</th>
-                <th>Time A</th>
-                <th>Time B</th>
+                <th>{{ tr('phase') }}</th>
+                <th>{{ tr('date') }}</th>
+                <th>{{ tr('time_brt') }}</th>
+                <th>{{ tr('team_a') }}</th>
+                <th>{{ tr('team_b') }}</th>
                 <th>Estádio</th>
                 <th>Cidade</th>
                 <th>M-M</th>
@@ -73,7 +73,7 @@
               {% for j in grupo.itens %}
               <tr>
                 <td>{{ j.numero_partida }}</td>
-                <td><span class="badge bg-secondary">{{ j.fase }}</span></td>
+                <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
                 <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
                 <td>{{ j.hora_brasilia }}</td>
                 <td class="{% if j.time_a == 'Brasil' or j.sigla_time_a == 'BRA' %}team-brasil{% endif %}"><strong>{{ j.time_a }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>

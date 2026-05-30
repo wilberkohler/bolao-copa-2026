@@ -7,7 +7,7 @@
       <div class="card-header bg-success text-white fw-bold">
         <i class="bi bi-check2-circle"></i>
         Jogo #{{ jogo.numero_partida }} &mdash; {{ jogo.time_a }} x {{ jogo.time_b }}
-        <br><small class="fw-normal">{{ jogo.data_jogo.strftime('%d/%m/%Y') }} | {{ jogo.hora_brasilia }} BRT | {{ jogo.fase }}</small>
+        <br><small class="fw-normal">{{ jogo.data_jogo.strftime('%d/%m/%Y') }} | {{ jogo.hora_brasilia }} BRT | {{ fase_label_traduzida(jogo.fase) }}</small>
       </div>
       <div class="card-body">
         <form method="post">
