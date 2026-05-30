@@ -19,7 +19,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy.orm import selectinload
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados, RelatorioRodadaEnvio
 from runtime_config import load_runtime_config
-from seed_jogos_copa_2026 import seed_jogos
+from seed_jogos_copa_2026 import JOGOS, seed_jogos
 from result_sync import sync_finished_results_football_data
 from scoring import (calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
@@ -3049,12 +3049,28 @@ def ranking_kwargs_por_etapa(etapa):
     return {} if etapa == "geral" else {"etapa": etapa}
 
 
-def etapa_atual_ranking():
+def data_referencia_app():
+    try:
+        data_simulada = session.get("data_simulada")
+    except RuntimeError:
+        data_simulada = None
+
+    if data_simulada:
+        try:
+            return datetime.strptime(data_simulada, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+
+    return date.today()
+
+
+def etapa_atual_ranking(data_referencia=None):
     primeiro_mata_mata = (Jogo.query
                           .filter_by(mata_mata=True)
                           .order_by(Jogo.data_jogo)
                           .first())
-    if primeiro_mata_mata and date.today() >= primeiro_mata_mata.data_jogo:
+    data_referencia = data_referencia or data_referencia_app()
+    if primeiro_mata_mata and data_referencia >= primeiro_mata_mata.data_jogo:
         return "mata_mata"
     return "grupos"
 
@@ -3087,6 +3103,9 @@ def clear_simulated_results():
     for resultado in simulated_results:
         db.session.delete(resultado)
 
+    db.session.flush()
+    restore_knockout_seed_slots()
+
     for jogo in Jogo.query.filter(Jogo.id.in_(jogo_ids)).all():
         jogo.status = "Agendado"
 
@@ -3098,6 +3117,24 @@ def clear_simulated_results():
 
     db.session.commit()
     return len(jogo_ids)
+
+
+def restore_knockout_seed_slots():
+    seed_slots = {}
+    for row in JOGOS:
+        (num, _fase, _grupo, _rodada, _data_str, _hora_et,
+         time_a, time_b, sigla_a, sigla_b,
+         _estadio, _cidade, _pais, mata_mata) = row
+        if mata_mata:
+            seed_slots[num] = (time_a, time_b, sigla_a, sigla_b)
+
+    for jogo in Jogo.query.filter_by(mata_mata=True).all():
+        if jogo.resultado and not is_simulated_result(jogo.resultado):
+            continue
+        original = seed_slots.get(jogo.numero_partida)
+        if not original:
+            continue
+        jogo.time_a, jogo.time_b, jogo.sigla_time_a, jogo.sigla_time_b = original
 
 
 def group_items_by_world_cup_group(items, item_to_jogo):
@@ -4387,7 +4424,7 @@ def dashboard():
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
 
     # Próximos jogos (não iniciados, próximos 10)
-    hoje = date.today()
+    hoje = data_referencia_app()
     proximos = (Jogo.query
                 .filter(Jogo.data_jogo >= hoje)
                 .filter(Jogo.status.in_(["Agendado", "Aberto para palpites"]))
@@ -5132,17 +5169,21 @@ def create_app():
 def simulacao():
     """Permite admin simular data futura para testar funcionalidades"""
     data_simulada = request.args.get("data_simulada", "")
+    if data_simulada:
+        session["data_simulada"] = data_simulada
     
     if request.method == "POST":
         acao = request.form.get("acao", "definir_data")
         data_str = request.form.get("data_simulada", "").strip()
         if acao == "limpar_resultados":
             removidos = clear_simulated_results()
+            session.pop("data_simulada", None)
             flash(f"{removidos} resultado(s) simulado(s) apagado(s). Ranking recalculado com resultados reais restantes.", "success")
             return redirect(url_for("simulacao"))
 
         try:
             data_obj = datetime.strptime(data_str, "%Y-%m-%d").date()
+            session["data_simulada"] = data_str
 
             if acao == "gerar_resultados":
                 removidos = clear_simulated_results()
@@ -5158,6 +5199,11 @@ def simulacao():
                 for jogo in jogos_ate_data:
                     if jogo.resultado and not is_simulated_result(jogo.resultado):
                         continue
+
+                    if jogo.mata_mata:
+                        db.session.commit()
+                        sync_knockout_teams()
+                        jogo = Jogo.query.get(jogo.id)
 
                     gols_a = random.randint(0, 4)
                     gols_b = random.randint(0, 4)
@@ -5182,11 +5228,10 @@ def simulacao():
                     db.session.add(resultado)
                     jogo.status = "Resultado Lançado"
                     jogos_gerados.append(jogo)
-
-                db.session.commit()
-
-                for jogo in jogos_gerados:
+                    db.session.commit()
                     calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+                    if jogo.mata_mata:
+                        sync_knockout_teams()
 
                 flash(f"Simulacao refeita: {removidos} resultado(s) simulado(s) anterior(es) apagado(s), {len(jogos_gerados)} novo(s) resultado(s) gerado(s) ate {data_str}. Resultados reais foram preservados.", "success")
 
