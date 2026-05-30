@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{{ current_language|default('pt-BR') }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#198754">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Bolão 2026">
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
@@ -46,6 +49,23 @@
         {% endif %}
       </ul>
       <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+            {{ current_language|default('pt-BR') }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for code, label in supported_languages.items() %}
+            <li>
+              <form method="post" action="{{ url_for('alterar_idioma', idioma=code) }}">
+                <input type="hidden" name="next" value="{{ request.full_path }}">
+                <button type="submit" class="dropdown-item {% if code == current_language %}active{% endif %}">
+                  {{ label }}
+                </button>
+              </form>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
         {% if user %}
           <div class="dropdown">
             <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">

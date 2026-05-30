@@ -34,6 +34,12 @@ RANKING_ETAPAS = {
     "grupos": "Fase de Grupos",
     "mata_mata": "Mata-mata ate a Final",
 }
+SUPPORTED_LANGUAGES = {
+    "pt-BR": "Português",
+    "en": "English",
+    "es": "Español",
+}
+DEFAULT_LANGUAGE = "pt-BR"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 app = Flask(__name__)
@@ -63,6 +69,35 @@ def normalize_email(email):
 
 def email_valido(email):
     return bool(EMAIL_RE.match(normalize_email(email)))
+
+
+def normalizar_idioma(idioma):
+    idioma = (idioma or "").strip().replace("_", "-")
+    if not idioma:
+        return None
+    idioma_lower = idioma.lower()
+    if idioma_lower in {"pt", "pt-br", "pt-pt"}:
+        return "pt-BR"
+    if idioma_lower.startswith("en"):
+        return "en"
+    if idioma_lower.startswith("es"):
+        return "es"
+    return idioma if idioma in SUPPORTED_LANGUAGES else None
+
+
+def detectar_idioma_navegador():
+    matches = ["pt-BR", "pt", "en", "es"]
+    match = request.accept_languages.best_match(matches)
+    return normalizar_idioma(match) or DEFAULT_LANGUAGE
+
+
+def idioma_atual():
+    session_lang = normalizar_idioma(session.get("idioma"))
+    if session_lang:
+        return session_lang
+    if getattr(g, "user", None) and normalizar_idioma(g.user.idioma):
+        return normalizar_idioma(g.user.idioma)
+    return detectar_idioma_navegador()
 
 
 def find_user_by_email(email):
@@ -220,6 +255,8 @@ def ensure_user_email_columns():
         statements.append("ALTER TABLE users ADD COLUMN email_confirmado_em TIMESTAMP")
     if "receber_relatorios" not in existing:
         statements.append(f"ALTER TABLE users ADD COLUMN receber_relatorios {bool_type} DEFAULT {bool_true}")
+    if "idioma" not in existing:
+        statements.append(f"ALTER TABLE users ADD COLUMN idioma VARCHAR(10) DEFAULT '{DEFAULT_LANGUAGE}'")
 
     if not statements:
         return
@@ -575,6 +612,13 @@ def load_logged_in_user():
             db.session.commit()
 
 
+@app.before_request
+def load_current_language():
+    idioma = idioma_atual()
+    session["idioma"] = idioma
+    g.idioma = idioma
+
+
 def login_required(f):
     """Decorator para exigir login."""
     @wraps(f)
@@ -685,6 +729,7 @@ def _current_user_payload(user):
         "eh_admin": is_authorized_admin(user),
         "email_confirmado": bool(user.email_confirmado),
         "receber_relatorios": bool(user.receber_relatorios),
+        "idioma": user.idioma or DEFAULT_LANGUAGE,
         "grupo": {"id": grupo.id, "nome": grupo.nome} if grupo else None,
         "competidor": {
             "id": competidor.id,
@@ -798,6 +843,7 @@ def api_registro():
         eh_admin=normalize_email(email) == ADMIN_EMAIL,
         email_confirmado=False,
         receber_relatorios=True,
+        idioma=idioma_atual(),
     )
     user.set_password(senha)
     db.session.add(user)
@@ -825,7 +871,10 @@ def api_registro():
 @app.route("/api/v1/logout", methods=["POST"])
 @api_login_required
 def api_logout():
+    idioma = session.get("idioma")
     session.clear()
+    if idioma:
+        session["idioma"] = idioma
     return jsonify({"ok": True})
 
 
@@ -1055,7 +1104,27 @@ def inject_globals():
     return dict(
         user=g.user,
         agora_br=agora_br(),
+        current_language=getattr(g, "idioma", DEFAULT_LANGUAGE),
+        supported_languages=SUPPORTED_LANGUAGES,
     )
+
+
+@app.route("/idioma/<idioma>", methods=["POST"])
+def alterar_idioma(idioma):
+    idioma_normalizado = normalizar_idioma(idioma)
+    if not idioma_normalizado:
+        flash("Idioma indisponível.", "warning")
+        idioma_normalizado = DEFAULT_LANGUAGE
+
+    session["idioma"] = idioma_normalizado
+    if g.user:
+        g.user.idioma = idioma_normalizado
+        db.session.commit()
+
+    next_url = request.form.get("next") or request.referrer or url_for("dashboard" if g.user else "login")
+    if not ((next_url.startswith("/") and not next_url.startswith("//")) or next_url.startswith(request.host_url)):
+        next_url = url_for("dashboard" if g.user else "login")
+    return redirect(next_url)
 
 
 # ---------------------------------------------------------------------------
@@ -1090,6 +1159,10 @@ def login():
                 flash("Não foi possível preparar seu acesso agora. Tente novamente em instantes.", "danger")
                 return render_template("auth/login.html", email=email)
             flash(f"Bem-vindo, {user.nome}!", "success")
+            if not normalizar_idioma(user.idioma):
+                user.idioma = idioma_atual()
+                db.session.commit()
+            session["idioma"] = user.idioma or DEFAULT_LANGUAGE
             return redirect(url_for("dashboard"))
         else:
             flash("E-mail ou senha inválidos, ou usuário inativo.", "danger")
@@ -1137,6 +1210,7 @@ def registro():
             eh_admin=normalize_email(email) == ADMIN_EMAIL,
             email_confirmado=False,
             receber_relatorios=True,
+            idioma=idioma_atual(),
         )
         user.set_password(senha)
         db.session.add(user)
@@ -1281,7 +1355,10 @@ def reenviar_confirmacao_email():
 
 @app.route("/logout")
 def logout():
+    idioma = session.get("idioma")
     session.clear()
+    if idioma:
+        session["idioma"] = idioma
     return redirect(url_for("login", logged_out="1"))
 
 
