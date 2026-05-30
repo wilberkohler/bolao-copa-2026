@@ -76,8 +76,20 @@ def email_serializer():
     return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="confirmar-email")
 
 
+def password_reset_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="redefinir-senha")
+
+
 def make_email_token(user):
     return email_serializer().dumps({"id": user.id, "email": normalize_email(user.email)})
+
+
+def make_password_reset_token(user):
+    return password_reset_serializer().dumps({
+        "id": user.id,
+        "email": normalize_email(user.email),
+        "senha_hash": user.senha_hash,
+    })
 
 
 def send_email_message(to_email, subject, text_body, html_body=None):
@@ -126,6 +138,25 @@ def send_email_confirmation(user):
     <p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p>
     <p><a href="{confirm_url}">Confirmar e-mail</a></p>
     <p>Se você não fez este cadastro, ignore esta mensagem.</p>
+    """
+    return send_email_message(user.email, subject, text, html)
+
+
+def send_password_reset_email(user):
+    token = make_password_reset_token(user)
+    reset_url = url_for("redefinir_senha", token=token, _external=True)
+    subject = "Redefina sua senha - Bolão Copa 2026"
+    text = (
+        f"Olá, {user.nome}!\n\n"
+        "Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.\n"
+        f"Acesse este link em até 1 hora para criar uma nova senha:\n{reset_url}\n\n"
+        "Se você não solicitou esta alteração, ignore esta mensagem."
+    )
+    html = f"""
+    <p>Olá, {escape(user.nome)}!</p>
+    <p>Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.</p>
+    <p><a href="{reset_url}">Criar nova senha</a></p>
+    <p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>
     """
     return send_email_message(user.email, subject, text, html)
 
@@ -1037,7 +1068,7 @@ def registro():
     
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
-        email = request.form.get("email", "").strip()
+        email = normalize_email(request.form.get("email", ""))
         apelido = request.form.get("apelido", "").strip()
         senha = request.form.get("senha", "")
         grupo_id = request.form.get("grupo_id")
@@ -1097,6 +1128,76 @@ def registro():
         return redirect(url_for("login"))
     
     return render_template("auth/registro.html", grupos=grupos)
+
+
+@app.route("/esqueci-senha", methods=["GET", "POST"])
+def esqueci_senha():
+    if g.user is not None:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        email = normalize_email(request.form.get("email", ""))
+        if not email_valido(email):
+            flash("Informe um e-mail válido.", "danger")
+            return render_template("auth/esqueci_senha.html", email=email)
+
+        user = find_user_by_email(email)
+        if user and user.ativo:
+            try:
+                if not send_password_reset_email(user):
+                    flash("SMTP ainda não configurado. Não foi possível enviar a recuperação agora.", "warning")
+                    return render_template("auth/esqueci_senha.html", email=email)
+            except Exception:
+                app.logger.exception("Falha ao enviar recuperação de senha para %s", email)
+                flash("Não foi possível enviar a recuperação agora. Tente novamente em instantes.", "danger")
+                return render_template("auth/esqueci_senha.html", email=email)
+
+        flash("Se este e-mail estiver cadastrado, enviaremos um link para redefinir a senha.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("auth/esqueci_senha.html")
+
+
+@app.route("/redefinir-senha/<token>", methods=["GET", "POST"])
+def redefinir_senha(token):
+    if g.user is not None:
+        return redirect(url_for("dashboard"))
+
+    try:
+        data = password_reset_serializer().loads(token, max_age=60 * 60)
+    except SignatureExpired:
+        flash("O link para redefinir senha expirou. Solicite um novo link.", "warning")
+        return redirect(url_for("esqueci_senha"))
+    except BadSignature:
+        flash("Link para redefinir senha inválido.", "danger")
+        return redirect(url_for("login"))
+
+    user = User.query.get(data.get("id"))
+    if (
+        not user
+        or not user.ativo
+        or normalize_email(user.email) != normalize_email(data.get("email"))
+        or user.senha_hash != data.get("senha_hash")
+    ):
+        flash("Não foi possível usar este link. Solicite uma nova redefinição de senha.", "danger")
+        return redirect(url_for("esqueci_senha"))
+
+    if request.method == "POST":
+        senha = request.form.get("senha", "")
+        confirmar_senha = request.form.get("confirmar_senha", "")
+        if len(senha) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "danger")
+            return render_template("auth/redefinir_senha.html", token=token)
+        if senha != confirmar_senha:
+            flash("As senhas não conferem.", "danger")
+            return render_template("auth/redefinir_senha.html", token=token)
+
+        user.set_password(senha)
+        db.session.commit()
+        flash("Senha redefinida com sucesso. Faça login com sua nova senha.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("auth/redefinir_senha.html", token=token)
 
 
 @app.route("/confirmar-email/<token>")
