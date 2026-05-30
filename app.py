@@ -2115,6 +2115,57 @@ TRANSLATIONS["ja"].update({
     "round_label_with_number": "{stage} - \u7b2c {round} \u30e9\u30a6\u30f3\u30c9",
 })
 
+TRANSLATIONS["pt-BR"].update({
+    "knockout_bracket": "Chaveamento",
+    "knockout_bracket_hint": "Atualizado conforme os classificados forem definidos.",
+    "classified": "Classificado",
+})
+TRANSLATIONS["en"].update({
+    "knockout_bracket": "Bracket",
+    "knockout_bracket_hint": "Updated as qualified teams are defined.",
+    "classified": "Qualified",
+})
+TRANSLATIONS["es"].update({
+    "knockout_bracket": "Cuadro",
+    "knockout_bracket_hint": "Se actualiza cuando se definan los clasificados.",
+    "classified": "Clasificado",
+})
+TRANSLATIONS["fr"].update({
+    "knockout_bracket": "Tableau",
+    "knockout_bracket_hint": "Mis a jour au fur et a mesure des qualifies.",
+    "classified": "Qualifie",
+})
+TRANSLATIONS["de"].update({
+    "knockout_bracket": "Turnierbaum",
+    "knockout_bracket_hint": "Wird aktualisiert, sobald die qualifizierten Teams feststehen.",
+    "classified": "Qualifiziert",
+})
+TRANSLATIONS["it"].update({
+    "knockout_bracket": "Tabellone",
+    "knockout_bracket_hint": "Aggiornato man mano che le qualificate vengono definite.",
+    "classified": "Qualificata",
+})
+TRANSLATIONS["ar"].update({
+    "knockout_bracket": "\u0645\u062e\u0637\u0637 \u0627\u0644\u0623\u062f\u0648\u0627\u0631",
+    "knockout_bracket_hint": "\u064a\u062a\u0645 \u062a\u062d\u062f\u064a\u062b\u0647 \u0639\u0646\u062f \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0645\u062a\u0623\u0647\u0644\u064a\u0646.",
+    "classified": "\u0645\u062a\u0623\u0647\u0644",
+})
+TRANSLATIONS["zh"].update({
+    "knockout_bracket": "\u6dd8\u6c70\u8d5b\u5bf9\u9635\u56fe",
+    "knockout_bracket_hint": "\u968f\u7740\u51fa\u7ebf\u7403\u961f\u786e\u5b9a\u800c\u66f4\u65b0\u3002",
+    "classified": "\u51fa\u7ebf",
+})
+TRANSLATIONS["ru"].update({
+    "knockout_bracket": "\u0421\u0435\u0442\u043a\u0430",
+    "knockout_bracket_hint": "\u041e\u0431\u043d\u043e\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043f\u043e \u043c\u0435\u0440\u0435 \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u044f \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.",
+    "classified": "\u041f\u0440\u043e\u0448\u0435\u043b",
+})
+TRANSLATIONS["ja"].update({
+    "knockout_bracket": "\u30c8\u30fc\u30ca\u30e1\u30f3\u30c8\u8868",
+    "knockout_bracket_hint": "\u9032\u51fa\u30c1\u30fc\u30e0\u304c\u6c7a\u307e\u308a\u6b21\u7b2c\u66f4\u65b0\u3055\u308c\u307e\u3059\u3002",
+    "classified": "\u9032\u51fa",
+})
+
 
 def _repair_mojibake(value):
     if not isinstance(value, str):
@@ -2398,6 +2449,227 @@ def prazo_palpite_brasilia(jogo):
     if not origem:
         return None
     return (origem.astimezone(BR_TZ) - timedelta(minutes=30)).replace(tzinfo=None)
+
+
+REAL_TEAM_CODE_RE = re.compile(r"^[A-Z]{3}$")
+GROUP_RANK_SLOT_RE = re.compile(r"^([12])([A-L])$")
+WINNER_GAME_SLOT_RE = re.compile(r"^WJ(\d+)$")
+WINNER_ROUND_SLOT_RE = re.compile(r"^WQ(\d+)$")
+WINNER_SEED_SLOT_RE = re.compile(r"^WSF(\d+)$")
+LOSER_SEED_SLOT_RE = re.compile(r"^LSF(\d+)$")
+
+
+def _is_real_team_code(code):
+    return bool(REAL_TEAM_CODE_RE.match((code or "").strip().upper()))
+
+
+def _team_identity(name, code):
+    return {"nome": (name or "").strip(), "sigla": (code or "").strip().upper()}
+
+
+def _team_name_by_code(jogos):
+    names = {}
+    for jogo in jogos:
+        for nome, sigla in ((jogo.time_a, jogo.sigla_time_a), (jogo.time_b, jogo.sigla_time_b)):
+            sigla = (sigla or "").strip().upper()
+            if _is_real_team_code(sigla):
+                names.setdefault(sigla, (nome or "").strip())
+    return names
+
+
+def _winner_identity(jogo):
+    resultado = getattr(jogo, "resultado", None)
+    if not jogo or not resultado:
+        return None
+
+    classificado = (resultado.classificado or "").strip()
+    if classificado:
+        esperado_a = {(jogo.time_a or "").strip().casefold(), (jogo.sigla_time_a or "").strip().casefold()}
+        esperado_b = {(jogo.time_b or "").strip().casefold(), (jogo.sigla_time_b or "").strip().casefold()}
+        normalizado = classificado.casefold()
+        if normalizado in esperado_a:
+            return _team_identity(jogo.time_a, jogo.sigla_time_a)
+        if normalizado in esperado_b:
+            return _team_identity(jogo.time_b, jogo.sigla_time_b)
+
+    if resultado.gols_a > resultado.gols_b:
+        return _team_identity(jogo.time_a, jogo.sigla_time_a)
+    if resultado.gols_b > resultado.gols_a:
+        return _team_identity(jogo.time_b, jogo.sigla_time_b)
+    return None
+
+
+def _loser_identity(jogo):
+    vencedor = _winner_identity(jogo)
+    if not jogo or not vencedor:
+        return None
+
+    if vencedor["sigla"] == (jogo.sigla_time_a or "").strip().upper():
+        return _team_identity(jogo.time_b, jogo.sigla_time_b)
+    if vencedor["sigla"] == (jogo.sigla_time_b or "").strip().upper():
+        return _team_identity(jogo.time_a, jogo.sigla_time_a)
+    return None
+
+
+def _group_standings():
+    jogos = (
+        Jogo.query.options(selectinload(Jogo.resultado))
+        .filter_by(mata_mata=False)
+        .order_by(Jogo.grupo, Jogo.numero_partida)
+        .all()
+    )
+    por_grupo = {}
+    for jogo in jogos:
+        por_grupo.setdefault(jogo.grupo, []).append(jogo)
+
+    rankings = {}
+    grupos_completos = True
+    for grupo, jogos_grupo in por_grupo.items():
+        tabela = {}
+        completo = True
+        for jogo in jogos_grupo:
+            for nome, sigla in ((jogo.time_a, jogo.sigla_time_a), (jogo.time_b, jogo.sigla_time_b)):
+                sigla = (sigla or "").strip().upper()
+                tabela.setdefault(
+                    sigla,
+                    {
+                        "grupo": grupo,
+                        "nome": (nome or "").strip(),
+                        "sigla": sigla,
+                        "pontos": 0,
+                        "saldo": 0,
+                        "gols_pro": 0,
+                        "gols_contra": 0,
+                        "vitorias": 0,
+                    },
+                )
+
+            resultado = jogo.resultado
+            if not resultado:
+                completo = False
+                grupos_completos = False
+                continue
+
+            a = tabela[(jogo.sigla_time_a or "").strip().upper()]
+            b = tabela[(jogo.sigla_time_b or "").strip().upper()]
+            a["gols_pro"] += resultado.gols_a
+            a["gols_contra"] += resultado.gols_b
+            b["gols_pro"] += resultado.gols_b
+            b["gols_contra"] += resultado.gols_a
+            a["saldo"] = a["gols_pro"] - a["gols_contra"]
+            b["saldo"] = b["gols_pro"] - b["gols_contra"]
+
+            if resultado.gols_a > resultado.gols_b:
+                a["pontos"] += 3
+                a["vitorias"] += 1
+            elif resultado.gols_b > resultado.gols_a:
+                b["pontos"] += 3
+                b["vitorias"] += 1
+            else:
+                a["pontos"] += 1
+                b["pontos"] += 1
+
+        if completo:
+            rankings[grupo] = sorted(
+                tabela.values(),
+                key=lambda item: (
+                    -item["pontos"],
+                    -item["saldo"],
+                    -item["gols_pro"],
+                    -item["vitorias"],
+                    item["nome"],
+                ),
+            )
+
+    return rankings, grupos_completos
+
+
+def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, third_slots):
+    slot_code = (slot_code or "").strip().upper()
+    if not slot_code or _is_real_team_code(slot_code):
+        return None
+
+    match = GROUP_RANK_SLOT_RE.match(slot_code)
+    if match:
+        posicao = int(match.group(1)) - 1
+        grupo = match.group(2)
+        ranking = rankings.get(grupo) or []
+        return ranking[posicao] if len(ranking) > posicao else None
+
+    if slot_code == "3X":
+        return third_slots.pop(0) if third_slots else None
+
+    match = WINNER_GAME_SLOT_RE.match(slot_code)
+    if match:
+        return _winner_identity(jogos_por_numero.get(int(match.group(1))))
+
+    match = WINNER_ROUND_SLOT_RE.match(slot_code)
+    if match:
+        numero = int(match.group(1))
+        return _winner_identity(jogos_por_numero.get(90 + numero))
+
+    match = WINNER_SEED_SLOT_RE.match(slot_code)
+    if match:
+        indice = int(match.group(1))
+        if target_num in {104, 105}:
+            return _winner_identity(jogos_por_numero.get(99 + indice))
+        if target_num == 107:
+            return _winner_identity(jogos_por_numero.get(103 + indice))
+
+    match = LOSER_SEED_SLOT_RE.match(slot_code)
+    if match and target_num == 106:
+        return _loser_identity(jogos_por_numero.get(103 + int(match.group(1))))
+
+    return None
+
+
+def sync_knockout_teams():
+    jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.numero_partida).all()
+    jogos_por_numero = {jogo.numero_partida: jogo for jogo in jogos if jogo.numero_partida}
+    nomes_por_codigo = _team_name_by_code(jogos)
+    rankings, grupos_completos = _group_standings()
+    terceiros = []
+    if grupos_completos:
+        terceiros = sorted(
+            [ranking[2] for ranking in rankings.values() if len(ranking) >= 3],
+            key=lambda item: (
+                -item["pontos"],
+                -item["saldo"],
+                -item["gols_pro"],
+                -item["vitorias"],
+                item["nome"],
+            ),
+        )
+
+    atualizados = 0
+    for jogo in [j for j in jogos if j.mata_mata]:
+        for lado in ("a", "b"):
+            sigla_attr = f"sigla_time_{lado}"
+            nome_attr = f"time_{lado}"
+            sigla_atual = (getattr(jogo, sigla_attr) or "").strip().upper()
+            if _is_real_team_code(sigla_atual):
+                continue
+
+            resolvido = _resolve_knockout_slot(
+                sigla_atual,
+                jogo.numero_partida,
+                jogos_por_numero,
+                rankings,
+                terceiros,
+            )
+            if not resolvido or not resolvido.get("sigla"):
+                continue
+
+            nova_sigla = resolvido["sigla"]
+            novo_nome = resolvido.get("nome") or nomes_por_codigo.get(nova_sigla) or nova_sigla
+            if getattr(jogo, sigla_attr) != nova_sigla or getattr(jogo, nome_attr) != novo_nome:
+                setattr(jogo, sigla_attr, nova_sigla)
+                setattr(jogo, nome_attr, novo_nome)
+                atualizados += 1
+
+    if atualizados:
+        db.session.commit()
+    return atualizados
 
 
 def recalcular_prazos_palpite(force=False):
@@ -2840,14 +3112,69 @@ def group_items_by_world_cup_group(items, item_to_jogo):
             grupos_ordenados.append(grupo)
         grupos_map[grupo].append(item)
 
+    priorizar_outros = "Outros" in grupos_map and etapa_atual_ranking() == "mata_mata"
+    if priorizar_outros:
+        grupos_ordenados = ["Outros"] + [grupo for grupo in grupos_ordenados if grupo != "Outros"]
+
     return [
         {
             "id": f"grupo-{idx}",
             "nome": grupo,
             "label": grupo_label_traduzido(grupo),
             "itens": grupos_map[grupo],
+            "destaque": grupo == "Outros" and priorizar_outros,
+            "discreto": grupo != "Outros" and priorizar_outros,
         }
         for idx, grupo in enumerate(grupos_ordenados)
+    ]
+
+
+def knockout_bracket_data():
+    fases = [
+        "Rodada de 32",
+        "Oitavas de Final",
+        "Quartas de Final",
+        "Semifinal",
+        "Terceiro Lugar",
+        "Final",
+    ]
+    jogos = (
+        Jogo.query.options(selectinload(Jogo.resultado))
+        .filter_by(mata_mata=True)
+        .order_by(Jogo.data_jogo, Jogo.hora_et, Jogo.numero_partida)
+        .all()
+    )
+    por_fase = {fase: [] for fase in fases}
+    for jogo in jogos:
+        resultado = jogo.resultado
+        score = None
+        classificado = None
+        if resultado:
+            score = f"{resultado.gols_a} x {resultado.gols_b}"
+            classificado = resultado.classificado
+        por_fase.setdefault(jogo.fase, []).append(
+            {
+                "numero": jogo.numero_partida,
+                "fase": jogo.fase,
+                "data": data_jogo_exibicao(jogo),
+                "hora": hora_jogo_exibicao(jogo),
+                "time_a": time_nome_traduzido(jogo.time_a),
+                "time_b": time_nome_traduzido(jogo.time_b),
+                "sigla_a": jogo.sigla_time_a,
+                "sigla_b": jogo.sigla_time_b,
+                "score": score,
+                "classificado": time_nome_traduzido(classificado) if classificado else None,
+            }
+        )
+
+    return [
+        {
+            "fase": fase,
+            "label": fase_label_traduzida(fase),
+            "jogos": por_fase.get(fase, []),
+        }
+        for fase in fases
+        if por_fase.get(fase)
     ]
 
 
@@ -4140,6 +4467,7 @@ def dashboard():
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
                            proximos_com_status=proximos_com_status,
+                           knockout_bracket=knockout_bracket_data(),
                            invite_url=invite_url,
                            invite_text=invite_text)
 
@@ -4580,6 +4908,7 @@ def lancar_resultado(jid):
 
         # Recalcular pontuação
         calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+        sync_knockout_teams()
         report_stats = send_pending_round_reports()
         flash("Resultado lançado e pontuação calculada!", "success")
         if report_stats["sent"] or report_stats["skipped"]:
@@ -4610,7 +4939,7 @@ def _run_auto_result_sync(launched_by: str):
     days_back = int(os.environ.get("RESULT_SYNC_DAYS_BACK", "2"))
     days_forward = int(os.environ.get("RESULT_SYNC_DAYS_FORWARD", "1"))
 
-    return sync_finished_results_football_data(
+    stats = sync_finished_results_football_data(
         db,
         Jogo,
         Resultado,
@@ -4623,6 +4952,8 @@ def _run_auto_result_sync(launched_by: str):
         days_forward=days_forward,
         launched_by=launched_by,
     )
+    stats["knockout_teams_updated"] = sync_knockout_teams()
+    return stats
 
 
 @app.route("/admin/sincronizar-resultados", methods=["POST"])
@@ -4748,6 +5079,9 @@ def create_app():
             print(f"[seed] {count} jogos carregados.")
         if recalcular_prazos_palpite(force=True):
             print("[setup] Prazos de palpite recalculados para 30 minutos antes dos jogos.")
+        updated_knockout = sync_knockout_teams()
+        if updated_knockout:
+            print(f"[setup] {updated_knockout} vagas do mata-mata atualizadas.")
         seed_public_groups()
         sync_admin_flags()
         # Cria admin automático via variáveis de ambiente (útil em cloud)

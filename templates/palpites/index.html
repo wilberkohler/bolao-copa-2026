@@ -192,7 +192,7 @@
     <ul class="nav nav-tabs mb-3" role="tablist">
       {% for grupo in palpites_por_grupo %}
         <li class="nav-item" role="presentation">
-          <button class="nav-link {% if loop.first %}active{% endif %}"
+          <button class="nav-link {% if loop.first %}active{% endif %} {% if grupo.destaque %}tab-destaque{% elif grupo.discreto %}tab-discreto{% endif %}"
                   id="{{ grupo.id }}-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#{{ grupo.id }}"

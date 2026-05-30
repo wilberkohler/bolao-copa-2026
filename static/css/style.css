@@ -60,6 +60,110 @@ body { background: #f4f6f9; }
 
 /* Tabelas */
 .table-jogos td, .table-jogos th { vertical-align: middle; font-size: .875rem; }
+.nav-tabs .nav-link.tab-destaque {
+	border-color: #198754 #198754 #fff;
+	color: #0b6b34;
+	font-weight: 800;
+	background: #f2fbf5;
+}
+.nav-tabs .nav-link.tab-destaque.active {
+	background: #198754;
+	border-color: #198754;
+	color: #fff;
+}
+.nav-tabs .nav-link.tab-discreto {
+	opacity: .68;
+	font-size: .92rem;
+}
+.nav-tabs .nav-link.tab-discreto.active {
+	opacity: 1;
+}
+
+/* Chaveamento */
+.bracket-board {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(230px, 280px);
+	gap: .85rem;
+	overflow-x: auto;
+	padding: .85rem;
+	background: #fff;
+	border: 1px solid #dee2e6;
+	border-radius: .5rem;
+}
+.bracket-round-title {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	margin-bottom: .65rem;
+	padding: .45rem .6rem;
+	border-radius: .4rem;
+	background: #e8f5ee;
+	color: #0b6b34;
+	font-weight: 800;
+	text-align: center;
+}
+.bracket-matches {
+	display: grid;
+	gap: .65rem;
+}
+.bracket-match {
+	position: relative;
+	border: 1px solid #dfe5ea;
+	border-radius: .5rem;
+	background: #fff;
+	padding: .6rem;
+}
+.bracket-match::after {
+	content: "";
+	position: absolute;
+	right: -.55rem;
+	top: 50%;
+	width: .55rem;
+	border-top: 2px solid #cfd8dc;
+}
+.bracket-round:last-child .bracket-match::after {
+	display: none;
+}
+.bracket-match-meta {
+	display: flex;
+	justify-content: space-between;
+	gap: .5rem;
+	color: #6c757d;
+	font-size: .72rem;
+	margin-bottom: .35rem;
+}
+.bracket-team {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: .5rem;
+	padding: .35rem .45rem;
+	border-radius: .35rem;
+	background: #f8f9fa;
+	font-weight: 700;
+}
+.bracket-team + .bracket-team {
+	margin-top: .35rem;
+}
+.bracket-team small {
+	color: #6c757d;
+	font-weight: 700;
+}
+.bracket-result {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: .5rem;
+	margin-top: .45rem;
+	padding-top: .45rem;
+	border-top: 1px solid #edf1f3;
+	font-size: .82rem;
+}
+.bracket-result span {
+	color: #198754;
+	font-weight: 700;
+}
 
 /* Ranking top 3 */
 .rank-1 td:first-child { color: #d4af37; font-weight: 700; font-size: 1.2rem; }
