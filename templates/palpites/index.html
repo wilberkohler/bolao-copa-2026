@@ -7,7 +7,7 @@
     <thead class="table-success">
       <tr>
         <th>{{ tr('date') }}</th>
-        <th>{{ tr('time_brt') }}</th>
+        <th>{{ rotulo_horario_jogos() }}</th>
         <th>{{ tr('phase') }}</th>
         <th>{{ tr('team_a') }}</th>
         <th>{{ tr('goals_a') }}</th>
@@ -27,8 +27,8 @@
       {% set p = item.palpite %}
       {% set pont = item.pontuacao %}
       <tr class="{% if not item.editavel %}row-jogo-encerrado{% elif not p %}row-sem-palpite{% endif %}">
-        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
-        <td>{{ j.hora_brasilia }}</td>
+        <td>{{ data_jogo_exibicao(j) }}</td>
+        <td>{{ hora_jogo_exibicao(j) }}</td>
         <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
         <td class="{% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong><br><small class="text-muted">{{ j.sigla_time_a }}</small></td>
         <td>
@@ -103,7 +103,7 @@
         </td>
         <td>
           <small class="text-muted">
-            {% if j.prazo_palpite %}{{ j.prazo_palpite.strftime('%d/%m %H:%M') }}{% endif %}
+            {% if j.prazo_palpite %}{{ prazo_palpite_exibicao(j) }} {{ timezone_jogos_label() }}{% endif %}
           </small>
         </td>
         <td>

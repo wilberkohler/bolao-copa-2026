@@ -124,7 +124,7 @@
       <div class="card-body">
         {% if proximo_jogo %}
           <h6>{{ time_nome_traduzido(proximo_jogo.time_a) }} x {{ time_nome_traduzido(proximo_jogo.time_b) }}</h6>
-          <p class="mb-0 text-muted">{{ proximo_jogo.data_jogo.strftime('%d/%m/%Y') }} &bull; {{ proximo_jogo.hora_brasilia }} BRT</p>
+          <p class="mb-0 text-muted">{{ data_jogo_exibicao(proximo_jogo) }} &bull; {{ hora_jogo_exibicao(proximo_jogo) }} {{ timezone_jogos_label() }}</p>
           <small class="text-muted">{{ proximo_jogo.estadio }}, {{ proximo_jogo.cidade }}</small>
         {% else %}
           <p class="text-muted">{{ tr('no_scheduled_game') }}</p>
@@ -137,7 +137,7 @@
       <div class="card-header bg-danger text-white fw-bold"><i class="bi bi-clock"></i> {{ tr('next_deadline') }}</div>
       <div class="card-body">
         {% if proximo_prazo %}
-          <h5>{{ proximo_prazo.strftime('%d/%m/%Y %H:%M') }} BRT</h5>
+          <h5>{{ prazo_palpite_exibicao(proximo_jogo) }} {{ timezone_jogos_label() }}</h5>
           <p class="mb-0 text-muted">{{ tr('deadline_for') }} {{ time_nome_traduzido(proximo_jogo.time_a) }} x {{ time_nome_traduzido(proximo_jogo.time_b) }}</p>
         {% else %}
           <p class="text-muted">{{ tr('no_upcoming_deadline') }}</p>
@@ -153,7 +153,7 @@
     <thead class="table-success">
       <tr>
         <th>{{ tr('date') }}</th>
-        <th>{{ tr('time_brt') }}</th>
+        <th>{{ rotulo_horario_jogos() }}</th>
         <th>{{ tr('phase') }}</th>
         <th>{{ tr('group_label') }}</th>
         <th>{{ tr('team_a') }}</th>
@@ -168,8 +168,8 @@
       {% for item in proximos_com_status %}
       {% set j = item.jogo %}
       <tr class="{% if not item.palpite and item.prazo_aberto %}row-sem-palpite{% endif %}">
-        <td>{{ j.data_jogo.strftime('%d/%m/%Y') }}</td>
-        <td>{{ j.hora_brasilia }}</td>
+        <td>{{ data_jogo_exibicao(j) }}</td>
+        <td>{{ hora_jogo_exibicao(j) }}</td>
         <td><span class="badge bg-secondary">{{ fase_label_traduzida(j.fase) }}</span></td>
         <td>{{ grupo_label_traduzido(j.grupo) if j.grupo else '-' }}</td>
         <td class="{% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}"><strong>{{ time_nome_traduzido(j.time_a) }}</strong></td>
@@ -197,7 +197,7 @@
         {% endif %}
         <td>
           {% if j.prazo_palpite %}
-            <small class="text-muted">{{ j.prazo_palpite.strftime('%d/%m %H:%M') }}</small>
+            <small class="text-muted">{{ prazo_palpite_exibicao(j) }} {{ timezone_jogos_label() }}</small>
           {% endif %}
         </td>
       </tr>

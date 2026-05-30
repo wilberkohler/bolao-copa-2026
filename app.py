@@ -62,6 +62,54 @@ DEFAULT_HIGHLIGHT_TEAM_BY_LANGUAGE = {
     "zh": "KOR",
     "ru": "KAZ",
 }
+TEAM_TIMEZONES = {
+    "ALG": "Africa/Algiers",
+    "ANG": "Africa/Luanda",
+    "ARG": "America/Argentina/Buenos_Aires",
+    "AUS": "Australia/Sydney",
+    "BEL": "Europe/Brussels",
+    "BIH": "Europe/Sarajevo",
+    "BRA": "America/Sao_Paulo",
+    "CAN": "America/Toronto",
+    "CHI": "America/Santiago",
+    "COD": "Africa/Kinshasa",
+    "COL": "America/Bogota",
+    "CPV": "Atlantic/Cape_Verde",
+    "CRC": "America/Costa_Rica",
+    "CRO": "Europe/Zagreb",
+    "CUW": "America/Curacao",
+    "DEN": "Europe/Copenhagen",
+    "ECU": "America/Guayaquil",
+    "ENG": "Europe/London",
+    "ESP": "Europe/Madrid",
+    "EUA": "America/New_York",
+    "FRA": "Europe/Paris",
+    "GER": "Europe/Berlin",
+    "HAI": "America/Port-au-Prince",
+    "ITA": "Europe/Rome",
+    "JPN": "Asia/Tokyo",
+    "KAZ": "Asia/Almaty",
+    "KOR": "Asia/Seoul",
+    "KSA": "Asia/Riyadh",
+    "MAR": "Africa/Casablanca",
+    "MEX": "America/Mexico_City",
+    "MWI": "Africa/Blantyre",
+    "NED": "Europe/Amsterdam",
+    "NZL": "Pacific/Auckland",
+    "PAR": "America/Asuncion",
+    "PHI": "Asia/Manila",
+    "POR": "Europe/Lisbon",
+    "RSA": "Africa/Johannesburg",
+    "SCO": "Europe/London",
+    "SEN": "Africa/Dakar",
+    "SRB": "Europe/Belgrade",
+    "SUI": "Europe/Zurich",
+    "TUR": "Europe/Istanbul",
+    "URU": "America/Montevideo",
+    "USA": "America/New_York",
+    "VEN": "America/Caracas",
+    "ZIM": "Africa/Harare",
+}
 LANGUAGE_BADGES = {
     "pt-BR": "BR",
     "en": "EN",
@@ -1972,6 +2020,82 @@ def nome_time_por_sigla(sigla):
     return sigla
 
 
+def timezone_time_destacado(user=None):
+    codigo = codigo_time_destacado(user)
+    timezone_name = TEAM_TIMEZONES.get(codigo, "America/Sao_Paulo")
+    return pytz.timezone(timezone_name)
+
+
+def _offset_utc_label(dt):
+    offset = dt.strftime("%z")
+    if not offset:
+        return "UTC"
+    horas = offset[:3]
+    minutos = offset[3:]
+    return f"UTC{horas}" if minutos == "00" else f"UTC{horas}:{minutos}"
+
+
+def timezone_jogos_label(user=None):
+    tz = timezone_time_destacado(user)
+    base = tz.localize(datetime(2026, 6, 15, 12, 0))
+    return _offset_utc_label(base)
+
+
+def rotulo_horario_jogos(user=None):
+    label = tr("time_brt")
+    timezone_label = timezone_jogos_label(user)
+    return label.replace("BRT", timezone_label) if "BRT" in label else f"{label} ({timezone_label})"
+
+
+def _jogo_datetime_origem(jogo):
+    data = getattr(jogo, "data_jogo", None)
+    if not data:
+        return None
+
+    hora = (getattr(jogo, "hora_et", None) or "").strip()
+    timezone_name = getattr(jogo, "timezone_original", None) or "America/New_York"
+    tz = pytz.timezone(timezone_name)
+    if hora:
+        try:
+            h, m = map(int, hora.split(":")[:2])
+            return tz.localize(datetime(data.year, data.month, data.day, h, m))
+        except (TypeError, ValueError):
+            pass
+
+    hora_br = (getattr(jogo, "hora_brasilia", None) or "00:00").strip()
+    try:
+        h, m = map(int, hora_br.split(":")[:2])
+    except (TypeError, ValueError):
+        h, m = 0, 0
+    return BR_TZ.localize(datetime(data.year, data.month, data.day, h, m))
+
+
+def datetime_jogo_exibicao(jogo, user=None):
+    origem = _jogo_datetime_origem(jogo)
+    if not origem:
+        return None
+    return origem.astimezone(timezone_time_destacado(user))
+
+
+def data_jogo_exibicao(jogo, user=None):
+    dt = datetime_jogo_exibicao(jogo, user)
+    return dt.strftime("%d/%m/%Y") if dt else "-"
+
+
+def hora_jogo_exibicao(jogo, user=None):
+    dt = datetime_jogo_exibicao(jogo, user)
+    return dt.strftime("%H:%M") if dt else "-"
+
+
+def prazo_palpite_exibicao(jogo, user=None):
+    prazo = getattr(jogo, "prazo_palpite", None)
+    if not prazo:
+        return ""
+    if prazo.tzinfo is None:
+        prazo = BR_TZ.localize(prazo)
+    return prazo.astimezone(timezone_time_destacado(user)).strftime("%d/%m %H:%M")
+
+
 def find_user_by_email(email):
     email = normalize_email(email)
     if not email:
@@ -2695,6 +2819,9 @@ def _jogo_payload(jogo, palpite=None, pontuacao=None):
         "rodada": jogo.rodada,
         "data_jogo": _dt_iso(jogo.data_jogo),
         "hora_brasilia": jogo.hora_brasilia,
+        "data_exibicao": data_jogo_exibicao(jogo, g.user),
+        "hora_exibicao": hora_jogo_exibicao(jogo, g.user),
+        "timezone_exibicao": timezone_jogos_label(g.user),
         "time_a": jogo.time_a,
         "time_b": jogo.time_b,
         "sigla_time_a": jogo.sigla_time_a,
@@ -2704,6 +2831,7 @@ def _jogo_payload(jogo, palpite=None, pontuacao=None):
         "pais": jogo.pais,
         "mata_mata": bool(jogo.mata_mata),
         "prazo_palpite": _dt_iso(jogo.prazo_palpite),
+        "prazo_palpite_exibicao": prazo_palpite_exibicao(jogo, g.user),
         "status": jogo.status,
         "editavel": palpite_editavel(jogo) and resultado is None,
         "resultado": {
@@ -3070,6 +3198,11 @@ def inject_globals():
         grupo_label_traduzido=grupo_label_traduzido,
         status_jogo_traduzido=status_jogo_traduzido,
         time_nome_traduzido=time_nome_traduzido,
+        data_jogo_exibicao=data_jogo_exibicao,
+        hora_jogo_exibicao=hora_jogo_exibicao,
+        prazo_palpite_exibicao=prazo_palpite_exibicao,
+        timezone_jogos_label=timezone_jogos_label,
+        rotulo_horario_jogos=rotulo_horario_jogos,
         is_time_destacado=is_time_destacado,
         codigo_time_destacado=codigo_time_destacado,
         codigo_time_destaque_padrao=codigo_time_destaque_padrao,
