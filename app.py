@@ -21,7 +21,7 @@ from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, Historic
 from runtime_config import load_runtime_config
 from seed_jogos_copa_2026 import JOGOS, seed_jogos
 from result_sync import sync_finished_results_football_data
-from scoring import (calcular_pontuacao_jogo, get_ranking,
+from scoring import (calcular_pontos, calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
 
 BR_TZ = pytz.timezone("America/Sao_Paulo")
@@ -2623,7 +2623,7 @@ def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, th
     return None
 
 
-def sync_knockout_teams():
+def sync_knockout_teams(commit=True):
     jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.numero_partida).all()
     jogos_por_numero = {jogo.numero_partida: jogo for jogo in jogos if jogo.numero_partida}
     nomes_por_codigo = _team_name_by_code(jogos)
@@ -2667,7 +2667,7 @@ def sync_knockout_teams():
                 setattr(jogo, nome_attr, novo_nome)
                 atualizados += 1
 
-    if atualizados:
+    if atualizados and commit:
         db.session.commit()
     return atualizados
 
@@ -3113,7 +3113,7 @@ def clear_simulated_results():
 
     for jogo in Jogo.query.filter(Jogo.resultado.has()).all():
         if jogo.resultado and not is_simulated_result(jogo.resultado):
-            calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+            calcular_pontuacao_jogo_sem_commit(jogo)
 
     db.session.commit()
     return len(jogo_ids)
@@ -3135,6 +3135,40 @@ def restore_knockout_seed_slots():
         if not original:
             continue
         jogo.time_a, jogo.time_b, jogo.sigla_time_a, jogo.sigla_time_b = original
+
+
+def calcular_pontuacao_jogo_sem_commit(jogo):
+    resultado = jogo.resultado
+    if not resultado:
+        return
+
+    palpites = Palpite.query.filter_by(jogo_id=jogo.id, valido=True).all()
+    for palpite in palpites:
+        res = calcular_pontos(
+            palpite.palpite_gols_a,
+            palpite.palpite_gols_b,
+            palpite.palpite_classificado,
+            resultado.gols_a,
+            resultado.gols_b,
+            resultado.classificado,
+            jogo.mata_mata,
+        )
+        pontuacao = Pontuacao.query.filter_by(
+            competidor_id=palpite.competidor_id,
+            jogo_id=jogo.id,
+        ).first()
+        if not pontuacao:
+            pontuacao = Pontuacao(competidor_id=palpite.competidor_id, jogo_id=jogo.id)
+            db.session.add(pontuacao)
+        pontuacao.pontos = res["pontos"]
+        pontuacao.placar_exato = res["placar_exato"]
+        pontuacao.vencedor_correto = res["vencedor_correto"]
+        pontuacao.saldo_correto = res["saldo_correto"]
+        pontuacao.gols_time_a_correto = res["gols_time_a_correto"]
+        pontuacao.gols_time_b_correto = res["gols_time_b_correto"]
+        pontuacao.classificado_correto = res["classificado_correto"]
+
+    jogo.status = "Pontuado"
 
 
 def group_items_by_world_cup_group(items, item_to_jogo):
@@ -5201,8 +5235,8 @@ def simulacao():
                         continue
 
                     if jogo.mata_mata:
-                        db.session.commit()
-                        sync_knockout_teams()
+                        db.session.flush()
+                        sync_knockout_teams(commit=False)
                         jogo = Jogo.query.get(jogo.id)
 
                     gols_a = random.randint(0, 4)
@@ -5226,12 +5260,17 @@ def simulacao():
                         usuario_lancamento=f"simulacao:{g.user.email}",
                     )
                     db.session.add(resultado)
+                    jogo.resultado = resultado
                     jogo.status = "Resultado Lançado"
                     jogos_gerados.append(jogo)
-                    db.session.commit()
-                    calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+                    db.session.flush()
                     if jogo.mata_mata:
-                        sync_knockout_teams()
+                        sync_knockout_teams(commit=False)
+
+                for jogo in jogos_gerados:
+                    calcular_pontuacao_jogo_sem_commit(jogo)
+
+                db.session.commit()
 
                 flash(f"Simulacao refeita: {removidos} resultado(s) simulado(s) anterior(es) apagado(s), {len(jogos_gerados)} novo(s) resultado(s) gerado(s) ate {data_str}. Resultados reais foram preservados.", "success")
 
