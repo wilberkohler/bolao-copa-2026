@@ -421,6 +421,12 @@ def rodadas_fechadas_com_resultado():
     return fechadas
 
 
+def etapa_ranking_para_rodada(rodada):
+    if any(jogo.mata_mata for jogo in rodada["jogos"]):
+        return "mata_mata", RANKING_ETAPAS["mata_mata"]
+    return "grupos", RANKING_ETAPAS["grupos"]
+
+
 def montar_relatorio_rodada(user, competidor, rodada):
     jogo_ids = [j.id for j in rodada["jogos"]]
     pontuacoes = Pontuacao.query.filter(
@@ -429,9 +435,13 @@ def montar_relatorio_rodada(user, competidor, rodada):
     ).all()
     pontos_rodada = sum(p.pontos for p in pontuacoes)
     placares = sum(1 for p in pontuacoes if p.placar_exato)
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    posicao = next((item["posicao"] for item in ranking if item["competidor"].id == competidor.id), None)
-    top5 = ranking[:5]
+    etapa_key, etapa_label = etapa_ranking_para_rodada(rodada)
+    ranking_etapa = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, etapa=etapa_key)
+    ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
+    posicao_etapa = next((item["posicao"] for item in ranking_etapa if item["competidor"].id == competidor.id), None)
+    posicao_geral = next((item["posicao"] for item in ranking_geral if item["competidor"].id == competidor.id), None)
+    top5_etapa = ranking_etapa[:5]
+    top5_geral = ranking_geral[:5]
     jogos_linhas = []
 
     for jogo in rodada["jogos"]:
@@ -442,9 +452,13 @@ def montar_relatorio_rodada(user, competidor, rodada):
             f"{pont.pontos if pont else 0} ponto(s)"
         )
 
-    top_linhas = [
+    top_etapa_linhas = [
         f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
-        for item in top5
+        for item in top5_etapa
+    ]
+    top_geral_linhas = [
+        f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} pts"
+        for item in top5_geral
     ]
     subject = f"Relatório da {rodada['label']} - Bolão Copa 2026"
     text = (
@@ -452,11 +466,14 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"Relatório da {rodada['label']}:\n"
         f"Seus pontos na rodada: {pontos_rodada}\n"
         f"Placares exatos na rodada: {placares}\n"
-        f"Sua posição no ranking geral: {posicao or '-'}\n\n"
+        f"Sua posição na etapa ({etapa_label}): {posicao_etapa or '-'}\n"
+        f"Sua posição no ranking geral: {posicao_geral or '-'}\n\n"
         "Jogos da rodada:\n"
         + "\n".join(jogos_linhas)
+        + f"\n\nTop 5 da etapa - {etapa_label}:\n"
+        + "\n".join(top_etapa_linhas)
         + "\n\nTop 5 geral:\n"
-        + "\n".join(top_linhas)
+        + "\n".join(top_geral_linhas)
         + "\n\nAcesse o app para ver todos os detalhes."
     )
     html = (
@@ -464,11 +481,14 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"<h2>{escape(rodada['label'])}</h2>"
         f"<p><strong>Seus pontos na rodada:</strong> {pontos_rodada}</p>"
         f"<p><strong>Placares exatos na rodada:</strong> {placares}</p>"
-        f"<p><strong>Sua posição no ranking geral:</strong> {posicao or '-'}</p>"
+        f"<p><strong>Sua posição na etapa ({escape(etapa_label)}):</strong> {posicao_etapa or '-'}</p>"
+        f"<p><strong>Sua posição no ranking geral:</strong> {posicao_geral or '-'}</p>"
         "<h3>Jogos da rodada</h3><ul>"
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
-        + "</ul><h3>Top 5 geral</h3><ol>"
-        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5)
+        + f"</ul><h3>Top 5 da etapa - {escape(etapa_label)}</h3><ol>"
+        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_etapa)
+        + "</ol><h3>Top 5 geral</h3><ol>"
+        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} pts</li>" for item in top5_geral)
         + "</ol><p>Acesse o app para ver todos os detalhes.</p>"
     )
     return subject, text, html
