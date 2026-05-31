@@ -83,9 +83,10 @@ body { background: #f4f6f9; }
 .bracket-board {
 	display: grid;
 	grid-auto-flow: column;
-	grid-auto-columns: minmax(270px, 310px);
+	grid-auto-columns: minmax(330px, 380px);
 	gap: 1.35rem;
 	overflow-x: auto;
+	overflow-y: visible;
 	padding: 1.35rem 1rem 1.6rem;
 	background: #eef0f3;
 	border: 1px solid #dde1e6;
@@ -110,9 +111,9 @@ body { background: #f4f6f9; }
 }
 .bracket-matches {
 	display: grid;
-	align-content: center;
+	align-content: start;
 	gap: 1rem;
-	min-height: 100%;
+	min-height: auto;
 	padding-top: .2rem;
 }
 .bracket-round-2 .bracket-matches {
@@ -195,6 +196,7 @@ body { background: #f4f6f9; }
 	font-size: .95rem;
 	font-weight: 800;
 	line-height: 1.05;
+	min-width: 0;
 }
 .bracket-team::before {
 	content: "";
@@ -242,7 +244,7 @@ body { background: #f4f6f9; }
 }
 @media (max-width: 767.98px) {
 	.bracket-board {
-		grid-auto-columns: minmax(240px, 270px);
+		grid-auto-columns: minmax(330px, 86vw);
 		gap: 1rem;
 		padding: 1rem .75rem 1.25rem;
 	}
@@ -250,9 +252,14 @@ body { background: #f4f6f9; }
 
 .prediction-bracket {
 	margin-bottom: 1rem;
+	max-height: none;
+	overflow-x: auto;
+	overflow-y: visible;
+	-webkit-overflow-scrolling: touch;
 }
 .prediction-match {
-	min-height: 150px;
+	min-height: 162px;
+	width: 100%;
 }
 .prediction-match::before {
 	height: calc(100% + 1rem);
@@ -266,17 +273,18 @@ body { background: #f4f6f9; }
 }
 .prediction-teams {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-	align-items: center;
-	gap: .55rem;
+	grid-template-columns: 1fr;
+	align-items: stretch;
+	gap: .35rem;
 }
 .prediction-teams .bracket-team {
 	min-width: 0;
 }
 .prediction-teams .bracket-team span {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	overflow: visible;
+	text-overflow: clip;
+	white-space: normal;
+	word-break: normal;
 }
 .prediction-score {
 	display: inline-grid;
@@ -284,6 +292,7 @@ body { background: #f4f6f9; }
 	align-items: center;
 	gap: .3rem;
 	font-weight: 800;
+	justify-self: center;
 }
 .prediction-goal {
 	text-align: center;
@@ -305,13 +314,17 @@ body { background: #f4f6f9; }
 	padding-top: .55rem;
 	border-top: 1px solid #edf0f4;
 }
+.prediction-match-footer .text-muted {
+	min-width: 0;
+	line-height: 1.25;
+}
+.prediction-match-footer .badge {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
 @media (max-width: 767.98px) {
-	.prediction-teams {
-		grid-template-columns: 1fr;
-		align-items: stretch;
-	}
-	.prediction-score {
-		justify-self: center;
+	.prediction-match {
+		min-height: 170px;
 	}
 }
 
