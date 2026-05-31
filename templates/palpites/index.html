@@ -433,8 +433,12 @@
         }
 
         var classificado = pane.querySelector("select[name='classificado_" + gameId + "']");
-        if (classificado && classificado.value === "" && goalsA.value === goalsB.value && classificado.options.length > 2) {
-          classificado.selectedIndex = Math.random() < 0.5 ? 1 : 2;
+        if (classificado && classificado.value === "" && classificado.options.length > 2) {
+          var a = parseInt(goalsA.value, 10);
+          var b = parseInt(goalsB.value, 10);
+          if (!Number.isNaN(a) && !Number.isNaN(b)) {
+            classificado.selectedIndex = a > b ? 1 : (b > a ? 2 : (Math.random() < 0.5 ? 1 : 2));
+          }
         }
       });
     }
