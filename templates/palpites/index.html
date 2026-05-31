@@ -146,6 +146,7 @@
   <button type="button" class="playoff-phase-tab" data-playoff-start="4">{{ tr('phase_third_place') }} & {{ tr('phase_final') }}</button>
 </div>
 <div class="bracket-board prediction-bracket shadow-sm">
+  <svg class="bracket-connectors" aria-hidden="true" focusable="false"></svg>
   {% set fases = [] %}
   {% for item in items %}
     {% set fase = item.jogo.fase %}
@@ -586,6 +587,7 @@
 
       var tabs = Array.prototype.slice.call(tabContainer.querySelectorAll(".playoff-phase-tab"));
       var rounds = Array.prototype.slice.call(board.querySelectorAll(".bracket-round"));
+      var connectorSvg = board.querySelector(".bracket-connectors");
 
       function maxVisible(start) {
         return start >= 4 ? 5 : Math.min(start + 2, 5);
@@ -609,12 +611,104 @@
           tab.classList.toggle("active", parseInt(tab.dataset.playoffStart || "0", 10) === start);
         });
         board.scrollLeft = 0;
+        window.requestAnimationFrame(drawConnectors);
+      }
+
+      function cardCenter(card, boardRect) {
+        var rect = card.getBoundingClientRect();
+        return {
+          left: rect.left - boardRect.left + board.scrollLeft,
+          right: rect.right - boardRect.left + board.scrollLeft,
+          y: rect.top - boardRect.top + board.scrollTop + (rect.height / 2)
+        };
+      }
+
+      function connectorPath(fromCards, toCard, boardRect) {
+        if (!fromCards.length || !toCard) {
+          return "";
+        }
+        var to = cardCenter(toCard, boardRect);
+        var fromCenters = fromCards.map(function (card) {
+          return cardCenter(card, boardRect);
+        });
+        var maxRight = Math.max.apply(null, fromCenters.map(function (point) { return point.right; }));
+        var startX = maxRight;
+        var midX = startX + Math.max(18, (to.left - startX) / 2);
+        var d = "";
+        fromCenters.forEach(function (from) {
+          d += "M " + from.right + " " + from.y + " H " + midX + " ";
+        });
+        var minY = Math.min.apply(null, fromCenters.map(function (point) { return point.y; }).concat([to.y]));
+        var maxY = Math.max.apply(null, fromCenters.map(function (point) { return point.y; }).concat([to.y]));
+        d += "M " + midX + " " + minY + " V " + maxY + " ";
+        d += "M " + midX + " " + to.y + " H " + to.left;
+        return d;
+      }
+
+      function drawConnectors() {
+        if (!connectorSvg) {
+          return;
+        }
+        connectorSvg.innerHTML = "";
+        var visibleRounds = rounds.filter(function (round) {
+          return !round.hidden;
+        });
+        if (visibleRounds.length < 2) {
+          return;
+        }
+
+        var boardRect = board.getBoundingClientRect();
+        var width = Math.max(board.scrollWidth, board.clientWidth);
+        var height = Math.max(board.scrollHeight, board.clientHeight);
+        connectorSvg.setAttribute("width", width);
+        connectorSvg.setAttribute("height", height);
+        connectorSvg.setAttribute("viewBox", "0 0 " + width + " " + height);
+
+        for (var i = 0; i < visibleRounds.length - 1; i += 1) {
+          var fromRound = visibleRounds[i];
+          var toRound = visibleRounds[i + 1];
+          var fromIndex = parseInt(fromRound.dataset.phaseIndex || "0", 10);
+          var toIndex = parseInt(toRound.dataset.phaseIndex || "0", 10);
+          if (fromIndex === 4 && toIndex === 5) {
+            continue;
+          }
+
+          var fromCards = Array.prototype.slice.call(fromRound.querySelectorAll(".bracket-match"));
+          var toCards = Array.prototype.slice.call(toRound.querySelectorAll(".bracket-match"));
+          if (!fromCards.length || !toCards.length) {
+            continue;
+          }
+
+          var ratio = Math.max(1, Math.floor(fromCards.length / toCards.length));
+          toCards.forEach(function (toCard, toCardIndex) {
+            var groupedSources = fromCards.slice(toCardIndex * ratio, (toCardIndex + 1) * ratio);
+            var pathData = connectorPath(groupedSources, toCard, boardRect);
+            if (!pathData) {
+              return;
+            }
+            var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "#c9ced6");
+            path.setAttribute("stroke-width", "1.5");
+            path.setAttribute("stroke-linecap", "square");
+            path.setAttribute("stroke-linejoin", "round");
+            connectorSvg.appendChild(path);
+          });
+        }
       }
 
       tabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
           applyWindow(parseInt(tab.dataset.playoffStart || "0", 10));
         });
+      });
+
+      board.addEventListener("scroll", function () {
+        window.requestAnimationFrame(drawConnectors);
+      });
+      window.addEventListener("resize", function () {
+        window.requestAnimationFrame(drawConnectors);
       });
 
       applyWindow(0);
