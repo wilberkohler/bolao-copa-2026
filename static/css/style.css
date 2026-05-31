@@ -116,21 +116,13 @@ body { background: #f4f6f9; }
 	min-height: auto;
 	padding-top: .2rem;
 }
-.bracket-round-2 .bracket-matches {
+.bracket-round.is-visible-2 .bracket-matches {
 	gap: 3.05rem;
 	padding-top: 3.25rem;
 }
-.bracket-round-3 .bracket-matches {
+.bracket-round.is-visible-3 .bracket-matches {
 	gap: 6.9rem;
 	padding-top: 6.9rem;
-}
-.bracket-round-4 .bracket-matches {
-	gap: 13.2rem;
-	padding-top: 12.4rem;
-}
-.bracket-round-5 .bracket-matches,
-.bracket-round-6 .bracket-matches {
-	padding-top: 14.8rem;
 }
 .bracket-match {
 	position: relative;
@@ -161,6 +153,10 @@ body { background: #f4f6f9; }
 	display: none;
 }
 .bracket-round:last-child .bracket-match::before {
+	display: none;
+}
+.bracket-round.is-visible-3 .bracket-match::after,
+.bracket-round.is-visible-3 .bracket-match::before {
 	display: none;
 }
 .bracket-match-meta {
@@ -256,6 +252,27 @@ body { background: #f4f6f9; }
 	overflow-x: auto;
 	overflow-y: visible;
 	-webkit-overflow-scrolling: touch;
+}
+.playoff-phase-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .6rem;
+	margin-bottom: .85rem;
+}
+.playoff-phase-tab {
+	border: 0;
+	border-radius: 999px;
+	background: #d4d7db;
+	box-shadow: 0 .2rem .45rem rgba(20, 28, 38, .18);
+	color: #111827;
+	font-size: .84rem;
+	font-weight: 800;
+	padding: .55rem 1rem;
+	white-space: nowrap;
+}
+.playoff-phase-tab.active {
+	background: #fff;
+	box-shadow: 0 .2rem .45rem rgba(20, 28, 38, .12), inset 0 0 0 1px #d9dde3;
 }
 .prediction-match {
 	min-height: 162px;

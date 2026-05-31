@@ -138,6 +138,13 @@
 {% endmacro %}
 
 {% macro palpites_bracket(items) %}
+<div class="playoff-phase-tabs" role="tablist" aria-label="{{ tr('knockout_bracket') }}">
+  <button type="button" class="playoff-phase-tab active" data-playoff-start="0">{{ tr('phase_round_32') }}</button>
+  <button type="button" class="playoff-phase-tab" data-playoff-start="1">{{ tr('phase_round_16') }}</button>
+  <button type="button" class="playoff-phase-tab" data-playoff-start="2">{{ tr('phase_quarterfinals') }}</button>
+  <button type="button" class="playoff-phase-tab" data-playoff-start="3">{{ tr('phase_semifinal') }}</button>
+  <button type="button" class="playoff-phase-tab" data-playoff-start="4">{{ tr('phase_third_place') }} & {{ tr('phase_final') }}</button>
+</div>
 <div class="bracket-board prediction-bracket shadow-sm">
   {% set fases = [] %}
   {% for item in items %}
@@ -148,7 +155,7 @@
   {% endfor %}
 
   {% for fase in fases %}
-    <div class="bracket-round bracket-round-{{ loop.index }}">
+    <div class="bracket-round bracket-round-{{ loop.index }}" data-phase-index="{{ loop.index0 }}">
       <div class="bracket-round-title">{{ fase_label_traduzida(fase) }}</div>
       <div class="bracket-matches">
         {% for item in items if item.jogo.fase == fase %}
@@ -569,6 +576,48 @@
           syncKnockoutQualified(field);
         });
       }
+    });
+
+    document.querySelectorAll(".prediction-bracket").forEach(function (board) {
+      var tabContainer = board.previousElementSibling;
+      if (!tabContainer || !tabContainer.classList.contains("playoff-phase-tabs")) {
+        return;
+      }
+
+      var tabs = Array.prototype.slice.call(tabContainer.querySelectorAll(".playoff-phase-tab"));
+      var rounds = Array.prototype.slice.call(board.querySelectorAll(".bracket-round"));
+
+      function maxVisible(start) {
+        return start >= 4 ? 5 : Math.min(start + 2, 5);
+      }
+
+      function applyWindow(start) {
+        var end = maxVisible(start);
+        var visiblePosition = 0;
+        rounds.forEach(function (round) {
+          var index = parseInt(round.dataset.phaseIndex || "0", 10);
+          var visible = index >= start && index <= end;
+          round.hidden = !visible;
+          round.classList.remove("is-visible-1", "is-visible-2", "is-visible-3");
+          if (visible) {
+            visiblePosition += 1;
+            round.classList.add("is-visible-" + Math.min(visiblePosition, 3));
+          }
+        });
+
+        tabs.forEach(function (tab) {
+          tab.classList.toggle("active", parseInt(tab.dataset.playoffStart || "0", 10) === start);
+        });
+        board.scrollLeft = 0;
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          applyWindow(parseInt(tab.dataset.playoffStart || "0", 10));
+        });
+      });
+
+      applyWindow(0);
     });
 
     if (modalElement) {
