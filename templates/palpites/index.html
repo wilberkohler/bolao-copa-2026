@@ -588,9 +588,19 @@
       var tabs = Array.prototype.slice.call(tabContainer.querySelectorAll(".playoff-phase-tab"));
       var rounds = Array.prototype.slice.call(board.querySelectorAll(".bracket-round"));
       var connectorSvg = board.querySelector(".bracket-connectors");
+      var cardGap = 24;
+      board.classList.add("is-dynamic");
 
       function maxVisible(start) {
         return start >= 4 ? 5 : Math.min(start + 2, 5);
+      }
+
+      function visibleRoundsForWindow(start) {
+        var end = maxVisible(start);
+        return rounds.filter(function (round) {
+          var index = parseInt(round.dataset.phaseIndex || "0", 10);
+          return index >= start && index <= end;
+        });
       }
 
       function applyWindow(start) {
@@ -611,7 +621,76 @@
           tab.classList.toggle("active", parseInt(tab.dataset.playoffStart || "0", 10) === start);
         });
         board.scrollLeft = 0;
-        window.requestAnimationFrame(drawConnectors);
+        window.requestAnimationFrame(function () {
+          layoutBracket(start);
+          drawConnectors();
+          window.setTimeout(drawConnectors, 220);
+        });
+      }
+
+      function stackFirstRound(round) {
+        var matches = round.querySelector(".bracket-matches");
+        var cards = Array.prototype.slice.call(round.querySelectorAll(".bracket-match"));
+        var top = 0;
+        cards.forEach(function (card) {
+          card.style.top = top + "px";
+          top += card.offsetHeight + cardGap;
+        });
+        matches.style.height = Math.max(0, top - cardGap) + "px";
+      }
+
+      function cardCenterInMatches(card, matches) {
+        return parseFloat(card.style.top || "0") + (card.offsetHeight / 2);
+      }
+
+      function positionRoundFromPrevious(prevRound, round) {
+        var prevMatches = prevRound.querySelector(".bracket-matches");
+        var matches = round.querySelector(".bracket-matches");
+        var prevCards = Array.prototype.slice.call(prevRound.querySelectorAll(".bracket-match"));
+        var cards = Array.prototype.slice.call(round.querySelectorAll(".bracket-match"));
+        var ratio = Math.max(1, Math.floor(prevCards.length / Math.max(cards.length, 1)));
+        var bottom = 0;
+
+        cards.forEach(function (card, index) {
+          var sources = prevCards.slice(index * ratio, (index + 1) * ratio);
+          if (!sources.length) {
+            sources = [prevCards[Math.min(index, prevCards.length - 1)]].filter(Boolean);
+          }
+          var sourceCenter = sources.reduce(function (sum, source) {
+            return sum + cardCenterInMatches(source, prevMatches);
+          }, 0) / Math.max(sources.length, 1);
+          var top = Math.max(0, sourceCenter - (card.offsetHeight / 2));
+          if (index > 0) {
+            var previous = cards[index - 1];
+            var minTop = parseFloat(previous.style.top || "0") + previous.offsetHeight + cardGap;
+            top = Math.max(top, minTop);
+          }
+          card.style.top = top + "px";
+          bottom = Math.max(bottom, top + card.offsetHeight);
+        });
+
+        matches.style.height = bottom + "px";
+      }
+
+      function layoutBracket(start) {
+        var visibleRounds = visibleRoundsForWindow(start);
+        rounds.forEach(function (round) {
+          var matches = round.querySelector(".bracket-matches");
+          Array.prototype.slice.call(round.querySelectorAll(".bracket-match")).forEach(function (card) {
+            card.style.top = "";
+          });
+          if (matches) {
+            matches.style.height = "";
+          }
+        });
+        if (!visibleRounds.length) {
+          return;
+        }
+
+        stackFirstRound(visibleRounds[0]);
+        for (var i = 1; i < visibleRounds.length; i += 1) {
+          positionRoundFromPrevious(visibleRounds[i - 1], visibleRounds[i]);
+        }
       }
 
       function cardCenter(card, boardRect) {
@@ -708,7 +787,13 @@
         window.requestAnimationFrame(drawConnectors);
       });
       window.addEventListener("resize", function () {
-        window.requestAnimationFrame(drawConnectors);
+        window.requestAnimationFrame(function () {
+          var activeTab = tabs.find(function (tab) { return tab.classList.contains("active"); });
+          var start = activeTab ? parseInt(activeTab.dataset.playoffStart || "0", 10) : 0;
+          layoutBracket(start);
+          drawConnectors();
+          window.setTimeout(drawConnectors, 220);
+        });
       });
 
       applyWindow(0);

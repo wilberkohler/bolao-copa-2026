@@ -125,6 +125,7 @@ body { background: #f4f6f9; }
 	gap: 1rem;
 	min-height: auto;
 	padding-top: .2rem;
+	position: relative;
 }
 .bracket-round.is-visible-2 .bracket-matches {
 	gap: 3.05rem;
@@ -143,6 +144,15 @@ body { background: #f4f6f9; }
 	border: 1px solid #d9dde3;
 	border-radius: .35rem;
 	box-shadow: 0 .18rem .45rem rgba(15, 23, 42, .12);
+}
+.prediction-bracket.is-dynamic .bracket-matches {
+	display: block;
+}
+.prediction-bracket.is-dynamic .bracket-match {
+	position: absolute;
+	left: 0;
+	right: 0;
+	transition: top .18s ease;
 }
 .bracket-match::after {
 	display: none;
