@@ -172,28 +172,34 @@
               <span>{{ data_jogo_exibicao(j) }} &bull; {{ hora_jogo_exibicao(j) }}</span>
             </div>
             <div class="prediction-teams">
-              <div class="bracket-team {% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}">
-                <span>{{ time_nome_traduzido(j.time_a) }}</span>
-                <small>{{ j.sigla_time_a }}</small>
-              </div>
-              <div class="prediction-score">
+              <div class="prediction-team-row">
+                <div class="bracket-team {% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}">
+                  <span>{{ time_nome_traduzido(j.time_a) }}</span>
+                  <small>{{ j.sigla_time_a }}</small>
+                </div>
                 {% if item.editavel %}
                   <input type="number" name="gols_a_{{ j.id }}" class="form-control form-control-sm palpite-input prediction-goal"
                          min="0" max="30"
                          value="{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '' }}"
                          aria-label="{{ tr('goals_a') }} {{ time_nome_traduzido(j.time_a) }}">
-                  <span>x</span>
+                {% else %}
+                  <strong class="prediction-goal-readonly">{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '-' }}</strong>
+                {% endif %}
+              </div>
+              <div class="prediction-score-divider">x</div>
+              <div class="prediction-team-row">
+                <div class="bracket-team {% if is_time_destacado(j.sigla_time_b) %}team-destaque{% endif %}">
+                  <span>{{ time_nome_traduzido(j.time_b) }}</span>
+                  <small>{{ j.sigla_time_b }}</small>
+                </div>
+                {% if item.editavel %}
                   <input type="number" name="gols_b_{{ j.id }}" class="form-control form-control-sm palpite-input prediction-goal"
                          min="0" max="30"
                          value="{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '' }}"
                          aria-label="{{ tr('goals_b') }} {{ time_nome_traduzido(j.time_b) }}">
                 {% else %}
-                  <strong>{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '-' }} x {{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</strong>
+                  <strong class="prediction-goal-readonly">{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</strong>
                 {% endif %}
-              </div>
-              <div class="bracket-team {% if is_time_destacado(j.sigla_time_b) %}team-destaque{% endif %}">
-                <span>{{ time_nome_traduzido(j.time_b) }}</span>
-                <small>{{ j.sigla_time_b }}</small>
               </div>
             </div>
 
@@ -712,7 +718,7 @@
         });
         var maxRight = Math.max.apply(null, fromCenters.map(function (point) { return point.right; }));
         var startX = maxRight;
-        var midX = startX + Math.max(18, (to.left - startX) / 2);
+        var midX = startX + Math.max(34, (to.left - startX) * 0.58);
         var d = "";
         fromCenters.forEach(function (from) {
           d += "M " + from.right + " " + from.y + " H " + midX + " ";

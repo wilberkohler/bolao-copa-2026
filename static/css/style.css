@@ -85,7 +85,8 @@ body { background: #f4f6f9; }
 	display: grid;
 	grid-auto-flow: column;
 	grid-auto-columns: minmax(330px, 380px);
-	gap: 1.35rem;
+	column-gap: 3.1rem;
+	row-gap: 0;
 	overflow-x: auto;
 	overflow-y: visible;
 	padding: 1.35rem 1rem 1.6rem;
@@ -252,7 +253,7 @@ body { background: #f4f6f9; }
 @media (max-width: 767.98px) {
 	.bracket-board {
 		grid-auto-columns: minmax(330px, 86vw);
-		gap: 1rem;
+		column-gap: 2rem;
 		padding: 1rem .75rem 1.25rem;
 	}
 }
@@ -303,27 +304,40 @@ body { background: #f4f6f9; }
 	display: grid;
 	grid-template-columns: 1fr;
 	align-items: stretch;
-	gap: .35rem;
+	gap: .2rem;
 }
-.prediction-teams .bracket-team {
+.prediction-team-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 4.4rem;
+	align-items: center;
+	gap: .65rem;
 	min-width: 0;
 }
-.prediction-teams .bracket-team span {
+.prediction-team-row .bracket-team {
+	min-width: 0;
+}
+.prediction-team-row .bracket-team span {
 	overflow: visible;
 	text-overflow: clip;
 	white-space: normal;
 	word-break: normal;
 }
-.prediction-score {
-	display: inline-grid;
-	grid-template-columns: 3.1rem auto 3.1rem;
-	align-items: center;
-	gap: .3rem;
+.prediction-score-divider {
+	width: 4.4rem;
+	justify-self: end;
+	text-align: center;
 	font-weight: 800;
-	justify-self: center;
+	line-height: 1;
 }
 .prediction-goal {
 	text-align: center;
+	font-weight: 800;
+}
+.prediction-goal-readonly {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2rem;
 	font-weight: 800;
 }
 .prediction-qualified {
@@ -353,6 +367,12 @@ body { background: #f4f6f9; }
 @media (max-width: 767.98px) {
 	.prediction-match {
 		min-height: 170px;
+	}
+	.prediction-team-row {
+		grid-template-columns: minmax(0, 1fr) 3.9rem;
+	}
+	.prediction-score-divider {
+		width: 3.9rem;
 	}
 }
 
