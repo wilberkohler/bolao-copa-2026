@@ -137,6 +137,89 @@
 </div>
 {% endmacro %}
 
+{% macro palpites_bracket(items) %}
+<div class="bracket-board prediction-bracket shadow-sm">
+  {% set fases = [] %}
+  {% for item in items %}
+    {% set fase = item.jogo.fase %}
+    {% if fase not in fases %}
+      {% set _ = fases.append(fase) %}
+    {% endif %}
+  {% endfor %}
+
+  {% for fase in fases %}
+    <div class="bracket-round bracket-round-{{ loop.index }}">
+      <div class="bracket-round-title">{{ fase_label_traduzida(fase) }}</div>
+      <div class="bracket-matches">
+        {% for item in items if item.jogo.fase == fase %}
+          {% set j = item.jogo %}
+          {% set p = item.palpite %}
+          {% set pont = item.pontuacao %}
+          <article class="bracket-match prediction-match {% if not item.editavel %}prediction-match-locked{% elif not p %}prediction-match-empty{% endif %}">
+            {% if item.editavel %}
+              <input type="hidden" name="jogo_id" value="{{ j.id }}">
+            {% endif %}
+            <div class="bracket-match-meta">
+              <strong>#{{ "%02d"|format(j.numero_partida) }}</strong>
+              <span>{{ data_jogo_exibicao(j) }} &bull; {{ hora_jogo_exibicao(j) }}</span>
+            </div>
+            <div class="prediction-teams">
+              <div class="bracket-team {% if is_time_destacado(j.sigla_time_a) %}team-destaque{% endif %}">
+                <span>{{ time_nome_traduzido(j.time_a) }}</span>
+                <small>{{ j.sigla_time_a }}</small>
+              </div>
+              <div class="prediction-score">
+                {% if item.editavel %}
+                  <input type="number" name="gols_a_{{ j.id }}" class="form-control form-control-sm palpite-input prediction-goal"
+                         min="0" max="30"
+                         value="{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '' }}"
+                         aria-label="{{ tr('goals_a') }} {{ time_nome_traduzido(j.time_a) }}">
+                  <span>x</span>
+                  <input type="number" name="gols_b_{{ j.id }}" class="form-control form-control-sm palpite-input prediction-goal"
+                         min="0" max="30"
+                         value="{{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '' }}"
+                         aria-label="{{ tr('goals_b') }} {{ time_nome_traduzido(j.time_b) }}">
+                {% else %}
+                  <strong>{{ p.palpite_gols_a if p and p.palpite_gols_a is not none else '-' }} x {{ p.palpite_gols_b if p and p.palpite_gols_b is not none else '-' }}</strong>
+                {% endif %}
+              </div>
+              <div class="bracket-team {% if is_time_destacado(j.sigla_time_b) %}team-destaque{% endif %}">
+                <span>{{ time_nome_traduzido(j.time_b) }}</span>
+                <small>{{ j.sigla_time_b }}</small>
+              </div>
+            </div>
+
+            <div class="prediction-qualified">
+              <label class="form-label small mb-1">{{ tr('qualified_knockout') }}</label>
+              {% if item.editavel %}
+                <select name="classificado_{{ j.id }}" class="form-select form-select-sm">
+                  <option value="">-- {{ tr('qualified_correct') }} --</option>
+                  <option value="{{ j.time_a }}" {% if p and p.palpite_classificado == j.time_a %}selected{% endif %}>{{ time_nome_traduzido(j.time_a) }}</option>
+                  <option value="{{ j.time_b }}" {% if p and p.palpite_classificado == j.time_b %}selected{% endif %}>{{ time_nome_traduzido(j.time_b) }}</option>
+                </select>
+              {% else %}
+                <div class="small fw-bold">{{ time_nome_traduzido(p.palpite_classificado) if p and p.palpite_classificado else '-' }}</div>
+              {% endif %}
+            </div>
+
+            <div class="prediction-match-footer">
+              <span class="small text-muted">
+                {% if j.prazo_palpite %}{{ tr('deadline') }}: {{ prazo_palpite_exibicao(j) }} {{ timezone_jogos_label() }}{% endif %}
+              </span>
+              {% if pont %}
+                <span class="badge bg-success">{{ pont.pontos }} pts</span>
+              {% elif item.status %}
+                <span class="badge bg-secondary">{{ item.status }}</span>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4><i class="bi bi-pencil-square text-success"></i> {{ tr('predictions_title') }} &mdash; {{ competidor.apelido }}</h4>
@@ -216,7 +299,11 @@
               <i class="bi bi-eraser"></i> {{ tr('clear_future_tab') }}
             </button>
           </div>
-          {{ palpites_table(grupo.itens) }}
+          {% if grupo.nome == 'Outros' %}
+            {{ palpites_bracket(grupo.itens) }}
+          {% else %}
+            {{ palpites_table(grupo.itens) }}
+          {% endif %}
         </div>
       {% endfor %}
     </div>
@@ -364,6 +451,26 @@
       form.submit();
     }
 
+    function syncKnockoutQualified(field) {
+      var match = field.name.match(/^gols_([ab])_(\d+)$/);
+      if (!match) {
+        return;
+      }
+      var gameId = match[2];
+      var goalsA = form.querySelector("input[name='gols_a_" + gameId + "']");
+      var goalsB = form.querySelector("input[name='gols_b_" + gameId + "']");
+      var classificado = form.querySelector("select[name='classificado_" + gameId + "']");
+      if (!goalsA || !goalsB || !classificado || goalsA.value === "" || goalsB.value === "") {
+        return;
+      }
+      var a = parseInt(goalsA.value, 10);
+      var b = parseInt(goalsB.value, 10);
+      if (Number.isNaN(a) || Number.isNaN(b) || a === b) {
+        return;
+      }
+      classificado.selectedIndex = a > b ? 1 : 2;
+    }
+
     function buildFormTargetUrl(targetForm) {
       var action = targetForm.getAttribute("action") || window.location.href;
       var method = (targetForm.getAttribute("method") || "get").toLowerCase();
@@ -454,6 +561,14 @@
       button.addEventListener("click", function () {
         clearFutureGuesses(tabPaneFromButton(button));
       });
+    });
+
+    trackedFields.forEach(function (field) {
+      if (field.name.indexOf("gols_") === 0) {
+        field.addEventListener("change", function () {
+          syncKnockoutQualified(field);
+        });
+      }
     });
 
     if (modalElement) {

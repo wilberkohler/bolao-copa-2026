@@ -248,6 +248,73 @@ body { background: #f4f6f9; }
 	}
 }
 
+.prediction-bracket {
+	margin-bottom: 1rem;
+}
+.prediction-match {
+	min-height: 150px;
+}
+.prediction-match::before {
+	height: calc(100% + 1rem);
+}
+.prediction-match-empty {
+	border-left: 4px solid #ffc107;
+}
+.prediction-match-locked {
+	background: #f8f9fa;
+	color: #6c757d;
+}
+.prediction-teams {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: .55rem;
+}
+.prediction-teams .bracket-team {
+	min-width: 0;
+}
+.prediction-teams .bracket-team span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.prediction-score {
+	display: inline-grid;
+	grid-template-columns: 3.1rem auto 3.1rem;
+	align-items: center;
+	gap: .3rem;
+	font-weight: 800;
+}
+.prediction-goal {
+	text-align: center;
+	font-weight: 800;
+}
+.prediction-qualified {
+	margin-top: .65rem;
+}
+.prediction-qualified .form-label {
+	color: #6b7280;
+	font-weight: 700;
+}
+.prediction-match-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: .5rem;
+	margin-top: .65rem;
+	padding-top: .55rem;
+	border-top: 1px solid #edf0f4;
+}
+@media (max-width: 767.98px) {
+	.prediction-teams {
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+	.prediction-score {
+		justify-self: center;
+	}
+}
+
 /* Ranking top 3 */
 .rank-1 td:first-child { color: #d4af37; font-weight: 700; font-size: 1.2rem; }
 .rank-2 td:first-child { color: #a8a9ad; font-weight: 700; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "bolao-copa-2026-v3";
+const CACHE_NAME = "bolao-copa-2026-v4";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/static/css/style.css",

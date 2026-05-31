@@ -147,52 +147,6 @@
   </div>
 </div>
 
-{% if podium_etapa_key == 'mata_mata' and knockout_bracket %}
-<section class="mb-4">
-  <div class="d-flex align-items-center justify-content-between mb-2">
-    <h5 class="mb-0"><i class="bi bi-diagram-3"></i> {{ tr('knockout_bracket') }}</h5>
-    <small class="text-muted">{{ tr('knockout_bracket_hint') }}</small>
-  </div>
-  <div class="bracket-board bracket-tree shadow-sm">
-    {% for fase in knockout_bracket %}
-      <div class="bracket-round bracket-round-{{ loop.index }}">
-        <div class="bracket-round-title">{{ fase.label }}</div>
-        <div class="bracket-matches">
-          {% for partida in fase.jogos %}
-            <article class="bracket-match">
-              <div class="bracket-match-meta">
-                <strong>#{{ "%02d"|format(partida.numero) }}</strong>
-                <span>{{ partida.data }} &bull; {{ partida.hora }}</span>
-              </div>
-              <div class="bracket-team {% if is_time_destacado(partida.sigla_a) %}team-destaque{% endif %}">
-                <span>{{ partida.time_a }}</span>
-                <small>{{ partida.sigla_a }}</small>
-              </div>
-              <div class="bracket-team {% if is_time_destacado(partida.sigla_b) %}team-destaque{% endif %}">
-                <span>{{ partida.time_b }}</span>
-                <small>{{ partida.sigla_b }}</small>
-              </div>
-              {% if partida.score %}
-                <div class="bracket-result">
-                  <strong>{{ partida.score }}</strong>
-                </div>
-              {% endif %}
-              <div class="bracket-winner">
-                {% if partida.classificado %}
-                  {{ partida.classificado }}
-                {% else %}
-                  {{ tr('winner') }} {{ "%02d"|format(partida.numero) }}
-                {% endif %}
-              </div>
-            </article>
-          {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
-
 <h5 class="mb-2"><i class="bi bi-calendar3"></i> {{ tr('upcoming_games') }}</h5>
 <div class="table-responsive">
   <table class="table table-jogos table-hover table-bordered bg-white shadow-sm">

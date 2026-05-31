@@ -536,7 +536,7 @@ TRANSLATIONS = {
         "phase_third_place": "Terceiro Lugar",
         "phase_final": "Final",
         "world_cup_group": "Grupo {group}",
-        "other_group": "Outros",
+        "other_group": "Eliminatórias",
         "round_report_subject": "Relatório da {round_label} - Bolão Copa 2026",
         "hello_name": "Olá, {name}!",
         "round_report_heading": "Relatório da {round_label}:",
@@ -789,7 +789,7 @@ TRANSLATIONS = {
         "phase_third_place": "Third Place",
         "phase_final": "Final",
         "world_cup_group": "Group {group}",
-        "other_group": "Other",
+        "other_group": "Knockout",
         "round_report_subject": "Report for {round_label} - World Cup Pool 2026",
         "hello_name": "Hello, {name}!",
         "round_report_heading": "Report for {round_label}:",
@@ -1042,7 +1042,7 @@ TRANSLATIONS = {
         "phase_third_place": "Tercer Puesto",
         "phase_final": "Final",
         "world_cup_group": "Grupo {group}",
-        "other_group": "Otros",
+        "other_group": "Eliminatorias",
         "round_report_subject": "Informe de {round_label} - Quiniela Mundial 2026",
         "hello_name": "Hola, {name}!",
         "round_report_heading": "Informe de {round_label}:",
@@ -1267,7 +1267,7 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "phase_third_place": "TroisiÃ¨me place",
     "phase_final": "Finale",
     "world_cup_group": "Groupe {group}",
-    "other_group": "Autres",
+    "other_group": "Phase finale",
     "predictions_title": "Pronostics",
     "goals_a": "Buts A",
     "goals_b": "Buts B",
@@ -1491,7 +1491,7 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "phase_third_place": "Spiel um Platz drei",
     "phase_final": "Finale",
     "world_cup_group": "Gruppe {group}",
-    "other_group": "Andere",
+    "other_group": "K.-o.-Runde",
     "predictions_title": "Tipps",
     "goals_a": "Tore A",
     "goals_b": "Tore B",
@@ -3183,7 +3183,7 @@ def group_items_by_world_cup_group(items, item_to_jogo):
             grupos_ordenados.append(grupo)
         grupos_map[grupo].append(item)
 
-    priorizar_outros = "Outros" in grupos_map and etapa_atual_ranking() == "mata_mata"
+    priorizar_outros = "Outros" in grupos_map
     if priorizar_outros:
         grupos_ordenados = ["Outros"] + [grupo for grupo in grupos_ordenados if grupo != "Outros"]
 
@@ -4538,7 +4538,6 @@ def dashboard():
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
                            proximos_com_status=proximos_com_status,
-                           knockout_bracket=knockout_bracket_data(),
                            invite_url=invite_url,
                            invite_text=invite_text)
 
