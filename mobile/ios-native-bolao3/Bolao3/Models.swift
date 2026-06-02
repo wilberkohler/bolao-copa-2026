@@ -80,6 +80,46 @@ struct PrivateGroupPriceDisplay: Decodable {
     }
 }
 
+struct PrivateGroupActivationRequest: Encodable {
+    let productId: String
+    let transactionId: String
+    let originalTransactionId: String?
+    let platform: String
+
+    enum CodingKeys: String, CodingKey {
+        case productId = "product_id"
+        case transactionId = "transaction_id"
+        case originalTransactionId = "original_transaction_id"
+        case platform
+    }
+}
+
+struct PrivateGroupActivationResponse: Decodable {
+    let ok: Bool
+    let grupo: PrivateGroupActivation?
+    let user: UserProfile?
+    let message: String?
+    let error: String?
+}
+
+struct PrivateGroupActivation: Decodable, Identifiable {
+    let id: Int
+    let nome: String
+    let statusPagamento: String
+    let limiteParticipantes: Int
+    let participantes: Int
+    let conviteURL: String
+    let codigoAcesso: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, nome, participantes
+        case statusPagamento = "status_pagamento"
+        case limiteParticipantes = "limite_participantes"
+        case conviteURL = "convite_url"
+        case codigoAcesso = "codigo_acesso"
+    }
+}
+
 struct RegisterRequest: Encodable {
     let nome: String
     let email: String

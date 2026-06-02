@@ -46,6 +46,17 @@ final class APIClient {
         try await request("/api/v1/grupos-privados/config")
     }
 
+    func activatePrivateGroup(productId: String, transactionId: String, originalTransactionId: String?) async throws -> PrivateGroupActivationResponse {
+        let payload = PrivateGroupActivationRequest(
+            productId: productId,
+            transactionId: transactionId,
+            originalTransactionId: originalTransactionId,
+            platform: "apple"
+        )
+        let data = try encoder.encode(payload)
+        return try await request("/api/v1/grupos-privados/ativar", method: "POST", body: data)
+    }
+
     func registrar(nome: String, email: String, apelido: String, senha: String, grupoId: Int?, codigoGrupo: String?) async throws -> UserProfile {
         let payload = RegisterRequest(
             nome: nome,

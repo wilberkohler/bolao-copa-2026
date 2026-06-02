@@ -1,7 +1,9 @@
 import os
 import random
+import hashlib
 import hmac
 import re
+import secrets
 import smtplib
 from datetime import datetime, date, timedelta
 from email.message import EmailMessage
@@ -2939,6 +2941,40 @@ def grupos_privados_do_usuario(user):
             .all())
 
 
+def gerar_codigo_grupo_privado():
+    return secrets.token_hex(4).upper()
+
+
+def nome_grupo_privado_unico(user):
+    base_name = f"Grupo privado de {(user.apelido or user.nome or 'usuario').strip()}"
+    candidate = base_name[:100]
+    counter = 2
+    while Grupo.query.filter_by(nome=candidate).first():
+        suffix = f" {counter}"
+        candidate = f"{base_name[:100 - len(suffix)]}{suffix}"
+        counter += 1
+    return candidate
+
+
+def token_compra_hash(transaction_id):
+    return hashlib.sha256(str(transaction_id).encode("utf-8")).hexdigest()
+
+
+def grupo_privado_ativado_payload(grupo, codigo_acesso=None):
+    participantes = User.query.filter_by(grupo_id=grupo.id).count()
+    payload = {
+        "id": grupo.id,
+        "nome": grupo.nome,
+        "status_pagamento": grupo.status_pagamento or "ativo",
+        "limite_participantes": grupo.limite_participantes or PRIVATE_GROUP_PARTICIPANT_LIMIT,
+        "participantes": participantes,
+        "convite_url": convite_grupo_url(grupo.id),
+    }
+    if codigo_acesso:
+        payload["codigo_acesso"] = codigo_acesso
+    return payload
+
+
 def grupos_para_cadastro():
     return (Grupo.query
             .filter(Grupo.publico == True)
@@ -3682,6 +3718,75 @@ def api_grupos_privados_config():
         "price_display": price,
         "participant_limit": PRIVATE_GROUP_PARTICIPANT_LIMIT,
         "mobile_store_only": True,
+    })
+
+
+@app.route("/api/v1/grupos-privados/ativar", methods=["POST"])
+@api_login_required
+def api_grupos_privados_ativar():
+    data = request.get_json(silent=True) or {}
+    product_id = (data.get("product_id") or "").strip()
+    transaction_id = (data.get("transaction_id") or "").strip()
+    original_transaction_id = (data.get("original_transaction_id") or "").strip()
+    platform = (data.get("platform") or "apple").strip().lower()
+
+    if product_id != PRIVATE_GROUP_PRODUCT_ID:
+        return jsonify({"ok": False, "error": "Produto de compra invalido."}), 400
+
+    if not transaction_id:
+        return jsonify({"ok": False, "error": "Transacao de compra nao informada."}), 400
+
+    if platform not in {"apple", "google"}:
+        return jsonify({"ok": False, "error": "Plataforma de compra invalida."}), 400
+
+    existing_active = (Grupo.query
+                       .filter_by(criado_por_id=g.user.id, tipo="privado_pago")
+                       .filter(Grupo.status_pagamento == "ativo")
+                       .order_by(Grupo.created_at.desc())
+                       .first())
+    if existing_active:
+        return jsonify({
+            "ok": True,
+            "grupo": grupo_privado_ativado_payload(existing_active),
+            "message": "Grupo privado ja ativo.",
+        })
+
+    transaction_hash = token_compra_hash(original_transaction_id or transaction_id)
+    duplicated = Grupo.query.filter_by(compra_token_hash=transaction_hash).first()
+    if duplicated and duplicated.criado_por_id != g.user.id:
+        return jsonify({"ok": False, "error": "Esta compra ja foi vinculada a outro usuario."}), 409
+
+    codigo_acesso = gerar_codigo_grupo_privado()
+    grupo = duplicated if duplicated else Grupo()
+    grupo.nome = grupo.nome or nome_grupo_privado_unico(g.user)
+    grupo.descricao = grupo.descricao or "Grupo privado criado por compra dentro do app."
+    grupo.publico = True
+    grupo.requer_codigo = True
+    grupo.criado_por_id = g.user.id
+    grupo.tipo = "privado_pago"
+    grupo.status_pagamento = "ativo"
+    grupo.limite_participantes = PRIVATE_GROUP_PARTICIPANT_LIMIT
+    grupo.preco_centavos = PRIVATE_GROUP_PRICE_CENTS
+    grupo.plataforma_pagamento = platform
+    grupo.produto_pagamento = PRIVATE_GROUP_PRODUCT_ID
+    grupo.compra_token_hash = transaction_hash
+    grupo.ativado_em = grupo.ativado_em or datetime.utcnow()
+    grupo.updated_at = datetime.utcnow()
+    grupo.set_codigo_acesso(codigo_acesso)
+
+    if not duplicated:
+        db.session.add(grupo)
+    db.session.flush()
+
+    g.user.grupo_id = grupo.id
+    g.user.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({
+        "ok": True,
+        "grupo": grupo_privado_ativado_payload(grupo, codigo_acesso=codigo_acesso),
+        "user": _current_user_payload(g.user),
+        "message": "Grupo privado ativado.",
     })
 
 
