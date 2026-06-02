@@ -99,6 +99,8 @@ jobs:
           <dict>
             <key>method</key>
             <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
             <key>signingStyle</key>
             <string>manual</string>
             <key>provisioningProfiles</key>
@@ -112,17 +114,10 @@ jobs:
           </plist>
           EOF
 
-      - name: Export IPA
-        run: |
-          xcodebuild \
-            -exportArchive \
-            -archivePath "$RUNNER_TEMP/Bolao3.xcarchive" \
-            -exportPath "$RUNNER_TEMP/export" \
-            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist"
-
       - name: Prepare App Store Connect API key
         env:
           APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
         run: |
           if [ -z "$APP_STORE_CONNECT_API_KEY_P8" ]; then
             echo "Missing APP_STORE_CONNECT_API_KEY_P8 secret"
@@ -130,22 +125,18 @@ jobs:
           fi
 
           mkdir -p "$HOME/.appstoreconnect/private_keys"
-          printf "%s" "$APP_STORE_CONNECT_API_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
+          printf "%s" "$APP_STORE_CONNECT_API_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
 
-      - name: Upload to TestFlight
+      - name: Export and upload to TestFlight
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
-          IPA_PATH=$(find "$RUNNER_TEMP/export" -name "*.ipa" -maxdepth 1 | head -n 1)
-          if [ -z "$IPA_PATH" ]; then
-            echo "IPA not found"
-            exit 1
-          fi
-
-          xcrun iTMSTransporter \
-            -m upload \
-            -assetFile "$IPA_PATH" \
-            -apiKey "$APP_STORE_CONNECT_KEY_ID" \
-            -apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
-            -v informational
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/Bolao3.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist" \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
