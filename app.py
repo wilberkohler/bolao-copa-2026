@@ -3766,6 +3766,51 @@ def api_reenviar_confirmacao_email():
     return jsonify({"ok": True})
 
 
+def excluir_conta_usuario(user):
+    user_id = user.id
+    competidor = Competidor.query.filter_by(user_id=user_id).first()
+
+    if competidor:
+        HistoricoPalpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+        Palpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+        Pontuacao.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+        db.session.delete(competidor)
+
+    RelatorioRodadaEnvio.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    for grupo in Grupo.query.filter_by(criado_por_id=user_id).all():
+        grupo.criado_por_id = None
+
+    marcador = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    user.nome = "Conta excluida"
+    user.email = f"deleted-user-{user_id}-{marcador}@deleted.local"
+    user.apelido = None
+    user.grupo_id = None
+    user.eh_admin = False
+    user.ativo = False
+    user.email_confirmado = False
+    user.email_confirmado_em = None
+    user.receber_relatorios = False
+    user.time_destaque = None
+    user.set_password(os.urandom(24).hex())
+    user.updated_at = datetime.utcnow()
+    db.session.commit()
+
+
+@app.route("/api/v1/excluir-conta", methods=["POST"])
+@api_login_required
+def api_excluir_conta():
+    data = request.get_json(silent=True) or {}
+    senha = data.get("senha") or data.get("password") or ""
+    confirmacao = (data.get("confirmacao") or "").strip().upper()
+
+    if not g.user.check_password(senha) or confirmacao not in {"EXCLUIR", "DELETE"}:
+        return jsonify({"ok": False, "error": "Senha ou confirmacao invalida."}), 400
+
+    excluir_conta_usuario(g.user)
+    session.clear()
+    return jsonify({"ok": True})
+
+
 @app.route("/api/v1/me")
 @api_login_required
 def api_me():
@@ -5141,35 +5186,7 @@ def solicitar_exclusao_dados():
             flash(tr("delete_account_invalid"), "danger")
             return render_template("solicitar_exclusao_dados.html")
 
-        user = g.user
-        user_id = user.id
-        competidor = Competidor.query.filter_by(user_id=user_id).first()
-
-        if competidor:
-            HistoricoPalpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
-            Palpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
-            Pontuacao.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
-            db.session.delete(competidor)
-
-        RelatorioRodadaEnvio.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-        for grupo in Grupo.query.filter_by(criado_por_id=user_id).all():
-            grupo.criado_por_id = None
-
-        marcador = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        user.nome = "Conta excluida"
-        user.email = f"deleted-user-{user_id}-{marcador}@deleted.local"
-        user.apelido = None
-        user.grupo_id = None
-        user.eh_admin = False
-        user.ativo = False
-        user.email_confirmado = False
-        user.email_confirmado_em = None
-        user.receber_relatorios = False
-        user.time_destaque = None
-        user.set_password(os.urandom(24).hex())
-        user.updated_at = datetime.utcnow()
-        db.session.commit()
-
+        excluir_conta_usuario(g.user)
         session.clear()
         flash(tr("delete_account_done"), "success")
         return redirect(url_for("login"))

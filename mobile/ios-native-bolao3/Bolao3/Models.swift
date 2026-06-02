@@ -44,6 +44,42 @@ struct GruposCadastroResponse: Decodable {
     let grupos: [GrupoCadastro]
 }
 
+struct PrivateGroupConfigResponse: Decodable {
+    let ok: Bool
+    let productId: String
+    let priceUsdCents: Int
+    let currency: String
+    let localCurrency: String
+    let priceDisplay: PrivateGroupPriceDisplay
+    let participantLimit: Int
+    let mobileStoreOnly: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case ok, currency
+        case productId = "product_id"
+        case priceUsdCents = "price_usd_cents"
+        case localCurrency = "local_currency"
+        case priceDisplay = "price_display"
+        case participantLimit = "participant_limit"
+        case mobileStoreOnly = "mobile_store_only"
+    }
+}
+
+struct PrivateGroupPriceDisplay: Decodable {
+    let usd: String
+    let local: String
+    let localCurrency: String
+    let teamCode: String
+    let teamName: String
+
+    enum CodingKeys: String, CodingKey {
+        case usd, local
+        case localCurrency = "local_currency"
+        case teamCode = "team_code"
+        case teamName = "team_name"
+    }
+}
+
 struct RegisterRequest: Encodable {
     let nome: String
     let email: String
@@ -269,4 +305,9 @@ struct ClearFuturePalpitesRequest: Encodable {
         case acao
         case jogoIds = "jogo_ids"
     }
+}
+
+struct DeleteAccountRequest: Encodable {
+    let senha: String
+    let confirmacao: String
 }

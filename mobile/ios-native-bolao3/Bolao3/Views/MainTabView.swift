@@ -27,6 +27,11 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Regras", systemImage: "book.closed")
                 }
+
+            AccountView()
+                .tabItem {
+                    Label("Conta", systemImage: "person.crop.circle")
+                }
         }
     }
 }

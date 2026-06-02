@@ -42,6 +42,10 @@ final class APIClient {
         return response.grupos
     }
 
+    func privateGroupConfig() async throws -> PrivateGroupConfigResponse {
+        try await request("/api/v1/grupos-privados/config")
+    }
+
     func registrar(nome: String, email: String, apelido: String, senha: String, grupoId: Int?, codigoGrupo: String?) async throws -> UserProfile {
         let payload = RegisterRequest(
             nome: nome,
@@ -69,6 +73,16 @@ final class APIClient {
 
     func logout() async throws {
         let _: EmptyResponse = try await request("/api/v1/logout", method: "POST")
+    }
+
+    func reenviarConfirmacaoEmail() async throws {
+        let _: EmptyResponse = try await request("/api/v1/reenviar-confirmacao-email", method: "POST")
+    }
+
+    func excluirConta(senha: String, confirmacao: String) async throws {
+        let payload = DeleteAccountRequest(senha: senha, confirmacao: confirmacao)
+        let data = try encoder.encode(payload)
+        let _: EmptyResponse = try await request("/api/v1/excluir-conta", method: "POST", body: data)
     }
 
     func dashboard() async throws -> DashboardResponse {

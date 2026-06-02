@@ -67,6 +67,20 @@ final class AppState: ObservableObject {
         user = nil
     }
 
+    func deleteAccount(senha: String, confirmacao: String) async {
+        isLoading = true
+        message = nil
+        do {
+            try await api.excluirConta(senha: senha, confirmacao: confirmacao)
+            clearCaches()
+            user = nil
+            message = nil
+        } catch {
+            message = error.localizedDescription
+        }
+        isLoading = false
+    }
+
     func clearCaches() {
         dashboardCache = nil
         jogosCache = []

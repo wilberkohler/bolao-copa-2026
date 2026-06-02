@@ -53,6 +53,12 @@ struct LoginView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(appState.isLoading || email.isEmpty || senha.isEmpty)
 
+                Link(destination: URL(string: "https://bolao2026-9jgh.onrender.com/esqueci-senha")!) {
+                    Label("Esqueci minha senha", systemImage: "key")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
                 NavigationLink {
                     RegisterView()
                 } label: {
