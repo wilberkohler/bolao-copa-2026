@@ -117,7 +117,7 @@ struct AccountView: View {
                 }
 
                 if let activatedGroup {
-                    Section("Seu grupo privado") {
+                    Section {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(activatedGroup.nome)
                                 .font(.headline)
@@ -138,6 +138,8 @@ struct AccountView: View {
                         } label: {
                             Label("Copiar convite do grupo", systemImage: "link")
                         }
+                    } header: {
+                        Text("Seu grupo privado")
                     } footer: {
                         Text("Guarde o codigo de acesso: novos participantes precisam dele para entrar no grupo.")
                     }
