@@ -10,7 +10,7 @@ on:
 jobs:
   archive-upload:
     name: Archive and Upload Bolao 3 to TestFlight
-    runs-on: macos-26
+    runs-on: macos-15
 
     defaults:
       run:
