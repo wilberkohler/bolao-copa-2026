@@ -91,7 +91,7 @@ final class APIClient {
     }
 
     func salvarPalpite(jogoId: Int, golsA: Int, golsB: Int) async throws {
-        try await salvarPalpites([SavePalpite(jogoId: jogoId, golsA: golsA, golsB: golsB)])
+        try await salvarPalpites([SavePalpite(jogoId: jogoId, golsA: golsA, golsB: golsB, classificado: nil)])
     }
 
     func salvarPalpites(_ palpites: [SavePalpite]) async throws {

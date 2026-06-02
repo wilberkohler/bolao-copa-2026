@@ -4,6 +4,7 @@ struct PalpitesView: View {
     @EnvironmentObject private var appState: AppState
     @State private var jogos: [Jogo] = []
     @State private var selectedGrupo = ""
+    @State private var playoffStartIndex = 0
     @State private var drafts: [Int: DraftPalpite] = [:]
     @State private var isLoading = false
     @State private var message: String?
@@ -11,23 +12,46 @@ struct PalpitesView: View {
     @FocusState private var focusedField: PalpiteField?
 
     private var grupos: [String] {
-        Array(Set(jogos.map { $0.grupo ?? "Outros" })).sorted()
+        let values = Array(Set(jogos.map { groupKey(for: $0) }))
+        return values.sorted { lhs, rhs in
+            if lhs == "Outros" { return true }
+            if rhs == "Outros" { return false }
+            return lhs < rhs
+        }
     }
 
     private var jogosDaAba: [Jogo] {
-        jogos.filter { ($0.grupo ?? "Outros") == selectedGrupo }
+        jogos.filter { groupKey(for: $0) == selectedGrupo }
     }
 
     private var jogosEditaveisDaAba: [Jogo] {
         jogosDaAba.filter { $0.editavel }
     }
 
+    private var isKnockoutTab: Bool {
+        selectedGrupo == "Outros" || jogosDaAba.contains { $0.mataMata }
+    }
+
     private var pendentesDaAba: Int {
         jogosEditaveisDaAba.filter { jogo in
             let draft = drafts[jogo.id] ?? DraftPalpite()
-            return draft.golsA.trimmingCharacters(in: .whitespaces).isEmpty ||
+            let missingScore = draft.golsA.trimmingCharacters(in: .whitespaces).isEmpty ||
                 draft.golsB.trimmingCharacters(in: .whitespaces).isEmpty
+            let missingQualified = jogo.mataMata && draft.classificado.trimmingCharacters(in: .whitespaces).isEmpty
+            return missingScore || missingQualified
         }.count
+    }
+
+    private var playoffPhases: [String] {
+        orderedPhases(from: jogosDaAba.filter { $0.mataMata })
+    }
+
+    private var visiblePlayoffPhases: [String] {
+        guard !playoffPhases.isEmpty else { return [] }
+        if playoffStartIndex >= 4 {
+            return Array(playoffPhases.dropFirst(4))
+        }
+        return Array(playoffPhases.dropFirst(playoffStartIndex).prefix(3))
     }
 
     var body: some View {
@@ -39,39 +63,14 @@ struct PalpitesView: View {
                     Divider()
                 }
 
-                List {
-                    if let message {
-                        Text(message)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                content
+                    .overlay {
+                        if isLoading {
+                            ProgressView()
+                                .padding()
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                        }
                     }
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-
-                    ForEach(jogosDaAba) { jogo in
-                        PalpiteGameRow(
-                            jogo: jogo,
-                            draft: Binding(
-                                get: { drafts[jogo.id] ?? DraftPalpite() },
-                                set: { drafts[jogo.id] = $0 }
-                            ),
-                            focusedField: $focusedField
-                        )
-                    }
-                }
-                .listStyle(.plain)
-                .overlay {
-                    if isLoading {
-                        ProgressView()
-                    }
-                }
-                .refreshable {
-                    await load(force: true)
-                }
             }
             .navigationTitle("Palpites")
             .toolbar {
@@ -92,6 +91,87 @@ struct PalpitesView: View {
                 }
             }
             .task { await load() }
+            .onChange(of: selectedGrupo) { _, _ in
+                playoffStartIndex = 0
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if isKnockoutTab {
+            knockoutContent
+        } else {
+            regularList
+        }
+    }
+
+    private var regularList: some View {
+        List {
+            messages
+
+            ForEach(jogosDaAba) { jogo in
+                PalpiteGameRow(
+                    jogo: jogo,
+                    draft: Binding(
+                        get: { drafts[jogo.id] ?? DraftPalpite() },
+                        set: { drafts[jogo.id] = $0 }
+                    ),
+                    focusedField: $focusedField
+                )
+            }
+        }
+        .listStyle(.plain)
+        .refreshable {
+            await load(force: true)
+        }
+    }
+
+    private var knockoutContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                messages
+                    .padding(.horizontal)
+
+                playoffPhaseTabs
+
+                ScrollView(.horizontal, showsIndicators: true) {
+                    HStack(alignment: .top, spacing: 28) {
+                        ForEach(Array(visiblePlayoffPhases.enumerated()), id: \.element) { offset, phase in
+                            let absoluteIndex = (playoffStartIndex >= 4 ? 4 : playoffStartIndex) + offset
+                            KnockoutPhaseColumn(
+                                phaseIndex: absoluteIndex,
+                                isFirstVisible: offset == 0,
+                                isLastVisible: offset == visiblePlayoffPhases.count - 1,
+                                jogos: jogosDaAba.filter { $0.fase == phase },
+                                drafts: $drafts,
+                                focusedField: $focusedField
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 14)
+                }
+            }
+        }
+        .refreshable {
+            await load(force: true)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
+    @ViewBuilder
+    private var messages: some View {
+        if let message {
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+
+        if let errorMessage {
+            Text(errorMessage)
+                .font(.footnote)
+                .foregroundStyle(.red)
         }
     }
 
@@ -102,7 +182,7 @@ struct PalpitesView: View {
                     Button {
                         selectedGrupo = grupo
                     } label: {
-                        Text(grupo == "Outros" ? "Outros" : "Grupo \(grupo)")
+                        Text(tabTitle(for: grupo))
                             .font(.subheadline.weight(.semibold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
@@ -118,11 +198,35 @@ struct PalpitesView: View {
         }
     }
 
+    private var playoffPhaseTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(0..<playoffTabCount, id: \.self) { index in
+                    Button {
+                        playoffStartIndex = index
+                    } label: {
+                        Text(playoffTabTitle(index))
+                            .font(.subheadline.weight(.bold))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 9)
+                            .background(playoffStartIndex == index ? Color.white : Color(.systemGray5))
+                            .foregroundStyle(.primary)
+                            .clipShape(Capsule())
+                            .shadow(color: .black.opacity(playoffStartIndex == index ? 0.14 : 0.06), radius: 6, y: 3)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+        }
+    }
+
     private var actionBar: some View {
         VStack(spacing: 10) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(selectedGrupo == "Outros" ? "Outros" : "Grupo \(selectedGrupo)")
+                    Text(tabTitle(for: selectedGrupo))
                         .font(.headline)
                     Text("\(jogosDaAba.count) jogos | \(pendentesDaAba) pendentes")
                         .font(.caption)
@@ -163,6 +267,10 @@ struct PalpitesView: View {
         .padding(.bottom, 12)
     }
 
+    private var playoffTabCount: Int {
+        min(5, max(playoffPhases.count, 1))
+    }
+
     private func load(force: Bool = false) async {
         isLoading = true
         do {
@@ -184,7 +292,8 @@ struct PalpitesView: View {
         for jogo in jogos {
             updated[jogo.id] = DraftPalpite(
                 golsA: jogo.palpite?.golsA.map(String.init) ?? "",
-                golsB: jogo.palpite?.golsB.map(String.init) ?? ""
+                golsB: jogo.palpite?.golsB.map(String.init) ?? "",
+                classificado: jogo.palpite?.classificado ?? ""
             )
         }
         drafts = updated
@@ -198,6 +307,11 @@ struct PalpitesView: View {
             }
             if draft.golsB.trimmingCharacters(in: .whitespaces).isEmpty {
                 draft.golsB = String(Int.random(in: 0...4))
+            }
+            if jogo.mataMata && draft.classificado.trimmingCharacters(in: .whitespaces).isEmpty {
+                let golsA = Int(draft.golsA) ?? 0
+                let golsB = Int(draft.golsB) ?? 0
+                draft.classificado = golsB > golsA ? (jogo.timeB ?? "") : (jogo.timeA ?? "")
             }
             drafts[jogo.id] = draft
         }
@@ -231,18 +345,29 @@ struct PalpitesView: View {
             let draft = drafts[jogo.id] ?? DraftPalpite()
             let aText = draft.golsA.trimmingCharacters(in: .whitespaces)
             let bText = draft.golsB.trimmingCharacters(in: .whitespaces)
-            if aText.isEmpty && bText.isEmpty {
+            let classificado = draft.classificado.trimmingCharacters(in: .whitespaces)
+
+            if aText.isEmpty && bText.isEmpty && classificado.isEmpty {
                 continue
             }
             guard let golsA = Int(aText), let golsB = Int(bText), golsA >= 0, golsB >= 0 else {
                 invalidos += 1
                 continue
             }
-            payload.append(SavePalpite(jogoId: jogo.id, golsA: golsA, golsB: golsB))
+            if jogo.mataMata && classificado.isEmpty {
+                invalidos += 1
+                continue
+            }
+            payload.append(SavePalpite(
+                jogoId: jogo.id,
+                golsA: golsA,
+                golsB: golsB,
+                classificado: classificado.isEmpty ? nil : classificado
+            ))
         }
 
         if payload.isEmpty {
-            message = invalidos > 0 ? "Revise placares invalidos." : "Nao ha palpites para salvar nesta aba."
+            message = invalidos > 0 ? "Revise placares ou classificados invalidos." : "Nao ha palpites para salvar nesta aba."
             return
         }
 
@@ -257,16 +382,292 @@ struct PalpitesView: View {
         }
         isLoading = false
     }
+
+    private func groupKey(for jogo: Jogo) -> String {
+        jogo.mataMata ? "Outros" : (jogo.grupo ?? "Outros")
+    }
+
+    private func tabTitle(for grupo: String) -> String {
+        grupo == "Outros" ? "Eliminatorias" : "Grupo \(grupo)"
+    }
+
+    private func orderedPhases(from jogos: [Jogo]) -> [String] {
+        var result: [String] = []
+        for jogo in jogos.sorted(by: sortByDateAndNumber) {
+            if !result.contains(jogo.fase) {
+                result.append(jogo.fase)
+            }
+        }
+        return result
+    }
+
+    private func sortByDateAndNumber(_ lhs: Jogo, _ rhs: Jogo) -> Bool {
+        if let leftNumber = lhs.numeroPartida, let rightNumber = rhs.numeroPartida, leftNumber != rightNumber {
+            return leftNumber < rightNumber
+        }
+        return lhs.id < rhs.id
+    }
+
+    private func playoffTabTitle(_ index: Int) -> String {
+        switch index {
+        case 0:
+            return "Rodada de 32"
+        case 1:
+            return "Oitavas de Final"
+        case 2:
+            return "Quartas de Final"
+        case 3:
+            return "Semifinal"
+        default:
+            return "Terceiro Lugar & Final"
+        }
+    }
 }
 
 private struct DraftPalpite {
     var golsA = ""
     var golsB = ""
+    var classificado = ""
 }
 
 private enum PalpiteField: Hashable {
     case golsA(Int)
     case golsB(Int)
+}
+
+private struct KnockoutPhaseColumn: View {
+    let phaseIndex: Int
+    let isFirstVisible: Bool
+    let isLastVisible: Bool
+    let jogos: [Jogo]
+    @Binding var drafts: [Int: DraftPalpite]
+    let focusedField: FocusState<PalpiteField?>.Binding
+
+    private var topPadding: CGFloat {
+        switch phaseIndex {
+        case 0:
+            return 0
+        case 1:
+            return 64
+        case 2:
+            return 150
+        case 3:
+            return 238
+        default:
+            return 0
+        }
+    }
+
+    private var spacing: CGFloat {
+        switch phaseIndex {
+        case 0:
+            return 14
+        case 1:
+            return 56
+        case 2:
+            return 128
+        default:
+            return 28
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: spacing) {
+            ForEach(jogos) { jogo in
+                KnockoutMatchCard(
+                    jogo: jogo,
+                    isFirstVisible: isFirstVisible,
+                    isLastVisible: isLastVisible,
+                    draft: Binding(
+                        get: { drafts[jogo.id] ?? DraftPalpite() },
+                        set: { drafts[jogo.id] = $0 }
+                    ),
+                    focusedField: focusedField
+                )
+            }
+        }
+        .padding(.top, topPadding)
+        .frame(width: 310, alignment: .top)
+    }
+}
+
+private struct KnockoutMatchCard: View {
+    let jogo: Jogo
+    let isFirstVisible: Bool
+    let isLastVisible: Bool
+    @Binding var draft: DraftPalpite
+    let focusedField: FocusState<PalpiteField?>.Binding
+
+    private var teamA: String { jogo.timeA ?? "-" }
+    private var teamB: String { jogo.timeB ?? "-" }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(matchDate)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let numero = jogo.numeroPartida {
+                    Text("#\(numero)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            VStack(spacing: 8) {
+                KnockoutTeamPredictionRow(
+                    name: teamA,
+                    code: jogo.siglaTimeA,
+                    score: $draft.golsA,
+                    field: .golsA(jogo.id),
+                    isEditable: jogo.editavel,
+                    focusedField: focusedField
+                )
+
+                HStack {
+                    Spacer()
+                    Text("x")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 48)
+                    Spacer()
+                }
+
+                KnockoutTeamPredictionRow(
+                    name: teamB,
+                    code: jogo.siglaTimeB,
+                    score: $draft.golsB,
+                    field: .golsB(jogo.id),
+                    isEditable: jogo.editavel,
+                    focusedField: focusedField
+                )
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Clasf. (mata-mata)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                if jogo.editavel {
+                    Picker("Classificado", selection: $draft.classificado) {
+                        Text("-- Classificado correto --").tag("")
+                        Text(teamA).tag(teamA)
+                        Text(teamB).tag(teamB)
+                    }
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                } else {
+                    Text(draft.classificado.isEmpty ? "-" : draft.classificado)
+                        .font(.subheadline.weight(.semibold))
+                }
+            }
+
+            Divider()
+
+            HStack {
+                Text(deadlineText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                Spacer()
+                if let pontuacao = jogo.pontuacao {
+                    Text("\(pontuacao.pontos) pts")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.green, in: Capsule())
+                        .foregroundStyle(.white)
+                } else {
+                    Text(jogo.status)
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.gray, in: Capsule())
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 8))
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(Color.yellow)
+                .frame(width: 4)
+        }
+        .overlay(alignment: .leading) {
+            if !isFirstVisible {
+                Rectangle()
+                    .fill(Color(.systemGray3))
+                    .frame(width: 28, height: 2)
+                    .offset(x: -28)
+            }
+        }
+        .overlay(alignment: .trailing) {
+            if !isLastVisible {
+                Rectangle()
+                    .fill(Color(.systemGray3))
+                    .frame(width: 28, height: 2)
+                    .offset(x: 28)
+            }
+        }
+        .shadow(color: .black.opacity(0.12), radius: 7, y: 3)
+    }
+
+    private var matchDate: String {
+        let date = jogo.dataExibicao ?? jogo.dataJogo ?? ""
+        let time = jogo.horaExibicao ?? jogo.horaBrasilia ?? ""
+        return "\(date) - \(time)"
+    }
+
+    private var deadlineText: String {
+        guard let prazo = jogo.prazoPalpiteExibicao, !prazo.isEmpty else {
+            return jogo.editavel ? "Aberto para palpite" : "Prazo encerrado"
+        }
+        return "Prazo: \(prazo)"
+    }
+}
+
+private struct KnockoutTeamPredictionRow: View {
+    let name: String
+    let code: String?
+    @Binding var score: String
+    let field: PalpiteField
+    let isEditable: Bool
+    let focusedField: FocusState<PalpiteField?>.Binding
+
+    var body: some View {
+        HStack(spacing: 8) {
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(Color(.systemGray3), lineWidth: 1)
+                .frame(width: 20, height: 20)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.82)
+                if let code {
+                    Text(code)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            TextField("-", text: $score)
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.center)
+                .focused(focusedField, equals: field)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 58)
+                .disabled(!isEditable)
+        }
+    }
 }
 
 private struct PalpiteGameRow: View {
@@ -293,7 +694,7 @@ private struct PalpiteGameRow: View {
                                 .foregroundStyle(.yellow)
                         }
                     }
-                    Text("\(jogo.dataJogo ?? "") \(jogo.horaBrasilia ?? "")")
+                    Text("\(jogo.dataExibicao ?? jogo.dataJogo ?? "") \(jogo.horaExibicao ?? jogo.horaBrasilia ?? "")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

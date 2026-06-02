@@ -174,16 +174,22 @@ struct RankingItem: Decodable, Identifiable {
 
 struct Jogo: Decodable, Identifiable {
     let id: Int
+    let numeroPartida: Int?
     let fase: String
     let grupo: String?
     let dataJogo: String?
     let horaBrasilia: String?
+    let dataExibicao: String?
+    let horaExibicao: String?
+    let timezoneExibicao: String?
     let timeA: String?
     let timeB: String?
     let siglaTimeA: String?
     let siglaTimeB: String?
     let estadio: String?
     let cidade: String?
+    let mataMata: Bool
+    let prazoPalpiteExibicao: String?
     let status: String
     let editavel: Bool
     let resultado: Resultado?
@@ -192,13 +198,19 @@ struct Jogo: Decodable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id, fase, grupo, status, editavel, resultado, palpite, pontuacao
+        case numeroPartida = "numero_partida"
         case dataJogo = "data_jogo"
         case horaBrasilia = "hora_brasilia"
+        case dataExibicao = "data_exibicao"
+        case horaExibicao = "hora_exibicao"
+        case timezoneExibicao = "timezone_exibicao"
         case timeA = "time_a"
         case timeB = "time_b"
         case siglaTimeA = "sigla_time_a"
         case siglaTimeB = "sigla_time_b"
         case estadio, cidade
+        case mataMata = "mata_mata"
+        case prazoPalpiteExibicao = "prazo_palpite_exibicao"
     }
 }
 
@@ -234,11 +246,13 @@ struct SavePalpite: Encodable {
     let jogoId: Int
     let golsA: Int
     let golsB: Int
+    let classificado: String?
 
     enum CodingKeys: String, CodingKey {
         case jogoId = "jogo_id"
         case golsA = "gols_a"
         case golsB = "gols_b"
+        case classificado
     }
 }
 
