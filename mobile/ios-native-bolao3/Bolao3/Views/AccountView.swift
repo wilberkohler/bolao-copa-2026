@@ -35,7 +35,7 @@ struct AccountView: View {
                     }
                 }
 
-                Section("Convite") {
+                Section {
                     ShareLink(item: inviteText) {
                         Label("Convidar amigo", systemImage: "square.and.arrow.up")
                     }
@@ -46,11 +46,13 @@ struct AccountView: View {
                     } label: {
                         Label("Copiar convite", systemImage: "link")
                     }
+                } header: {
+                    Text("Convite")
                 } footer: {
                     Text(inviteURL.absoluteString)
                 }
 
-                Section("Grupo privado") {
+                Section {
                     if isLoadingConfig {
                         ProgressView("Carregando informacoes...")
                     } else if let privateConfig {
@@ -78,16 +80,20 @@ struct AccountView: View {
                         Text("Informacoes de grupo privado indisponiveis no momento.")
                             .foregroundStyle(.secondary)
                     }
+                } header: {
+                    Text("Grupo privado")
                 } footer: {
                     Text("O preco final sera exibido pela Apple ou Google Play no momento da compra.")
                 }
 
-                Section("E-mail") {
+                Section {
                     Button {
                         Task { await resendConfirmation() }
                     } label: {
                         Label("Reenviar confirmacao de e-mail", systemImage: "envelope")
                     }
+                } header: {
+                    Text("E-mail")
                 } footer: {
                     Text("Verifique tambem a caixa de spam.")
                 }
