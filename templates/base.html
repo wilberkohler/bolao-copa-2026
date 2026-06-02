@@ -104,6 +104,8 @@
                 </form>
               </li>
               <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('solicitar_exclusao_dados') }}">{{ tr('delete_account') }}</a></li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{{ url_for('logout') }}">{{ tr('logout') }}</a></li>
             </ul>
           </div>
@@ -133,6 +135,8 @@
     {{ tr('footer_note') }}
     <span class="mx-2">|</span>
     <a href="{{ url_for('solicitar_exclusao_dados') }}">{{ tr('account_deletion') }}</a>
+    <br>
+    {{ tr('independent_notice') }}
   </small>
 </footer>
 

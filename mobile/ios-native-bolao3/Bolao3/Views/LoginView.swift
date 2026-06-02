@@ -17,7 +17,7 @@ struct LoginView: View {
                 VStack(spacing: 6) {
                     Text("Bolao 3")
                         .font(.largeTitle.bold())
-                    Text("Copa do Mundo 2026")
+                    Text("Copa de Futebol 2026")
                         .foregroundStyle(.secondary)
                 }
 

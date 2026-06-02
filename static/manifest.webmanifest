@@ -1,7 +1,7 @@
 {
   "name": "Bolão Copa 2026",
   "short_name": "Bolão 2026",
-  "description": "Sistema de palpites da Copa do Mundo 2026",
+  "description": "Sistema de palpites de futebol 2026",
   "lang": "pt-BR",
   "start_url": "/login",
   "scope": "/",

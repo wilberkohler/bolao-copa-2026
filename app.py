@@ -473,8 +473,18 @@ TRANSLATIONS = {
         "highlight_team_auto": "Automático pelo idioma ({team})",
         "save_highlight_team": "Aplicar selección",
         "logout": "Sair",
-        "account_deletion": "Solicitar exclusão de conta e dados",
-        "footer_note": "Bolão Copa do Mundo FIFA 2026 — Todos os horários em Brasília (BRT/UTC-3)",
+        "account_deletion": "Excluir minha conta",
+        "footer_note": "Bolão de Futebol 2026 — Todos os horários em Brasília (BRT/UTC-3)",
+        "independent_notice": "Aplicativo independente, sem afiliação, patrocínio ou endosso de entidades oficiais do torneio.",
+        "delete_account": "Excluir minha conta",
+        "delete_account_title": "Excluir Conta e Dados",
+        "delete_account_intro": "Esta ação remove seus dados pessoais, palpites, pontuações e histórico vinculados à conta. Ela não pode ser desfeita.",
+        "delete_account_password": "Confirme sua senha",
+        "delete_account_confirm_label": "Digite EXCLUIR para confirmar",
+        "delete_account_button": "Excluir minha conta definitivamente",
+        "delete_account_cancel": "Cancelar",
+        "delete_account_invalid": "Senha ou confirmação inválida.",
+        "delete_account_done": "Sua conta e seus dados pessoais foram excluídos.",
         "dashboard": "Dashboard",
         "invite_friend": "Convidar amigo",
         "copy_invite": "Copiar convite",
@@ -668,8 +678,8 @@ TRANSLATIONS = {
     },
     "en": {
         "language_label": "Language",
-        "login_title": "Sign in - World Cup Pool 2026",
-        "app_name": "World Cup Pool 2026",
+        "login_title": "Sign in - Football Pool 2026",
+        "app_name": "Football Pool 2026",
         "system_subtitle": "Prediction System",
         "email": "Email",
         "password": "Password",
@@ -679,8 +689,8 @@ TRANSLATIONS = {
         "no_account": "Don't have an account?",
         "register_here": "Register here",
         "logged_out": "You have signed out.",
-        "register_title": "Register - World Cup Pool 2026",
-        "register_heading": "Register - World Cup Pool 2026",
+        "register_title": "Register - Football Pool 2026",
+        "register_heading": "Register - Football Pool 2026",
         "name": "Name",
         "nickname": "Nickname",
         "required": "*",
@@ -696,13 +706,13 @@ TRANSLATIONS = {
         "registering": "Registering...",
         "has_account": "Already have an account?",
         "sign_in_here": "Sign in here",
-        "recover_password_title": "Recover password - World Cup Pool 2026",
+        "recover_password_title": "Recover password - Football Pool 2026",
         "recover_password": "Recover password",
         "recover_password_subtitle": "Enter your account email",
         "send_link": "Send link",
         "sending": "Sending...",
         "remembered_password": "Remembered your password?",
-        "new_password_title": "New password - World Cup Pool 2026",
+        "new_password_title": "New password - Football Pool 2026",
         "new_password_heading": "Create a new password",
         "new_password": "New password",
         "confirm_new_password": "Confirm new password",
@@ -726,8 +736,18 @@ TRANSLATIONS = {
         "highlight_team_auto": "Automatic by language ({team})",
         "save_highlight_team": "Apply highlight",
         "logout": "Sign out",
-        "account_deletion": "Request account and data deletion",
-        "footer_note": "FIFA World Cup Pool 2026 — All times in Brasília (BRT/UTC-3)",
+        "account_deletion": "Delete my account",
+        "footer_note": "Football Pool 2026 — All times in Brasília (BRT/UTC-3)",
+        "independent_notice": "Independent app, not affiliated with, sponsored by, or endorsed by any official tournament entity.",
+        "delete_account": "Delete my account",
+        "delete_account_title": "Delete Account and Data",
+        "delete_account_intro": "This action removes your personal data, predictions, points and account history. It cannot be undone.",
+        "delete_account_password": "Confirm your password",
+        "delete_account_confirm_label": "Type DELETE to confirm",
+        "delete_account_button": "Permanently delete my account",
+        "delete_account_cancel": "Cancel",
+        "delete_account_invalid": "Invalid password or confirmation.",
+        "delete_account_done": "Your account and personal data have been deleted.",
         "dashboard": "Dashboard",
         "invite_friend": "Invite a friend",
         "copy_invite": "Copy invite",
@@ -790,7 +810,7 @@ TRANSLATIONS = {
         "phase_final": "Final",
         "world_cup_group": "Group {group}",
         "other_group": "Knockout",
-        "round_report_subject": "Report for {round_label} - World Cup Pool 2026",
+        "round_report_subject": "Report for {round_label} - Football Pool 2026",
         "hello_name": "Hello, {name}!",
         "round_report_heading": "Report for {round_label}:",
         "your_round_points": "Your points this round: {points}",
@@ -804,7 +824,7 @@ TRANSLATIONS = {
         "invite_friend_line": "Invite a friend to join:",
         "private_group_title": "Private group",
         "private_group_hero": "Create a private group to manage your own pool.",
-        "private_group_price": "One-time payment for the 2026 World Cup.",
+        "private_group_price": "One-time payment for the 2026 football tournament.",
         "private_group_price_usd": "Estimated one-time price in USD",
         "private_group_local_price": "Approximate currency for the highlighted team",
         "private_group_price_note": "Approximate values. The final price will be shown by Apple or Google Play at purchase time.",
@@ -887,7 +907,7 @@ TRANSLATIONS = {
         "deadline_4": "Games without a prediction before the deadline count as missed.",
         "deadline_5": "Results appear on the predictions screen for immediate comparison.",
         "ranking_stages": "Ranking by Stage",
-        "ranking_stage_overall": "adds all World Cup games.",
+        "ranking_stage_overall": "adds all football tournament games.",
         "ranking_stage_groups": "counts only group stage games.",
         "ranking_stage_knockout": "starts from zero in the knockout stage and runs through the final.",
         "ranking_stage_ties": "Tie-breaker criteria are the same in every stage.",
@@ -911,13 +931,13 @@ TRANSLATIONS = {
         "ranking_info": "The overall ranking adds all scored games. Stage ranking considers only games from the selected stage.",
         "simulation_info": "Admins can use simulation to move dates forward and generate random results to validate the system.",
         "data_deletion": "Data Deletion",
-        "data_deletion_info": "Users can request account and data deletion through the link",
-        "confirm_email_subject": "Confirm your email - World Cup Pool 2026",
-        "confirm_email_text": "Hello, {name}!\n\nConfirm your email to receive round reports from World Cup Pool 2026:\n{url}\n\nIf you did not create this account, ignore this message.",
-        "confirm_email_html": "<p>Hello, {name}!</p><p>Confirm your email to receive round reports from World Cup Pool 2026.</p><p><a href=\"{url}\">Confirm email</a></p><p>If you did not create this account, ignore this message.</p>",
-        "reset_password_subject": "Reset your password - World Cup Pool 2026",
-        "reset_password_text": "Hello, {name}!\n\nWe received a request to reset your World Cup Pool 2026 password.\nUse this link within 1 hour to create a new password:\n{url}\n\nIf you did not request this change, ignore this message.",
-        "reset_password_html": "<p>Hello, {name}!</p><p>We received a request to reset your World Cup Pool 2026 password.</p><p><a href=\"{url}\">Create new password</a></p><p>This link expires in 1 hour. If you did not request this change, ignore this message.</p>",
+        "data_deletion_info": "Users can delete their account and data through the link",
+        "confirm_email_subject": "Confirm your email - Football Pool 2026",
+        "confirm_email_text": "Hello, {name}!\n\nConfirm your email to receive round reports from Football Pool 2026:\n{url}\n\nIf you did not create this account, ignore this message.",
+        "confirm_email_html": "<p>Hello, {name}!</p><p>Confirm your email to receive round reports from Football Pool 2026.</p><p><a href=\"{url}\">Confirm email</a></p><p>If you did not create this account, ignore this message.</p>",
+        "reset_password_subject": "Reset your password - Football Pool 2026",
+        "reset_password_text": "Hello, {name}!\n\nWe received a request to reset your Football Pool 2026 password.\nUse this link within 1 hour to create a new password:\n{url}\n\nIf you did not request this change, ignore this message.",
+        "reset_password_html": "<p>Hello, {name}!</p><p>We received a request to reset your Football Pool 2026 password.</p><p><a href=\"{url}\">Create new password</a></p><p>This link expires in 1 hour. If you did not request this change, ignore this message.</p>",
     },
     "es": {
         "language_label": "Idioma",
@@ -980,7 +1000,7 @@ TRANSLATIONS = {
         "save_highlight_team": "Aplicar destaque",
         "logout": "Salir",
         "account_deletion": "Solicitar eliminación de cuenta y datos",
-        "footer_note": "Quiniela Mundial FIFA 2026 — Todos los horarios en Brasilia (BRT/UTC-3)",
+        "footer_note": "Quiniela de Futbol 2026 — Todos los horarios en Brasilia (BRT/UTC-3)",
         "dashboard": "Panel",
         "invite_friend": "Invitar a un amigo",
         "copy_invite": "Copiar invitación",
@@ -1149,8 +1169,8 @@ TRANSLATIONS = {
 
 TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "language_label": "Langue",
-    "login_title": "Connexion - Pool Coupe du Monde 2026",
-    "app_name": "Pool Coupe du Monde 2026",
+    "login_title": "Connexion - Pool Football 2026",
+    "app_name": "Pool Football 2026",
     "system_subtitle": "SystÃ¨me de pronostics",
     "email": "E-mail",
     "password": "Mot de passe",
@@ -1160,8 +1180,8 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "no_account": "Pas encore de compte ?",
     "register_here": "Inscrivez-vous ici",
     "logged_out": "Vous Ãªtes dÃ©connectÃ©.",
-    "register_title": "Inscription - Pool Coupe du Monde 2026",
-    "register_heading": "Inscription - Pool Coupe du Monde 2026",
+    "register_title": "Inscription - Pool Football 2026",
+    "register_heading": "Inscription - Pool Football 2026",
     "name": "Nom",
     "nickname": "Pseudo",
     "nickname_placeholder": "Comment souhaitez-vous Ãªtre appelÃ© ?",
@@ -1176,13 +1196,13 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "registering": "Inscription...",
     "has_account": "Vous avez dÃ©jÃ  un compte ?",
     "sign_in_here": "Connectez-vous ici",
-    "recover_password_title": "RÃ©cupÃ©rer le mot de passe - Pool Coupe du Monde 2026",
+    "recover_password_title": "RÃ©cupÃ©rer le mot de passe - Pool Football 2026",
     "recover_password": "RÃ©cupÃ©rer le mot de passe",
     "recover_password_subtitle": "Indiquez l'e-mail de votre compte",
     "send_link": "Envoyer le lien",
     "sending": "Envoi...",
     "remembered_password": "Mot de passe retrouvÃ© ?",
-    "new_password_title": "Nouveau mot de passe - Pool Coupe du Monde 2026",
+    "new_password_title": "Nouveau mot de passe - Pool Football 2026",
     "new_password_heading": "CrÃ©er un nouveau mot de passe",
     "new_password": "Nouveau mot de passe",
     "confirm_new_password": "Confirmer le nouveau mot de passe",
@@ -1205,7 +1225,7 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "save_highlight_team": "Appliquer",
     "logout": "Se dÃ©connecter",
     "account_deletion": "Demander la suppression du compte et des donnÃ©es",
-    "footer_note": "Pool Coupe du Monde FIFA 2026 - Tous les horaires sont Ã  Brasilia (BRT/UTC-3)",
+    "footer_note": "Pool Football 2026 - Tous les horaires sont Ã  Brasilia (BRT/UTC-3)",
     "dashboard": "Tableau de bord",
     "invite_friend": "Inviter un ami",
     "copy_invite": "Copier l'invitation",
@@ -1351,7 +1371,7 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "simulation_info": "Les administrateurs peuvent utiliser la simulation pour avancer les dates et valider le fonctionnement.",
     "data_deletion": "Suppression des donnÃ©es",
     "data_deletion_info": "Les utilisateurs peuvent demander la suppression du compte et des donnÃ©es via le lien",
-    "round_report_subject": "Rapport de {round_label} - Pool Coupe du Monde 2026",
+    "round_report_subject": "Rapport de {round_label} - Pool Football 2026",
     "hello_name": "Bonjour, {name} !",
     "round_report_heading": "Rapport de {round_label} :",
     "your_round_points": "Vos points sur cette journÃ©e : {points}",
@@ -1363,18 +1383,18 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "top5_overall": "Top 5 gÃ©nÃ©ral :",
     "access_app_details": "Ouvrez l'app pour voir tous les dÃ©tails.",
     "invite_friend_line": "Invitez un ami Ã  participer :",
-    "confirm_email_subject": "Confirmez votre e-mail - Pool Coupe du Monde 2026",
-    "confirm_email_text": "Bonjour, {name} !\n\nConfirmez votre e-mail pour recevoir les rapports du Pool Coupe du Monde 2026 :\n{url}\n\nSi vous n'avez pas crÃ©Ã© ce compte, ignorez ce message.",
-    "confirm_email_html": "<p>Bonjour, {name} !</p><p>Confirmez votre e-mail pour recevoir les rapports du Pool Coupe du Monde 2026.</p><p><a href=\"{url}\">Confirmer l'e-mail</a></p><p>Si vous n'avez pas crÃ©Ã© ce compte, ignorez ce message.</p>",
-    "reset_password_subject": "RÃ©initialisez votre mot de passe - Pool Coupe du Monde 2026",
+    "confirm_email_subject": "Confirmez votre e-mail - Pool Football 2026",
+    "confirm_email_text": "Bonjour, {name} !\n\nConfirmez votre e-mail pour recevoir les rapports du Pool Football 2026 :\n{url}\n\nSi vous n'avez pas crÃ©Ã© ce compte, ignorez ce message.",
+    "confirm_email_html": "<p>Bonjour, {name} !</p><p>Confirmez votre e-mail pour recevoir les rapports du Pool Football 2026.</p><p><a href=\"{url}\">Confirmer l'e-mail</a></p><p>Si vous n'avez pas crÃ©Ã© ce compte, ignorez ce message.</p>",
+    "reset_password_subject": "RÃ©initialisez votre mot de passe - Pool Football 2026",
     "reset_password_text": "Bonjour, {name} !\n\nNous avons reÃ§u une demande de rÃ©initialisation de votre mot de passe.\nUtilisez ce lien dans l'heure pour crÃ©er un nouveau mot de passe :\n{url}\n\nSi vous n'avez pas demandÃ© ce changement, ignorez ce message.",
     "reset_password_html": "<p>Bonjour, {name} !</p><p>Nous avons reÃ§u une demande de rÃ©initialisation de votre mot de passe.</p><p><a href=\"{url}\">CrÃ©er un nouveau mot de passe</a></p><p>Ce lien expire dans 1 heure. Si vous n'avez pas demandÃ© ce changement, ignorez ce message.</p>",
 }}
 
 TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "language_label": "Sprache",
-    "login_title": "Anmelden - WM-Tippspiel 2026",
-    "app_name": "WM-Tippspiel 2026",
+    "login_title": "Anmelden - Fussball-Tippspiel 2026",
+    "app_name": "Fussball-Tippspiel 2026",
     "system_subtitle": "Tippsystem",
     "email": "E-Mail",
     "password": "Passwort",
@@ -1384,8 +1404,8 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "no_account": "Noch kein Konto?",
     "register_here": "Hier registrieren",
     "logged_out": "Sie wurden abgemeldet.",
-    "register_title": "Registrierung - WM-Tippspiel 2026",
-    "register_heading": "Registrierung - WM-Tippspiel 2026",
+    "register_title": "Registrierung - Fussball-Tippspiel 2026",
+    "register_heading": "Registrierung - Fussball-Tippspiel 2026",
     "name": "Name",
     "nickname": "Spitzname",
     "nickname_placeholder": "Wie sollen wir Sie nennen?",
@@ -1400,13 +1420,13 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "registering": "Registrierung...",
     "has_account": "Sie haben bereits ein Konto?",
     "sign_in_here": "Hier anmelden",
-    "recover_password_title": "Passwort wiederherstellen - WM-Tippspiel 2026",
+    "recover_password_title": "Passwort wiederherstellen - Fussball-Tippspiel 2026",
     "recover_password": "Passwort wiederherstellen",
     "recover_password_subtitle": "Geben Sie Ihre Konto-E-Mail ein",
     "send_link": "Link senden",
     "sending": "Senden...",
     "remembered_password": "Passwort wieder eingefallen?",
-    "new_password_title": "Neues Passwort - WM-Tippspiel 2026",
+    "new_password_title": "Neues Passwort - Fussball-Tippspiel 2026",
     "new_password_heading": "Neues Passwort erstellen",
     "new_password": "Neues Passwort",
     "confirm_new_password": "Neues Passwort bestÃ¤tigen",
@@ -1429,7 +1449,7 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "save_highlight_team": "Anwenden",
     "logout": "Abmelden",
     "account_deletion": "Konto- und DatenlÃ¶schung beantragen",
-    "footer_note": "FIFA WM-Tippspiel 2026 - Alle Zeiten in Brasilia (BRT/UTC-3)",
+    "footer_note": "Fussball-Tippspiel 2026 - Alle Zeiten in Brasilia (BRT/UTC-3)",
     "dashboard": "Dashboard",
     "invite_friend": "Freund einladen",
     "copy_invite": "Einladung kopieren",
@@ -1575,7 +1595,7 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "simulation_info": "Administratoren kÃ¶nnen Simulationen nutzen, um Daten vorzuziehen und das System zu prÃ¼fen.",
     "data_deletion": "DatenlÃ¶schung",
     "data_deletion_info": "Benutzer kÃ¶nnen die LÃ¶schung von Konto und Daten Ã¼ber den Link beantragen",
-    "round_report_subject": "Bericht fÃ¼r {round_label} - WM-Tippspiel 2026",
+    "round_report_subject": "Bericht fÃ¼r {round_label} - Fussball-Tippspiel 2026",
     "hello_name": "Hallo, {name}!",
     "round_report_heading": "Bericht fÃ¼r {round_label}:",
     "your_round_points": "Ihre Punkte in dieser Runde: {points}",
@@ -1587,10 +1607,10 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "top5_overall": "Gesamt Top 5:",
     "access_app_details": "Ã–ffnen Sie die App, um alle Details zu sehen.",
     "invite_friend_line": "Laden Sie einen Freund ein:",
-    "confirm_email_subject": "BestÃ¤tigen Sie Ihre E-Mail - WM-Tippspiel 2026",
-    "confirm_email_text": "Hallo, {name}!\n\nBestÃ¤tigen Sie Ihre E-Mail, um Rundenberichte vom WM-Tippspiel 2026 zu erhalten:\n{url}\n\nWenn Sie dieses Konto nicht erstellt haben, ignorieren Sie diese Nachricht.",
-    "confirm_email_html": "<p>Hallo, {name}!</p><p>BestÃ¤tigen Sie Ihre E-Mail, um Rundenberichte vom WM-Tippspiel 2026 zu erhalten.</p><p><a href=\"{url}\">E-Mail bestÃ¤tigen</a></p><p>Wenn Sie dieses Konto nicht erstellt haben, ignorieren Sie diese Nachricht.</p>",
-    "reset_password_subject": "Passwort zurÃ¼cksetzen - WM-Tippspiel 2026",
+    "confirm_email_subject": "BestÃ¤tigen Sie Ihre E-Mail - Fussball-Tippspiel 2026",
+    "confirm_email_text": "Hallo, {name}!\n\nBestÃ¤tigen Sie Ihre E-Mail, um Rundenberichte vom Fussball-Tippspiel 2026 zu erhalten:\n{url}\n\nWenn Sie dieses Konto nicht erstellt haben, ignorieren Sie diese Nachricht.",
+    "confirm_email_html": "<p>Hallo, {name}!</p><p>BestÃ¤tigen Sie Ihre E-Mail, um Rundenberichte vom Fussball-Tippspiel 2026 zu erhalten.</p><p><a href=\"{url}\">E-Mail bestÃ¤tigen</a></p><p>Wenn Sie dieses Konto nicht erstellt haben, ignorieren Sie diese Nachricht.</p>",
+    "reset_password_subject": "Passwort zurÃ¼cksetzen - Fussball-Tippspiel 2026",
     "reset_password_text": "Hallo, {name}!\n\nWir haben eine Anfrage zum ZurÃ¼cksetzen Ihres Passworts erhalten.\nNutzen Sie diesen Link innerhalb von 1 Stunde, um ein neues Passwort zu erstellen:\n{url}\n\nWenn Sie diese Ã„nderung nicht angefordert haben, ignorieren Sie diese Nachricht.",
     "reset_password_html": "<p>Hallo, {name}!</p><p>Wir haben eine Anfrage zum ZurÃ¼cksetzen Ihres Passworts erhalten.</p><p><a href=\"{url}\">Neues Passwort erstellen</a></p><p>Dieser Link lÃ¤uft in 1 Stunde ab. Wenn Sie diese Ã„nderung nicht angefordert haben, ignorieren Sie diese Nachricht.</p>",
 }}
@@ -1902,7 +1922,7 @@ TRANSLATIONS["fr"].update({
     "nav_private_group": "Groupe prive",
     "private_group_title": "Groupe prive",
     "private_group_hero": "Creez un groupe prive pour administrer votre propre pool.",
-    "private_group_price": "Paiement unique pour la Coupe du Monde 2026.",
+    "private_group_price": "Paiement unique pour le tournoi de football 2026.",
     "private_group_price_usd": "Prix unique estime en dollars",
     "private_group_local_price": "Devise approximative de l'equipe mise en avant",
     "private_group_price_note": "Montants approximatifs. Le prix final sera affiche par Apple ou Google Play au moment de l'achat.",
@@ -5111,27 +5131,48 @@ def regras():
 
 
 @app.route("/solicitar-exclusao-dados", methods=["GET", "POST"])
+@login_required
 def solicitar_exclusao_dados():
     if request.method == "POST":
-        nome = request.form.get("nome", "").strip()
-        email = request.form.get("email", "").strip().lower()
-        motivo = request.form.get("motivo", "").strip()
+        senha = request.form.get("senha", "")
+        confirmacao = request.form.get("confirmacao", "").strip().upper()
 
-        if not nome or not email:
-            flash("Nome e e-mail sao obrigatorios.", "danger")
-            return render_template("solicitar_exclusao_dados.html", nome=nome, email=email, motivo=motivo)
+        if not g.user.check_password(senha) or confirmacao not in {"EXCLUIR", "DELETE"}:
+            flash(tr("delete_account_invalid"), "danger")
+            return render_template("solicitar_exclusao_dados.html")
 
-        solicitacao = SolicitacaoExclusaoDados(
-            nome=nome,
-            email=email,
-            motivo=motivo or None,
-            status="Pendente",
-        )
-        db.session.add(solicitacao)
+        user = g.user
+        user_id = user.id
+        competidor = Competidor.query.filter_by(user_id=user_id).first()
+
+        if competidor:
+            HistoricoPalpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+            Palpite.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+            Pontuacao.query.filter_by(competidor_id=competidor.id).delete(synchronize_session=False)
+            db.session.delete(competidor)
+
+        RelatorioRodadaEnvio.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        for grupo in Grupo.query.filter_by(criado_por_id=user_id).all():
+            grupo.criado_por_id = None
+
+        marcador = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        user.nome = "Conta excluida"
+        user.email = f"deleted-user-{user_id}-{marcador}@deleted.local"
+        user.apelido = None
+        user.grupo_id = None
+        user.eh_admin = False
+        user.ativo = False
+        user.email_confirmado = False
+        user.email_confirmado_em = None
+        user.receber_relatorios = False
+        user.time_destaque = None
+        user.set_password(os.urandom(24).hex())
+        user.updated_at = datetime.utcnow()
         db.session.commit()
 
-        flash("Solicitacao recebida com sucesso. Nossa equipe analisara o pedido e retornara por e-mail.", "success")
-        return redirect(url_for("solicitar_exclusao_dados"))
+        session.clear()
+        flash(tr("delete_account_done"), "success")
+        return redirect(url_for("login"))
 
     return render_template("solicitar_exclusao_dados.html")
 
