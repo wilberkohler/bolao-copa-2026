@@ -3,6 +3,11 @@
 {% block content %}
 <h4 class="mb-3"><i class="bi bi-bar-chart-fill text-success"></i> Ranking - {{ etapa_label }}</h4>
 
+<div class="alert alert-light border small">
+  Use as abas para alternar entre ranking geral, fase de grupos, mata-mata e selecao em destaque.
+  A selecao em destaque pode ser alterada no seletor de selecao/país no menu superior.
+</div>
+
 <ul class="nav nav-tabs mb-4">
   {% for key, label in ranking_etapas.items() %}
     <li class="nav-item">

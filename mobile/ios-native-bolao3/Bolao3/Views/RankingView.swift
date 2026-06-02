@@ -20,6 +20,10 @@ struct RankingView: View {
                     Text(etapa.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    Text("Use as opcoes para alternar o ranking. A selecao em destaque usa o pais escolhido na tela Conta.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
 
                 ForEach(ranking) { item in
