@@ -10,7 +10,7 @@ on:
 jobs:
   archive-upload:
     name: Archive and Upload Bolao 3 to TestFlight
-    runs-on: macos-15
+    runs-on: macos-26
 
     defaults:
       run:
@@ -143,9 +143,9 @@ jobs:
             exit 1
           fi
 
-          xcrun altool \
-            --upload-app \
-            --type ios \
-            --file "$IPA_PATH" \
-            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+          xcrun iTMSTransporter \
+            -m upload \
+            -assetFile "$IPA_PATH" \
+            -apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            -apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            -v informational
