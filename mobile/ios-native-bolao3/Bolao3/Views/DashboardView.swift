@@ -57,7 +57,7 @@ struct DashboardView: View {
                         .pickerStyle(.segmented)
 
                         if podiumMode == .etapa {
-                            Text("A etapa muda automaticamente pela data da Copa.")
+                            Text("A etapa muda automaticamente pela data da Competicao.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

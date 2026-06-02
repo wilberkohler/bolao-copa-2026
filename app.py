@@ -32,7 +32,7 @@ PUBLIC_GROUP_COUNT = int(os.environ.get("PUBLIC_GROUP_COUNT", "100"))
 PRIVATE_GROUP_PRICE_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_CENTS", "4990"))
 PRIVATE_GROUP_PRICE_USD_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_USD_CENTS", "999"))
 PRIVATE_GROUP_PARTICIPANT_LIMIT = int(os.environ.get("PRIVATE_GROUP_PARTICIPANT_LIMIT", "150"))
-PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "grupo_privado_copa_2026")
+PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "private_group_2026")
 RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
@@ -415,8 +415,8 @@ TEAM_TRANSLATIONS = {
 TRANSLATIONS = {
     "pt-BR": {
         "language_label": "Idioma",
-        "login_title": "Login - Bolão Copa 2026",
-        "app_name": "Bolão Copa 2026",
+        "login_title": "Login - Bolão Competicao 2026",
+        "app_name": "Bolão Competicao 2026",
         "system_subtitle": "Sistema de Palpites",
         "email": "E-mail",
         "password": "Senha",
@@ -426,8 +426,8 @@ TRANSLATIONS = {
         "no_account": "Ainda não tem conta?",
         "register_here": "Cadastre-se aqui",
         "logged_out": "Você saiu.",
-        "register_title": "Cadastro - Bolão Copa 2026",
-        "register_heading": "Cadastro - Bolão Copa 2026",
+        "register_title": "Cadastro - Bolão Competicao 2026",
+        "register_heading": "Cadastro - Bolão Competicao 2026",
         "name": "Nome",
         "nickname": "Apelido",
         "required": "*",
@@ -443,13 +443,13 @@ TRANSLATIONS = {
         "registering": "Cadastrando...",
         "has_account": "Já tem conta?",
         "sign_in_here": "Entre aqui",
-        "recover_password_title": "Recuperar senha - Bolão Copa 2026",
+        "recover_password_title": "Recuperar senha - Bolão Competicao 2026",
         "recover_password": "Recuperar senha",
         "recover_password_subtitle": "Informe seu e-mail de cadastro",
         "send_link": "Enviar link",
         "sending": "Enviando...",
         "remembered_password": "Lembrou a senha?",
-        "new_password_title": "Nova senha - Bolão Copa 2026",
+        "new_password_title": "Nova senha - Bolão Competicao 2026",
         "new_password_heading": "Criar nova senha",
         "new_password": "Nova senha",
         "confirm_new_password": "Confirmar nova senha",
@@ -547,7 +547,7 @@ TRANSLATIONS = {
         "phase_final": "Final",
         "world_cup_group": "Grupo {group}",
         "other_group": "Eliminatórias",
-        "round_report_subject": "Relatório da {round_label} - Bolão Copa 2026",
+        "round_report_subject": "Relatório da {round_label} - Bolão Competicao 2026",
         "hello_name": "Olá, {name}!",
         "round_report_heading": "Relatório da {round_label}:",
         "your_round_points": "Seus pontos na rodada: {points}",
@@ -561,7 +561,7 @@ TRANSLATIONS = {
         "invite_friend_line": "Convide um amigo para participar:",
         "private_group_title": "Grupo privado",
         "private_group_hero": "Crie um grupo privado para administrar seu proprio bolao.",
-        "private_group_price": "Pagamento unico pela Copa 2026.",
+        "private_group_price": "Pagamento unico pela Competicao 2026.",
         "private_group_price_usd": "Pagamento unico estimado em dolar",
         "private_group_local_price": "Moeda aproximada da selecao em destaque",
         "private_group_price_note": "Valores aproximados. O preco final sera exibido pela Apple ou Google Play no momento da compra.",
@@ -644,7 +644,7 @@ TRANSLATIONS = {
         "deadline_4": "Jogos sem palpite dentro do prazo contam como não enviados.",
         "deadline_5": "Resultados aparecem na tela de palpites para comparação imediata.",
         "ranking_stages": "Ranking por Etapas",
-        "ranking_stage_overall": "soma todos os jogos da Copa.",
+        "ranking_stage_overall": "soma todos os jogos da Competicao.",
         "ranking_stage_groups": "considera apenas os jogos da fase de grupos.",
         "ranking_stage_knockout": "recomeça do zero na etapa eliminatória e segue até a final.",
         "ranking_stage_ties": "Os critérios de desempate são os mesmos em todas as etapas.",
@@ -669,12 +669,12 @@ TRANSLATIONS = {
         "simulation_info": "Administradores podem usar a simulação para adiantar datas e gerar resultados aleatórios para validar o funcionamento do sistema.",
         "data_deletion": "Exclusão de Dados",
         "data_deletion_info": "Usuários podem solicitar a exclusão de conta e dados pelo link",
-        "confirm_email_subject": "Confirme seu e-mail - Bolão Copa 2026",
-        "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
-        "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Copa 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
-        "reset_password_subject": "Redefina sua senha - Bolão Copa 2026",
-        "reset_password_text": "Olá, {name}!\n\nRecebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.\nAcesse este link em até 1 hora para criar uma nova senha:\n{url}\n\nSe você não solicitou esta alteração, ignore esta mensagem.",
-        "reset_password_html": "<p>Olá, {name}!</p><p>Recebemos uma solicitação para redefinir sua senha no Bolão Copa 2026.</p><p><a href=\"{url}\">Criar nova senha</a></p><p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>",
+        "confirm_email_subject": "Confirme seu e-mail - Bolão Competicao 2026",
+        "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Competicao 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
+        "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Competicao 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
+        "reset_password_subject": "Redefina sua senha - Bolão Competicao 2026",
+        "reset_password_text": "Olá, {name}!\n\nRecebemos uma solicitação para redefinir sua senha no Bolão Competicao 2026.\nAcesse este link em até 1 hora para criar uma nova senha:\n{url}\n\nSe você não solicitou esta alteração, ignore esta mensagem.",
+        "reset_password_html": "<p>Olá, {name}!</p><p>Recebemos uma solicitação para redefinir sua senha no Bolão Competicao 2026.</p><p><a href=\"{url}\">Criar nova senha</a></p><p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>",
     },
     "en": {
         "language_label": "Language",
@@ -1570,7 +1570,7 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "deadline_4": "Spiele ohne rechtzeitigen Tipp zÃ¤hlen als nicht abgegeben.",
     "deadline_5": "Ergebnisse erscheinen zur direkten Kontrolle auf der Tippseite.",
     "ranking_stages": "Rangliste nach Phasen",
-    "ranking_stage_overall": "summiert alle WM-Spiele.",
+    "ranking_stage_overall": "summiert alle Turnierspiele.",
     "ranking_stage_groups": "berÃ¼cksichtigt nur Spiele der Gruppenphase.",
     "ranking_stage_knockout": "beginnt in der K.-o.-Phase bei null und lÃ¤uft bis zum Finale.",
     "ranking_stage_ties": "Die Tie-Breaker sind in allen Phasen gleich.",
@@ -1953,7 +1953,7 @@ TRANSLATIONS["de"].update({
     "nav_private_group": "Private Gruppe",
     "private_group_title": "Private Gruppe",
     "private_group_hero": "Erstellen Sie eine private Gruppe, um Ihr eigenes Tippspiel zu verwalten.",
-    "private_group_price": "Einmalzahlung fuer die WM 2026.",
+    "private_group_price": "Einmalzahlung fuer die Turnier 2026.",
     "private_group_price_usd": "Geschaetzter Einmalpreis in US-Dollar",
     "private_group_local_price": "Ungefaehre Waehrung des hervorgehobenen Teams",
     "private_group_price_note": "Ungefaehre Werte. Der endgueltige Preis wird beim Kauf von Apple oder Google Play angezeigt.",
@@ -2203,7 +2203,7 @@ for _lang in ("fr", "de", "it", "ar", "zh", "ru", "ja"):
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-copa-2026-secret")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "bolao-competicao-2026-secret")
 database_url = os.environ.get("DATABASE_URL", "sqlite:///bolao.db")
 # Alguns provedores ainda expõem postgres://; SQLAlchemy requer postgresql://.
 if database_url.startswith("postgres://"):
@@ -3016,7 +3016,7 @@ def seed_public_groups():
 
         db.session.add(Grupo(
             nome=nome,
-            descricao="Grupo aberto para participantes do Bolao Copa 2026.",
+            descricao="Grupo aberto para participantes do Bolao Futebol 2026.",
             publico=True,
             requer_codigo=False,
             criado_pelo_sistema=True,

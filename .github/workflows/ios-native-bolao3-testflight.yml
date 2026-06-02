@@ -2,6 +2,10 @@ name: iOS Native Bolao 3 TestFlight
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/ios-native-bolao3-testflight.yml"
+      - "mobile/ios-native-bolao3/**"
 
 jobs:
   archive-upload:

@@ -41,7 +41,7 @@ struct RegrasView: View {
                 }
 
                 Section("Ranking por etapas") {
-                    RuleBullet(text: "Geral: soma todos os jogos da Copa.")
+                    RuleBullet(text: "Geral: soma todos os jogos da Competicao.")
                     RuleBullet(text: "Fase de Grupos: soma apenas os jogos antes do mata-mata.")
                     RuleBullet(text: "Mata-mata: recomeca do zero na etapa eliminatoria e segue ate a final.")
                 }
