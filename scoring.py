@@ -111,9 +111,16 @@ def calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo):
     db.session.commit()
 
 
-def _jogo_ids_por_etapa(Jogo, etapa=None, fase=None):
+def _jogo_ids_por_etapa(Jogo, etapa=None, fase=None, team_code=None):
     if fase:
         return [j.id for j in Jogo.query.filter_by(fase=fase).all()]
+    if etapa == "destaque" and team_code:
+        team_code = team_code.strip().upper()
+        return [
+            j.id for j in Jogo.query.filter(
+                (Jogo.sigla_time_a == team_code) | (Jogo.sigla_time_b == team_code)
+            ).all()
+        ]
     if etapa == "grupos":
         return [j.id for j in Jogo.query.filter_by(mata_mata=False).all()]
     if etapa == "mata_mata":
@@ -121,14 +128,14 @@ def _jogo_ids_por_etapa(Jogo, etapa=None, fase=None):
     return None
 
 
-def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None):
+def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None, team_code=None):
     """
     Retorna lista ordenada de dicts com o ranking dos competidores.
     Se fase for informado, filtra por fase.
     """
     competidores = Competidor.query.all()
     ranking = []
-    jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase)
+    jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase, team_code=team_code)
 
     for c in competidores:
         query = db.session.query(Pontuacao).filter_by(competidor_id=c.id)

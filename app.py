@@ -39,6 +39,7 @@ RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
     "mata_mata": "Mata-mata ate a Final",
+    "destaque": "Selecao em destaque",
 }
 SUPPORTED_LANGUAGES = {
     "pt-BR": "Português",
@@ -2287,6 +2288,8 @@ def etapa_label_traduzida(etapa_key, idioma=None):
         return tr("stage_groups", idioma)
     if etapa_key == "mata_mata":
         return tr("stage_knockout", idioma)
+    if etapa_key == "destaque":
+        return "Selecao em destaque"
     return tr("overall", idioma)
 
 
@@ -3101,8 +3104,23 @@ def normalizar_etapa_ranking(etapa):
     return etapa if etapa in RANKING_ETAPAS else "geral"
 
 
-def ranking_kwargs_por_etapa(etapa):
-    return {} if etapa == "geral" else {"etapa": etapa}
+def ranking_kwargs_por_etapa(etapa, user=None):
+    if etapa == "geral":
+        return {}
+    if etapa == "destaque":
+        return {"etapa": etapa, "team_code": codigo_time_destacado(user)}
+    return {"etapa": etapa}
+
+
+def etapa_label_ranking(etapa, user=None):
+    if etapa == "destaque":
+        codigo = codigo_time_destacado(user)
+        return f"Selecao em destaque - {nome_time_por_sigla(codigo)}"
+    return etapa_label_traduzida(etapa)
+
+
+def ranking_etapas_para_usuario(user=None):
+    return {key: etapa_label_ranking(key, user) for key in RANKING_ETAPAS}
 
 
 def data_referencia_app():
@@ -4091,12 +4109,12 @@ def api_ranking():
         Palpite,
         Jogo,
         fase=fase,
-        **({} if fase else ranking_kwargs_por_etapa(etapa))
+        **({} if fase else ranking_kwargs_por_etapa(etapa, g.user))
     )
     return jsonify({
         "ok": True,
         "etapa": etapa if not fase else "fase",
-        "etapa_label": fase or etapa_label_traduzida(etapa),
+        "etapa_label": fase or etapa_label_ranking(etapa, g.user),
         "ranking": [
             {
                 "posicao": item["posicao"],
@@ -5256,12 +5274,13 @@ def sincronizar_resultados_cron():
 @app.route("/ranking")
 def ranking_geral():
     etapa = normalizar_etapa_ranking(request.args.get("etapa"))
-    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa))
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa, g.user))
     return render_template("ranking/geral.html",
                            ranking=ranking,
                            etapa=etapa,
-                           etapa_label=etapa_label_traduzida(etapa),
-                           ranking_etapas=RANKING_ETAPAS)
+                           etapa_label=etapa_label_ranking(etapa, g.user),
+                           ranking_etapas=ranking_etapas_para_usuario(g.user),
+                           destaque_nome=nome_time_por_sigla(codigo_time_destacado(g.user)))
 
 
 @app.route("/ranking/fase")

@@ -195,6 +195,7 @@ enum RankingEtapa: String, CaseIterable, Identifiable {
     case geral
     case grupos
     case mataMata = "mata_mata"
+    case destaque
 
     var id: String { rawValue }
 
@@ -206,6 +207,8 @@ enum RankingEtapa: String, CaseIterable, Identifiable {
             return "Grupos"
         case .mataMata:
             return "Mata-mata"
+        case .destaque:
+            return "Destaque"
         }
     }
 
@@ -217,6 +220,8 @@ enum RankingEtapa: String, CaseIterable, Identifiable {
             return "Conta apenas a fase de grupos."
         case .mataMata:
             return "Recomeca no mata-mata e segue ate a final."
+        case .destaque:
+            return "Conta apenas jogos da selecao em destaque."
         }
     }
 }

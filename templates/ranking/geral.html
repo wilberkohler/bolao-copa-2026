@@ -22,6 +22,11 @@
 <div class="alert alert-primary small">
   Esta etapa comeca zerada para os jogos de mata-mata e segue ate a final, mantendo a disputa aberta novamente.
 </div>
+{% elif etapa == 'destaque' %}
+<div class="alert alert-info small">
+  Este ranking considera apenas os jogos da selecao em destaque{% if destaque_nome %}: {{ destaque_nome }}{% endif %}.
+  Para alterar a selecao, use o seletor no menu superior.
+</div>
 {% else %}
 <div class="alert alert-secondary small">
   O ranking geral continua somando todos os jogos da Competicao.
