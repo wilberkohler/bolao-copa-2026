@@ -27,10 +27,10 @@ struct RootView: View {
             await appState.restoreSession()
         }
         .preferredColorScheme(preferredScheme)
-        .overlay(alignment: .topTrailing) {
+        .overlay(alignment: .bottomTrailing) {
             ThemeToggleButton(appearanceMode: $appearanceMode)
-                .padding(.top, 8)
-                .padding(.trailing, 10)
+                .padding(.trailing, 14)
+                .padding(.bottom, appState.isAuthenticated ? 72 : 20)
         }
     }
 }
@@ -48,9 +48,11 @@ private struct ThemeToggleButton: View {
         } label: {
             Image(systemName: isDark ? "sun.max.fill" : "moon.fill")
                 .font(.caption.weight(.bold))
-                .frame(width: 30, height: 30)
+                .foregroundStyle(.primary)
+                .frame(width: 34, height: 34)
                 .background(.thinMaterial, in: Circle())
                 .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 1))
+                .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isDark ? "Usar tema claro" : "Usar tema escuro")
