@@ -97,7 +97,7 @@
                       class="btn btn-sm js-podium-tab {% if podium_view == podium_set['key'] %}btn-warning{% else %}btn-outline-warning{% endif %}"
                       data-podium-target="{{ podium_set['key'] }}"
                       data-podium-label="{{ podium_set['label'] }}">
-                {% if podium_set['key'] == 'etapa' %}{{ tr('stage') }}{% elif podium_set['key'] == 'destaque' %}Destaque{% else %}{{ tr('overall') }}{% endif %}
+                {% if podium_set['key'] == 'etapa' %}{{ tr('stage') }}{% elif podium_set['key'] == 'destaque' %}{{ tr('highlight_podium_tab') }}{% else %}{{ tr('overall') }}{% endif %}
               </button>
             {% endfor %}
           </div>
