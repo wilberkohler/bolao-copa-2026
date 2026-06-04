@@ -136,16 +136,13 @@ struct PalpitesView: View {
                 playoffPhaseTabs
 
                 ScrollView(.horizontal, showsIndicators: true) {
+                    let layouts = playoffPhaseLayouts()
                     HStack(alignment: .top, spacing: 28) {
-                        ForEach(Array(visiblePlayoffPhases.enumerated()), id: \.element) { offset, phase in
-                            let absoluteIndex = (playoffStartIndex >= 4 ? 4 : playoffStartIndex) + offset
-                            let visibleStartIndex = playoffStartIndex >= 4 ? 4 : playoffStartIndex
+                        ForEach(Array(layouts.enumerated()), id: \.element.phase) { offset, layout in
                             KnockoutPhaseColumn(
-                                phaseIndex: absoluteIndex,
-                                topPadding: playoffTopPadding(for: absoluteIndex, visibleStartIndex: visibleStartIndex),
+                                layout: layout,
                                 isFirstVisible: offset == 0,
-                                isLastVisible: offset == visiblePlayoffPhases.count - 1,
-                                jogos: jogosDaAba.filter { $0.fase == phase },
+                                isLastVisible: offset == layouts.count - 1 || layout.phaseIndex == 4,
                                 drafts: $drafts,
                                 focusedField: $focusedField
                             )
@@ -211,8 +208,8 @@ struct PalpitesView: View {
                             .font(.subheadline.weight(.bold))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 9)
-                            .background(playoffStartIndex == index ? Color.white : Color(.systemGray5))
-                            .foregroundStyle(.primary)
+                            .background(playoffStartIndex == index ? Color.green : Color(.secondarySystemBackground))
+                            .foregroundStyle(playoffStartIndex == index ? .white : .primary)
                             .clipShape(Capsule())
                             .shadow(color: .black.opacity(playoffStartIndex == index ? 0.14 : 0.06), radius: 6, y: 3)
                     }
@@ -425,8 +422,60 @@ struct PalpitesView: View {
         }
     }
 
-    private func playoffTopPadding(for phaseIndex: Int, visibleStartIndex: Int) -> CGFloat {
-        max(0, KnockoutLayout.rawTopPadding(for: phaseIndex) - KnockoutLayout.rawTopPadding(for: visibleStartIndex))
+    private func playoffPhaseLayouts() -> [KnockoutPhaseLayout] {
+        let visibleStartIndex = playoffStartIndex >= 4 ? 4 : playoffStartIndex
+        var layouts: [KnockoutPhaseLayout] = []
+
+        for (offset, phase) in visiblePlayoffPhases.enumerated() {
+            let phaseIndex = visibleStartIndex + offset
+            let phaseGames = jogosDaAba
+                .filter { $0.fase == phase }
+                .sorted(by: sortByDateAndNumber)
+            let positions = positionsForPhase(phaseGames, previous: layouts.last)
+            layouts.append(KnockoutPhaseLayout(
+                phase: phase,
+                phaseIndex: phaseIndex,
+                matches: positions,
+                height: layoutHeight(for: positions)
+            ))
+        }
+
+        return layouts
+    }
+
+    private func positionsForPhase(_ jogos: [Jogo], previous: KnockoutPhaseLayout?) -> [PositionedKnockoutMatch] {
+        guard let previous, !previous.matches.isEmpty, !jogos.isEmpty else {
+            return jogos.enumerated().map { index, jogo in
+                PositionedKnockoutMatch(jogo: jogo, top: CGFloat(index) * (KnockoutLayout.cardHeight + KnockoutLayout.cardGap))
+            }
+        }
+
+        let ratio = max(1, previous.matches.count / max(jogos.count, 1))
+        var result: [PositionedKnockoutMatch] = []
+
+        for (index, jogo) in jogos.enumerated() {
+            let start = min(index * ratio, previous.matches.count - 1)
+            let end = min((index + 1) * ratio, previous.matches.count)
+            let sources = Array(previous.matches[start..<max(start + 1, end)])
+            let sourceCenter = sources.reduce(CGFloat(0)) { partial, source in
+                partial + source.centerY
+            } / CGFloat(max(sources.count, 1))
+
+            var top = max(0, sourceCenter - (KnockoutLayout.cardHeight / 2))
+            if let last = result.last {
+                top = max(top, last.top + KnockoutLayout.cardHeight + KnockoutLayout.cardGap)
+            }
+            result.append(PositionedKnockoutMatch(jogo: jogo, top: top))
+        }
+
+        return result
+    }
+
+    private func layoutHeight(for positions: [PositionedKnockoutMatch]) -> CGFloat {
+        guard let bottom = positions.map({ $0.top + KnockoutLayout.cardHeight }).max() else {
+            return KnockoutLayout.cardHeight
+        }
+        return bottom
     }
 }
 
@@ -441,65 +490,64 @@ private enum PalpiteField: Hashable {
     case golsB(Int)
 }
 
-private enum KnockoutLayout {
-    static let cardHeight: CGFloat = 258
-    static let cardWidth: CGFloat = 310
-    static let firstRoundGap: CGFloat = 16
-    static let connectorWidth: CGFloat = 28
+private struct PositionedKnockoutMatch: Identifiable {
+    let jogo: Jogo
+    let top: CGFloat
 
-    static func multiplier(for phaseIndex: Int) -> CGFloat {
-        CGFloat(1 << max(0, min(phaseIndex, 4)))
+    var id: Int { jogo.id }
+    var centerY: CGFloat { top + (KnockoutLayout.cardHeight / 2) }
+}
+
+private struct KnockoutPhaseLayout: Identifiable, Hashable {
+    let phase: String
+    let phaseIndex: Int
+    let matches: [PositionedKnockoutMatch]
+    let height: CGFloat
+
+    var id: String { phase }
+
+    static func == (lhs: KnockoutPhaseLayout, rhs: KnockoutPhaseLayout) -> Bool {
+        lhs.phase == rhs.phase && lhs.phaseIndex == rhs.phaseIndex && lhs.matches.map(\.id) == rhs.matches.map(\.id)
     }
 
-    static func centerSpacing(for phaseIndex: Int) -> CGFloat {
-        guard phaseIndex > 0 else {
-            return cardHeight + firstRoundGap
-        }
-        return (cardHeight + firstRoundGap) * multiplier(for: phaseIndex)
-    }
-
-    static func rowSpacing(for phaseIndex: Int) -> CGFloat {
-        max(firstRoundGap, centerSpacing(for: phaseIndex) - cardHeight)
-    }
-
-    static func rawTopPadding(for phaseIndex: Int) -> CGFloat {
-        guard phaseIndex > 0 else {
-            return 0
-        }
-        return ((cardHeight + firstRoundGap) * multiplier(for: phaseIndex - 1)) - (cardHeight / 2)
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(phase)
+        hasher.combine(phaseIndex)
+        hasher.combine(matches.map(\.id))
     }
 }
 
+private enum KnockoutLayout {
+    static let cardHeight: CGFloat = 258
+    static let cardWidth: CGFloat = 310
+    static let cardGap: CGFloat = 16
+    static let connectorWidth: CGFloat = 28
+}
+
 private struct KnockoutPhaseColumn: View {
-    let phaseIndex: Int
-    let topPadding: CGFloat
+    let layout: KnockoutPhaseLayout
     let isFirstVisible: Bool
     let isLastVisible: Bool
-    let jogos: [Jogo]
     @Binding var drafts: [Int: DraftPalpite]
     let focusedField: FocusState<PalpiteField?>.Binding
 
-    private var spacing: CGFloat {
-        KnockoutLayout.rowSpacing(for: min(phaseIndex, 4))
-    }
-
     var body: some View {
-        VStack(spacing: spacing) {
-            ForEach(jogos) { jogo in
+        ZStack(alignment: .top) {
+            ForEach(layout.matches) { match in
                 KnockoutMatchCard(
-                    jogo: jogo,
+                    jogo: match.jogo,
                     isFirstVisible: isFirstVisible,
                     isLastVisible: isLastVisible,
                     draft: Binding(
-                        get: { drafts[jogo.id] ?? DraftPalpite() },
-                        set: { drafts[jogo.id] = $0 }
+                        get: { drafts[match.jogo.id] ?? DraftPalpite() },
+                        set: { drafts[match.jogo.id] = $0 }
                     ),
                     focusedField: focusedField
                 )
+                .offset(y: match.top)
             }
         }
-        .padding(.top, topPadding)
-        .frame(width: KnockoutLayout.cardWidth, alignment: .top)
+        .frame(width: KnockoutLayout.cardWidth, height: layout.height, alignment: .top)
     }
 }
 

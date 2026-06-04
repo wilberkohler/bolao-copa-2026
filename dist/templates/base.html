@@ -4,9 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bolão Futebol 2026 - {% block title %}{% endblock %}</title>
+  <script>
+    (function () {
+      if (localStorage.getItem("bolao-theme-inverted") === "1") {
+        document.documentElement.classList.add("theme-inverted");
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260604-theme-bracket-1">
 </head>
 <body>
 
@@ -42,6 +49,12 @@
         {% endif %}
       </ul>
       <div class="d-flex align-items-center gap-2">
+        <button type="button"
+                class="btn btn-outline-light btn-sm theme-toggle"
+                data-theme-toggle
+                aria-label="Alternar tema">
+          <i class="bi bi-moon-fill" aria-hidden="true"></i>
+        </button>
         {% if user %}
           <div class="dropdown">
             <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
@@ -80,13 +93,32 @@
 
 <footer class="text-center text-muted py-3 mt-5 border-top">
   <small>
-    Bolão Copa do Mundo FIFA 2026 &mdash; Todos os horários em Brasília (BRT/UTC-3)
+    Bolão Futebol 2026 &mdash; Todos os horários em Brasília (BRT/UTC-3)
     <span class="mx-2">|</span>
     <a href="{{ url_for('solicitar_exclusao_dados') }}">Solicitar exclusão de conta e dados</a>
   </small>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function () {
+    var button = document.querySelector("[data-theme-toggle]");
+    if (!button) return;
+
+    function updateButton() {
+      var inverted = document.documentElement.classList.contains("theme-inverted");
+      button.innerHTML = '<i class="bi ' + (inverted ? 'bi-sun-fill' : 'bi-moon-fill') + '" aria-hidden="true"></i>';
+      button.setAttribute("aria-label", inverted ? "Usar tema claro" : "Usar tema escuro");
+    }
+
+    button.addEventListener("click", function () {
+      var inverted = document.documentElement.classList.toggle("theme-inverted");
+      localStorage.setItem("bolao-theme-inverted", inverted ? "1" : "0");
+      updateButton();
+    });
+    updateButton();
+  })();
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
