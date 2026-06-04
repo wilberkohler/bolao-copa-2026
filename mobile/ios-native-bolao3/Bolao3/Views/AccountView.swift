@@ -9,6 +9,9 @@ struct AccountView: View {
     @State private var localMessage: String?
     @State private var activatedGroup: PrivateGroupActivation?
     @State private var showingDeleteSheet = false
+    @State private var highlightOptions: HighlightTeamOptionsResponse?
+    @State private var selectedHighlightTeam = "AUTO"
+    @State private var isSavingHighlightTeam = false
 
     private let inviteURL = URL(string: "https://bolao2026-9jgh.onrender.com/registro")!
     private let privateGroupURL = URL(string: "https://bolao2026-9jgh.onrender.com/grupo-privado")!
@@ -35,6 +38,34 @@ struct AccountView: View {
                             }
                         }
                     }
+                }
+
+                Section {
+                    if let highlightOptions {
+                        Picker("Selecao/Pais", selection: $selectedHighlightTeam) {
+                            Text("Automatico (\(teamName(for: highlightOptions.automatic)))").tag("AUTO")
+                            ForEach(highlightOptions.options) { option in
+                                Text("\(option.name) (\(option.code))").tag(option.code)
+                            }
+                        }
+
+                        Text("O podium e o ranking de destaque usam apenas os jogos da selecao/pais escolhido.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Button {
+                            Task { await saveHighlightTeam() }
+                        } label: {
+                            Label(isSavingHighlightTeam ? "Aplicando..." : "Aplicar destaque", systemImage: "star")
+                        }
+                        .disabled(isSavingHighlightTeam)
+                    } else {
+                        ProgressView("Carregando selecoes...")
+                    }
+                } header: {
+                    Text("Selecao/Pais em destaque")
+                } footer: {
+                    Text("Altere aqui a selecao/pais exibido na aba Destaque do podium da tela inicial e do ranking.")
                 }
 
                 Section {
@@ -181,10 +212,12 @@ struct AccountView: View {
             }
             .navigationTitle("Conta")
             .task {
+                await loadHighlightOptions()
                 await loadPrivateConfig()
                 await storeKit.loadProduct(productId: privateConfig?.productId)
             }
             .refreshable {
+                await loadHighlightOptions()
                 await loadPrivateConfig()
                 await storeKit.loadProduct(productId: privateConfig?.productId)
             }
@@ -193,6 +226,38 @@ struct AccountView: View {
                     .environmentObject(appState)
             }
         }
+    }
+
+    private func loadHighlightOptions() async {
+        do {
+            let response = try await appState.api.highlightTeamOptions()
+            highlightOptions = response
+            selectedHighlightTeam = response.isAutomatic ? "AUTO" : response.selected
+        } catch {
+            localMessage = error.localizedDescription
+        }
+    }
+
+    private func saveHighlightTeam() async {
+        isSavingHighlightTeam = true
+        localMessage = nil
+        do {
+            let response = try await appState.api.updateHighlightTeam(selectedHighlightTeam)
+            highlightOptions = response
+            selectedHighlightTeam = response.isAutomatic ? "AUTO" : response.selected
+            if let user = response.user {
+                appState.user = user
+            }
+            appState.clearCaches()
+            localMessage = "Selecao em destaque atualizada."
+        } catch {
+            localMessage = error.localizedDescription
+        }
+        isSavingHighlightTeam = false
+    }
+
+    private func teamName(for code: String) -> String {
+        highlightOptions?.options.first(where: { $0.code == code })?.name ?? code
     }
 
     private func loadPrivateConfig() async {

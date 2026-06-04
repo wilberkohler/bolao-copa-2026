@@ -1,6 +1,6 @@
 # Wrapper iOS (Capacitor)
 
-Este diretorio prepara um app iOS para o Bolao Copa 2026 sem reescrever o backend Flask.
+Este diretorio prepara um app iOS para o Bolao Futebol 2026 sem reescrever o backend Flask.
 
 ## Como funciona
 

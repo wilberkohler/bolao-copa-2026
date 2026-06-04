@@ -12,12 +12,14 @@ struct UserProfile: Decodable, Identifiable {
     let email: String
     let apelido: String?
     let ehAdmin: Bool
+    let timeDestaque: String?
     let grupo: GrupoResumo?
     let competidor: CompetidorResumo?
 
     enum CodingKeys: String, CodingKey {
         case id, nome, email, apelido, grupo, competidor
         case ehAdmin = "eh_admin"
+        case timeDestaque = "time_destaque"
     }
 }
 
@@ -147,17 +149,53 @@ struct DashboardResponse: Decodable {
     let podium: [PodiumItem]
     let podiumGeral: [PodiumItem]?
     let podiumEtapa: [PodiumItem]?
+    let podiumDestaque: [PodiumItem]?
     let podiumEtapaKey: String?
     let podiumEtapaLabel: String?
+    let podiumDestaqueLabel: String?
+    let podiumDestaqueTime: String?
+    let podiumDestaqueNome: String?
     let proximosJogos: [Jogo]
 
     enum CodingKeys: String, CodingKey {
         case ok, summary, podium
         case podiumGeral = "podium_geral"
         case podiumEtapa = "podium_etapa"
+        case podiumDestaque = "podium_destaque"
         case podiumEtapaKey = "podium_etapa_key"
         case podiumEtapaLabel = "podium_etapa_label"
+        case podiumDestaqueLabel = "podium_destaque_label"
+        case podiumDestaqueTime = "podium_destaque_time"
+        case podiumDestaqueNome = "podium_destaque_nome"
         case proximosJogos = "proximos_jogos"
+    }
+}
+
+struct HighlightTeamOption: Decodable, Identifiable, Hashable {
+    var id: String { code }
+    let code: String
+    let name: String
+}
+
+struct HighlightTeamOptionsResponse: Decodable {
+    let ok: Bool
+    let selected: String
+    let automatic: String
+    let isAutomatic: Bool
+    let options: [HighlightTeamOption]
+    let user: UserProfile?
+
+    enum CodingKeys: String, CodingKey {
+        case ok, selected, automatic, options, user
+        case isAutomatic = "is_automatic"
+    }
+}
+
+struct HighlightTeamRequest: Encodable {
+    let timeDestaque: String
+
+    enum CodingKeys: String, CodingKey {
+        case timeDestaque = "time_destaque"
     }
 }
 
@@ -206,7 +244,7 @@ enum RankingEtapa: String, CaseIterable, Identifiable {
         case .grupos:
             return "Grupos"
         case .mataMata:
-            return "Mata-mata"
+            return "Eliminatorias"
         case .destaque:
             return "Destaque"
         }
@@ -219,7 +257,7 @@ enum RankingEtapa: String, CaseIterable, Identifiable {
         case .grupos:
             return "Conta apenas a fase de grupos."
         case .mataMata:
-            return "Recomeca no mata-mata e segue ate a final."
+            return "Recomeca nas eliminatorias e segue ate a final."
         case .destaque:
             return "Conta apenas jogos da selecao em destaque."
         }

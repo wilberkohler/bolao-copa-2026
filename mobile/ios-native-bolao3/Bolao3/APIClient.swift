@@ -90,6 +90,16 @@ final class APIClient {
         let _: EmptyResponse = try await request("/api/v1/reenviar-confirmacao-email", method: "POST")
     }
 
+    func highlightTeamOptions() async throws -> HighlightTeamOptionsResponse {
+        try await request("/api/v1/time-destaque")
+    }
+
+    func updateHighlightTeam(_ code: String) async throws -> HighlightTeamOptionsResponse {
+        let payload = HighlightTeamRequest(timeDestaque: code)
+        let data = try encoder.encode(payload)
+        return try await request("/api/v1/time-destaque", method: "POST", body: data)
+    }
+
     func excluirConta(senha: String, confirmacao: String) async throws {
         let payload = DeleteAccountRequest(senha: senha, confirmacao: confirmacao)
         let data = try encoder.encode(payload)

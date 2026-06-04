@@ -15,9 +15,9 @@ struct LoginView: View {
                     .foregroundStyle(.green)
 
                 VStack(spacing: 6) {
-                    Text("Bolao 3")
+                    Text("Bolao Futebol")
                         .font(.largeTitle.bold())
-                    Text("Competicao de Futebol 2026")
+                    Text("Palpites de Futebol 2026")
                         .foregroundStyle(.secondary)
                 }
 

@@ -38,7 +38,7 @@ PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "private_g
 RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
-    "mata_mata": "Mata-mata ate a Final",
+    "mata_mata": "Eliminatórias",
     "destaque": "Selecao em destaque",
 }
 SUPPORTED_LANGUAGES = {
@@ -418,8 +418,8 @@ TEAM_TRANSLATIONS = {
 TRANSLATIONS = {
     "pt-BR": {
         "language_label": "Idioma",
-        "login_title": "Login - Bolão Competicao 2026",
-        "app_name": "Bolão Competicao 2026",
+        "login_title": "Login - Bolão Futebol 2026",
+        "app_name": "Bolão Futebol 2026",
         "system_subtitle": "Sistema de Palpites",
         "email": "E-mail",
         "password": "Senha",
@@ -429,8 +429,8 @@ TRANSLATIONS = {
         "no_account": "Ainda não tem conta?",
         "register_here": "Cadastre-se aqui",
         "logged_out": "Você saiu.",
-        "register_title": "Cadastro - Bolão Competicao 2026",
-        "register_heading": "Cadastro - Bolão Competicao 2026",
+        "register_title": "Cadastro - Bolão Futebol 2026",
+        "register_heading": "Cadastro - Bolão Futebol 2026",
         "name": "Nome",
         "nickname": "Apelido",
         "required": "*",
@@ -446,13 +446,13 @@ TRANSLATIONS = {
         "registering": "Cadastrando...",
         "has_account": "Já tem conta?",
         "sign_in_here": "Entre aqui",
-        "recover_password_title": "Recuperar senha - Bolão Competicao 2026",
+        "recover_password_title": "Recuperar senha - Bolão Futebol 2026",
         "recover_password": "Recuperar senha",
         "recover_password_subtitle": "Informe seu e-mail de cadastro",
         "send_link": "Enviar link",
         "sending": "Enviando...",
         "remembered_password": "Lembrou a senha?",
-        "new_password_title": "Nova senha - Bolão Competicao 2026",
+        "new_password_title": "Nova senha - Bolão Futebol 2026",
         "new_password_heading": "Criar nova senha",
         "new_password": "Nova senha",
         "confirm_new_password": "Confirmar nova senha",
@@ -474,7 +474,9 @@ TRANSLATIONS = {
         "group_label": "Grupo",
         "highlight_team": "Seleção em destaque",
         "highlight_team_auto": "Automático pelo idioma ({team})",
-        "save_highlight_team": "Aplicar selección",
+        "save_highlight_team": "Aplicar destaque",
+        "highlight_podium": "Seleção/País em destaque",
+        "highlight_podium_help": "Para alterar a seleção/país em destaque, abra o menu do usuário no topo da página e use o seletor \"Seleção em destaque\".",
         "logout": "Sair",
         "account_deletion": "Excluir minha conta",
         "footer_note": "Bolão de Futebol 2026 — Todos os horários em Brasília (BRT/UTC-3)",
@@ -541,7 +543,7 @@ TRANSLATIONS = {
         "no_prediction": "Sem palpite",
         "no_upcoming_games": "Nenhum jogo próximo encontrado.",
         "stage_groups": "Fase de Grupos",
-        "stage_knockout": "Mata-mata ate a Final",
+        "stage_knockout": "Eliminatórias",
         "phase_round_32": "Rodada de 32",
         "phase_round_16": "Oitavas de Final",
         "phase_quarterfinals": "Quartas de Final",
@@ -550,7 +552,7 @@ TRANSLATIONS = {
         "phase_final": "Final",
         "world_cup_group": "Grupo {group}",
         "other_group": "Eliminatórias",
-        "round_report_subject": "Relatório da {round_label} - Bolão Competicao 2026",
+        "round_report_subject": "Relatório da {round_label} - Bolão Futebol 2026",
         "hello_name": "Olá, {name}!",
         "round_report_heading": "Relatório da {round_label}:",
         "your_round_points": "Seus pontos na rodada: {points}",
@@ -564,11 +566,13 @@ TRANSLATIONS = {
         "invite_friend_line": "Convide um amigo para participar:",
         "private_group_title": "Grupo privado",
         "private_group_hero": "Crie um grupo privado para administrar seu proprio bolao.",
-        "private_group_price": "Pagamento unico pela Competicao 2026.",
+        "private_group_price": "Pagamento unico pelo Futebol 2026.",
         "private_group_price_usd": "Pagamento unico estimado em dolar",
         "private_group_local_price": "Moeda aproximada da selecao em destaque",
         "private_group_price_note": "Valores aproximados. O preco final sera exibido pela Apple ou Google Play no momento da compra.",
         "private_group_mobile_only": "A contratacao sera feita pelo aplicativo para celular, usando Apple ou Google Play. No computador, esta pagina serve apenas como orientacao.",
+        "private_group_mobile_only_badge": "Ativacao pelo app",
+        "private_group_mobile_only_detail": "No computador voce pode consultar as informacoes e administrar grupos ja ativos. A aquisicao de novo grupo sera concluida no aplicativo para celular.",
         "private_group_feature_1": "Painel administrativo limitado ao grupo criado por voce.",
         "private_group_feature_2": "Convite por link e codigo de acesso para participantes.",
         "private_group_feature_3": "Ranking exclusivo, relatorios e acompanhamento dos palpites do grupo.",
@@ -647,7 +651,7 @@ TRANSLATIONS = {
         "deadline_4": "Jogos sem palpite dentro do prazo contam como não enviados.",
         "deadline_5": "Resultados aparecem na tela de palpites para comparação imediata.",
         "ranking_stages": "Ranking por Etapas",
-        "ranking_stage_overall": "soma todos os jogos da Competicao.",
+        "ranking_stage_overall": "soma todos os jogos do torneio de futebol.",
         "ranking_stage_groups": "considera apenas os jogos da fase de grupos.",
         "ranking_stage_knockout": "recomeça do zero na etapa eliminatória e segue até a final.",
         "ranking_stage_ties": "Os critérios de desempate são os mesmos em todas as etapas.",
@@ -672,12 +676,12 @@ TRANSLATIONS = {
         "simulation_info": "Administradores podem usar a simulação para adiantar datas e gerar resultados aleatórios para validar o funcionamento do sistema.",
         "data_deletion": "Exclusão de Dados",
         "data_deletion_info": "Usuários podem solicitar a exclusão de conta e dados pelo link",
-        "confirm_email_subject": "Confirme seu e-mail - Bolão Competicao 2026",
-        "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Competicao 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
-        "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Competicao 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
-        "reset_password_subject": "Redefina sua senha - Bolão Competicao 2026",
-        "reset_password_text": "Olá, {name}!\n\nRecebemos uma solicitação para redefinir sua senha no Bolão Competicao 2026.\nAcesse este link em até 1 hora para criar uma nova senha:\n{url}\n\nSe você não solicitou esta alteração, ignore esta mensagem.",
-        "reset_password_html": "<p>Olá, {name}!</p><p>Recebemos uma solicitação para redefinir sua senha no Bolão Competicao 2026.</p><p><a href=\"{url}\">Criar nova senha</a></p><p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>",
+        "confirm_email_subject": "Confirme seu e-mail - Bolão Futebol 2026",
+        "confirm_email_text": "Olá, {name}!\n\nConfirme seu e-mail para receber os relatórios das rodadas do Bolão Futebol 2026:\n{url}\n\nSe você não fez este cadastro, ignore esta mensagem.",
+        "confirm_email_html": "<p>Olá, {name}!</p><p>Confirme seu e-mail para receber os relatórios das rodadas do Bolão Futebol 2026.</p><p><a href=\"{url}\">Confirmar e-mail</a></p><p>Se você não fez este cadastro, ignore esta mensagem.</p>",
+        "reset_password_subject": "Redefina sua senha - Bolão Futebol 2026",
+        "reset_password_text": "Olá, {name}!\n\nRecebemos uma solicitação para redefinir sua senha no Bolão Futebol 2026.\nAcesse este link em até 1 hora para criar uma nova senha:\n{url}\n\nSe você não solicitou esta alteração, ignore esta mensagem.",
+        "reset_password_html": "<p>Olá, {name}!</p><p>Recebemos uma solicitação para redefinir sua senha no Bolão Futebol 2026.</p><p><a href=\"{url}\">Criar nova senha</a></p><p>Este link expira em 1 hora. Se você não solicitou esta alteração, ignore esta mensagem.</p>",
     },
     "en": {
         "language_label": "Language",
@@ -738,6 +742,8 @@ TRANSLATIONS = {
         "highlight_team": "Highlighted team",
         "highlight_team_auto": "Automatic by language ({team})",
         "save_highlight_team": "Apply highlight",
+        "highlight_podium": "Highlighted team/country",
+        "highlight_podium_help": "To change the highlighted team/country, open the user menu at the top of the page and use the \"Highlighted team\" selector.",
         "logout": "Sign out",
         "account_deletion": "Delete my account",
         "footer_note": "Football Pool 2026 — All times in Brasília (BRT/UTC-3)",
@@ -804,7 +810,7 @@ TRANSLATIONS = {
         "no_prediction": "No prediction",
         "no_upcoming_games": "No upcoming games found.",
         "stage_groups": "Group Stage",
-        "stage_knockout": "Knockout Stage through the Final",
+        "stage_knockout": "Knockout Stage",
         "phase_round_32": "Round of 32",
         "phase_round_16": "Round of 16",
         "phase_quarterfinals": "Quarterfinals",
@@ -832,6 +838,8 @@ TRANSLATIONS = {
         "private_group_local_price": "Approximate currency for the highlighted team",
         "private_group_price_note": "Approximate values. The final price will be shown by Apple or Google Play at purchase time.",
         "private_group_mobile_only": "Purchase will be available in the mobile app through Apple or Google Play. On desktop, this page is informational only.",
+        "private_group_mobile_only_badge": "Activate in the app",
+        "private_group_mobile_only_detail": "On desktop you can review information and manage groups that are already active. New private groups are acquired in the mobile app.",
         "private_group_feature_1": "Admin panel limited to the group you created.",
         "private_group_feature_2": "Invite link and access code for participants.",
         "private_group_feature_3": "Exclusive ranking, reports, and prediction tracking for the group.",
@@ -1000,7 +1008,9 @@ TRANSLATIONS = {
         "group_label": "Grupo",
         "highlight_team": "Selección destacada",
         "highlight_team_auto": "Automático por idioma ({team})",
-        "save_highlight_team": "Aplicar destaque",
+        "save_highlight_team": "Aplicar selección",
+        "highlight_podium": "Selección/país destacado",
+        "highlight_podium_help": "Para cambiar la selección/país destacado, abre el menú del usuario en la parte superior y usa el selector \"Selección destacada\".",
         "logout": "Salir",
         "account_deletion": "Solicitar eliminación de cuenta y datos",
         "footer_note": "Quiniela de Futbol 2026 — Todos los horarios en Brasilia (BRT/UTC-3)",
@@ -1057,7 +1067,7 @@ TRANSLATIONS = {
         "no_prediction": "Sin pronóstico",
         "no_upcoming_games": "No se encontraron próximos partidos.",
         "stage_groups": "Fase de Grupos",
-        "stage_knockout": "Eliminatorias hasta la Final",
+        "stage_knockout": "Eliminatorias",
         "phase_round_32": "Ronda de 32",
         "phase_round_16": "Octavos de Final",
         "phase_quarterfinals": "Cuartos de Final",
@@ -1891,6 +1901,16 @@ TRANSLATIONS["ja"] = {**TRANSLATIONS["en"], **{
 
 
 TRANSLATIONS["es"].update({
+    "independent_notice": "Aplicación independiente, sin afiliación, patrocinio ni respaldo de entidades oficiales del torneo.",
+    "delete_account": "Eliminar mi cuenta",
+    "delete_account_title": "Eliminar cuenta y datos",
+    "delete_account_intro": "Esta acción elimina tus datos personales, pronósticos, puntos e historial vinculados a la cuenta. No se puede deshacer.",
+    "delete_account_password": "Confirma tu contraseña",
+    "delete_account_confirm_label": "Escribe ELIMINAR para confirmar",
+    "delete_account_button": "Eliminar mi cuenta definitivamente",
+    "delete_account_cancel": "Cancelar",
+    "delete_account_invalid": "Contraseña o confirmación inválida.",
+    "delete_account_done": "Tu cuenta y tus datos personales han sido eliminados.",
     "nav_private_group": "Grupo privado",
     "private_group_title": "Grupo privado",
     "private_group_hero": "Crea un grupo privado para administrar tu propia quiniela.",
@@ -1899,6 +1919,8 @@ TRANSLATIONS["es"].update({
     "private_group_local_price": "Moneda aproximada de la seleccion destacada",
     "private_group_price_note": "Valores aproximados. El precio final sera mostrado por Apple o Google Play al comprar.",
     "private_group_mobile_only": "La contratacion se hara desde la app movil, usando Apple o Google Play. En computadora, esta pagina es solo informativa.",
+    "private_group_mobile_only_badge": "Activacion en la app",
+    "private_group_mobile_only_detail": "En computadora puedes consultar la informacion y administrar grupos ya activos. La adquisicion de un nuevo grupo se completa en la app movil.",
     "private_group_feature_1": "Panel administrativo limitado al grupo que creaste.",
     "private_group_feature_2": "Invitacion por enlace y codigo de acceso para participantes.",
     "private_group_feature_3": "Ranking exclusivo, informes y seguimiento de pronosticos del grupo.",
@@ -1922,6 +1944,9 @@ TRANSLATIONS["es"].update({
 })
 
 TRANSLATIONS["fr"].update({
+    "highlight_podium": "Sélection/pays mis en avant",
+    "highlight_podium_help": "Pour changer la sélection ou le pays mis en avant, ouvrez le menu utilisateur en haut de la page et utilisez le sélecteur \"Sélection mise en avant\".",
+    "stage_knockout": "Éliminatoires",
     "nav_private_group": "Groupe prive",
     "private_group_title": "Groupe prive",
     "private_group_hero": "Creez un groupe prive pour administrer votre propre pool.",
@@ -1953,6 +1978,9 @@ TRANSLATIONS["fr"].update({
 })
 
 TRANSLATIONS["de"].update({
+    "highlight_podium": "Hervorgehobenes Team/Land",
+    "highlight_podium_help": "Um das hervorgehobene Team oder Land zu ändern, öffnen Sie oben auf der Seite das Benutzermenü und verwenden Sie den Selektor \"Hervorgehobene Auswahl\".",
+    "stage_knockout": "K.-o.-Phase",
     "nav_private_group": "Private Gruppe",
     "private_group_title": "Private Gruppe",
     "private_group_hero": "Erstellen Sie eine private Gruppe, um Ihr eigenes Tippspiel zu verwalten.",
@@ -1984,6 +2012,9 @@ TRANSLATIONS["de"].update({
 })
 
 TRANSLATIONS["it"].update({
+    "highlight_podium": "Squadra/paese in evidenza",
+    "highlight_podium_help": "Per cambiare la squadra o il paese in evidenza, apri il menu utente in alto nella pagina e usa il selettore \"Selezione in evidenza\".",
+    "stage_knockout": "Eliminatorie",
     "nav_private_group": "Gruppo privato",
     "private_group_title": "Gruppo privato",
     "private_group_hero": "Crea un gruppo privato per amministrare il tuo gioco.",
@@ -2015,6 +2046,9 @@ TRANSLATIONS["it"].update({
 })
 
 TRANSLATIONS["ar"].update({
+    "highlight_podium": "المنتخب/البلد المميز",
+    "highlight_podium_help": "لتغيير المنتخب أو البلد المميز، افتح قائمة المستخدم في أعلى الصفحة واستخدم خيار \"المنتخب المميز\".",
+    "stage_knockout": "الأدوار الإقصائية",
     "nav_private_group": "\u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629",
     "private_group_title": "\u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629",
     "private_group_hero": "\u0623\u0646\u0634\u0626 \u0645\u062c\u0645\u0648\u0639\u0629 \u062e\u0627\u0635\u0629 \u0644\u0625\u062f\u0627\u0631\u0629 \u062a\u0648\u0642\u0639\u0627\u062a\u0643.",
@@ -2046,6 +2080,9 @@ TRANSLATIONS["ar"].update({
 })
 
 TRANSLATIONS["zh"].update({
+    "highlight_podium": "重点球队/国家",
+    "highlight_podium_help": "要更改重点球队或国家，请打开页面顶部的用户菜单，并使用“高亮球队”选择器。",
+    "stage_knockout": "淘汰赛",
     "nav_private_group": "\u79c1\u4eba\u5c0f\u7ec4",
     "private_group_title": "\u79c1\u4eba\u5c0f\u7ec4",
     "private_group_hero": "\u521b\u5efa\u79c1\u4eba\u5c0f\u7ec4\u5e76\u7ba1\u7406\u4f60\u7684\u9884\u6d4b\u6d3b\u52a8\u3002",
@@ -2077,6 +2114,9 @@ TRANSLATIONS["zh"].update({
 })
 
 TRANSLATIONS["ru"].update({
+    "highlight_podium": "Выделенная сборная/страна",
+    "highlight_podium_help": "Чтобы изменить выделенную сборную или страну, откройте меню пользователя вверху страницы и используйте выбор \"Выделенная сборная\".",
+    "stage_knockout": "Плей-офф",
     "nav_private_group": "\u041f\u0440\u0438\u0432\u0430\u0442\u043d\u0430\u044f \u0433\u0440\u0443\u043f\u043f\u0430",
     "private_group_title": "\u041f\u0440\u0438\u0432\u0430\u0442\u043d\u0430\u044f \u0433\u0440\u0443\u043f\u043f\u0430",
     "private_group_hero": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u043f\u0440\u0438\u0432\u0430\u0442\u043d\u0443\u044e \u0433\u0440\u0443\u043f\u043f\u0443 \u0434\u043b\u044f \u0441\u0432\u043e\u0435\u0433\u043e \u043f\u0443\u043b\u0430 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u043e\u0432.",
@@ -2108,6 +2148,9 @@ TRANSLATIONS["ru"].update({
 })
 
 TRANSLATIONS["ja"].update({
+    "highlight_podium": "\u6ce8\u76ee\u30c1\u30fc\u30e0/\u56fd",
+    "highlight_podium_help": "\u6ce8\u76ee\u30c1\u30fc\u30e0\u307e\u305f\u306f\u56fd\u3092\u5909\u66f4\u3059\u308b\u306b\u306f\u3001\u30da\u30fc\u30b8\u4e0a\u90e8\u306e\u30e6\u30fc\u30b6\u30fc\u30e1\u30cb\u30e5\u30fc\u3092\u958b\u304d\u3001\u300c\u6ce8\u76ee\u30c1\u30fc\u30e0\u300d\u30bb\u30ec\u30af\u30bf\u30fc\u3092\u4f7f\u7528\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    "stage_knockout": "\u6c7a\u52dd\u30c8\u30fc\u30ca\u30e1\u30f3\u30c8",
     "nav_private_group": "\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7",
     "private_group_title": "\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7",
     "private_group_hero": "\u81ea\u5206\u306e\u4e88\u60f3\u30b0\u30eb\u30fc\u30d7\u3092\u7ba1\u7406\u3067\u304d\u308b\u30d7\u30e9\u30a4\u30d9\u30fc\u30c8\u30b0\u30eb\u30fc\u30d7\u3092\u4f5c\u6210\u3057\u307e\u3059\u3002",
@@ -3645,6 +3688,17 @@ def _current_user_payload(user):
     }
 
 
+def _highlight_team_options_payload(user=None):
+    selected = codigo_time_destacado(user)
+    automatic = codigo_time_destaque_padrao(getattr(user, "idioma", None) if user else None)
+    return {
+        "selected": selected,
+        "automatic": automatic,
+        "is_automatic": not bool(getattr(user, "time_destaque", None)),
+        "options": opcoes_time_destaque(),
+    }
+
+
 def _jogo_payload(jogo, palpite=None, pontuacao=None):
     resultado = jogo.resultado
     return {
@@ -3947,8 +4001,10 @@ def api_dashboard():
     etapa_podium = etapa_atual_ranking()
     ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
     ranking_etapa = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa_podium))
+    ranking_destaque = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa("destaque", g.user))
     podium_geral = podium_payload(ranking_geral)
     podium_etapa = podium_payload(ranking_etapa)
+    podium_destaque = podium_payload(ranking_destaque)
     total_jogos = Jogo.query.count()
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
     proximos = (Jogo.query
@@ -3965,10 +4021,37 @@ def api_dashboard():
         "podium": podium_etapa,
         "podium_geral": podium_geral,
         "podium_etapa": podium_etapa,
+        "podium_destaque": podium_destaque,
+        "podium_destaque_label": etapa_label_ranking("destaque", g.user),
+        "podium_destaque_time": codigo_time_destacado(g.user),
+        "podium_destaque_nome": nome_time_por_sigla(codigo_time_destacado(g.user)),
         "podium_etapa_key": etapa_podium,
         "podium_etapa_label": etapa_label_traduzida(etapa_podium),
         "proximos_jogos": [_jogo_payload(j) for j in proximos],
     })
+
+
+@app.route("/api/v1/time-destaque", methods=["GET"])
+@api_login_required
+def api_time_destaque():
+    return jsonify({"ok": True, **_highlight_team_options_payload(g.user)})
+
+
+@app.route("/api/v1/time-destaque", methods=["POST"])
+@api_login_required
+def api_alterar_time_destaque():
+    data = request.get_json(silent=True) or {}
+    codigo = (data.get("time_destaque") or "").strip().upper()
+    codigos_validos = {opcao["code"] for opcao in opcoes_time_destaque()}
+    if codigo == "AUTO":
+        g.user.time_destaque = None
+    elif codigo in codigos_validos:
+        g.user.time_destaque = codigo
+    else:
+        return jsonify({"ok": False, "error": "Selecao indisponivel para destaque."}), 400
+
+    db.session.commit()
+    return jsonify({"ok": True, "user": _current_user_payload(g.user), **_highlight_team_options_payload(g.user)})
 
 
 @app.route("/api/v1/jogos")
@@ -4663,7 +4746,7 @@ def dashboard():
 
     # Pódio atual
     podium_view = request.args.get("podium", "etapa").strip()
-    if podium_view not in {"etapa", "geral"}:
+    if podium_view not in {"etapa", "destaque", "geral"}:
         podium_view = "etapa"
     etapa_podium = etapa_atual_ranking()
     ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
@@ -4675,9 +4758,45 @@ def dashboard():
         Jogo,
         **ranking_kwargs_por_etapa(etapa_podium),
     )
+    ranking_destaque = get_ranking(
+        db,
+        Competidor,
+        Pontuacao,
+        Palpite,
+        Jogo,
+        **ranking_kwargs_por_etapa("destaque", g.user),
+    )
     podium_geral = ranking_geral[:3]
     podium_etapa = ranking_etapa[:3]
-    podium = podium_geral if podium_view == "geral" else podium_etapa
+    podium_destaque = ranking_destaque[:3]
+    podium_etapa_label = etapa_label_traduzida(etapa_podium)
+    podium_sets = [
+        {
+            "key": "etapa",
+            "label": podium_etapa_label,
+            "items": podium_etapa,
+            "help": "",
+        },
+        {
+            "key": "destaque",
+            "label": etapa_label_ranking("destaque", g.user),
+            "items": podium_destaque,
+            "help": tr("highlight_podium_help"),
+        },
+        {
+            "key": "geral",
+            "label": tr("overall_ranking"),
+            "items": podium_geral,
+            "help": "",
+        },
+    ]
+    if podium_view == "geral":
+        podium = podium_geral
+    elif podium_view == "destaque":
+        podium = podium_destaque
+    else:
+        podium = podium_etapa
+    active_podium_label = next((item["label"] for item in podium_sets if item["key"] == podium_view), podium_etapa_label)
     lider = podium[0] if podium else None
 
     # Palpites pendentes (jogos abertos sem palpite do competidor logado)
@@ -4720,9 +4839,13 @@ def dashboard():
                            palpites_pendentes=palpites_pendentes,
                            lider=lider,
                            podium=podium,
+                           podium_sets=podium_sets,
                            podium_view=podium_view,
-                           podium_etapa_label=etapa_label_traduzida(etapa_podium),
+                           active_podium_label=active_podium_label,
+                           podium_etapa_label=podium_etapa_label,
                            podium_etapa_key=etapa_podium,
+                           podium_destaque_label=etapa_label_ranking("destaque", g.user),
+                           podium_destaque_nome=nome_time_por_sigla(codigo_time_destacado(g.user)),
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
                            proximos_com_status=proximos_com_status,

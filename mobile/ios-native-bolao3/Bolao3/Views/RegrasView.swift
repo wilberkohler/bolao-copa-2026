@@ -36,14 +36,14 @@ struct RegrasView: View {
                 Section("Como acompanhar") {
                     RuleBullet(text: "Use Jogos para consultar datas, grupos e resultados.")
                     RuleBullet(text: "Use Palpites para preencher, salvar e limpar apenas os jogos permitidos.")
-                    RuleBullet(text: "Use Ranking para acompanhar Geral, Fase de Grupos e Mata-mata.")
+                    RuleBullet(text: "Use Ranking para acompanhar Geral, Fase de Grupos e Eliminatorias.")
                     RuleBullet(text: "O podium da tela inicial mostra os tres primeiros colocados atuais.")
                 }
 
                 Section("Ranking por etapas") {
-                    RuleBullet(text: "Geral: soma todos os jogos da Competicao.")
+                    RuleBullet(text: "Geral: soma todos os jogos cadastrados.")
                     RuleBullet(text: "Fase de Grupos: soma apenas os jogos antes do mata-mata.")
-                    RuleBullet(text: "Mata-mata: recomeca do zero na etapa eliminatoria e segue ate a final.")
+                    RuleBullet(text: "Eliminatorias: recomeca do zero na etapa eliminatoria e segue ate a final.")
                 }
 
                 Section("Desempate") {

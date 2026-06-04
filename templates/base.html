@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#198754">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Bolão 2026">
+  <meta name="apple-mobile-web-app-title" content="Bolão Futebol 2026">
   <link rel="manifest" href="{{ url_for('manifest_webmanifest') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}">
-  <title>Bolão Competicao 2026 - {% block title %}{% endblock %}</title>
+  <title>Bolão Futebol 2026 - {% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260531-hide-bracket-column-titles-1">
@@ -20,7 +20,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-success">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="{% if user %}{{ url_for('dashboard') }}{% else %}{{ url_for('login') }}{% endif %}">
-      <i class="bi bi-trophy-fill"></i> Bolão Competicao 2026
+      <i class="bi bi-trophy-fill"></i> Bolão Futebol 2026
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>

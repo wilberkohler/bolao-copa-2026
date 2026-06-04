@@ -87,34 +87,41 @@
     <div class="card shadow-sm border-warning h-100">
       <div class="card-header bg-warning text-dark fw-bold"><i class="bi bi-trophy"></i> {{ tr('current_podium') }}</div>
       <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-          <span class="small text-muted">
-            {% if podium_view == 'geral' %}{{ tr('overall_ranking') }}{% else %}{{ podium_etapa_label }}{% endif %}
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" data-podium-root>
+          <span class="small text-muted" data-podium-label>
+            {{ active_podium_label }}
           </span>
-          <div class="btn-group btn-group-sm" role="group" aria-label="Selecionar podium">
-            <a href="{{ url_for('dashboard') }}"
-               class="btn {% if podium_view != 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
-              {{ tr('stage') }}
-            </a>
-            <a href="{{ url_for('dashboard', podium='geral') }}"
-               class="btn {% if podium_view == 'geral' %}btn-warning{% else %}btn-outline-warning{% endif %}">
-              {{ tr('overall') }}
-            </a>
-          </div>
-        </div>
-        {% if podium %}
-          <div class="podium-wrap">
-            {% for r in podium %}
-              <div class="podium-place podium-place-{{ r.posicao }}">
-                <div class="podium-rank">#{{ r.posicao }}</div>
-                <div class="podium-name mt-2">{{ r.competidor.apelido }}</div>
-                <div class="small text-muted">{{ r.pontos }} {{ tr('points') }}</div>
-              </div>
+          <div class="podium-tabs" role="group" aria-label="{{ tr('current_podium') }}">
+            {% for podium_set in podium_sets %}
+              <button type="button"
+                      class="btn btn-sm js-podium-tab {% if podium_view == podium_set['key'] %}btn-warning{% else %}btn-outline-warning{% endif %}"
+                      data-podium-target="{{ podium_set['key'] }}"
+                      data-podium-label="{{ podium_set['label'] }}">
+                {% if podium_set['key'] == 'etapa' %}{{ tr('stage') }}{% elif podium_set['key'] == 'destaque' %}Destaque{% else %}{{ tr('overall') }}{% endif %}
+              </button>
             {% endfor %}
           </div>
-        {% else %}
-          <p class="text-muted">{{ tr('no_results_yet') }}</p>
-        {% endif %}
+        </div>
+        {% for podium_set in podium_sets %}
+          <div class="js-podium-panel" data-podium-panel="{{ podium_set['key'] }}" {% if podium_view != podium_set['key'] %}hidden{% endif %}>
+            {% if podium_set['help'] %}
+              <p class="small text-muted mb-3">{{ podium_set['help'] }}</p>
+            {% endif %}
+            {% if podium_set['items'] %}
+              <div class="podium-wrap">
+                {% for r in podium_set['items'] %}
+                  <div class="podium-place podium-place-{{ r.posicao }}">
+                    <div class="podium-rank">#{{ r.posicao }}</div>
+                    <div class="podium-name mt-2">{{ r.competidor.apelido }}</div>
+                    <div class="small text-muted">{{ r.pontos }} {{ tr('points') }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted">{{ tr('no_results_yet') }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -208,6 +215,40 @@
   </table>
 </div>
 <script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll(".js-podium-tab"));
+    var panels = Array.prototype.slice.call(document.querySelectorAll(".js-podium-panel"));
+    var label = document.querySelector("[data-podium-label]");
+
+    function showPodium(key, pushUrl) {
+      tabs.forEach(function (tab) {
+        var active = tab.dataset.podiumTarget === key;
+        tab.classList.toggle("btn-warning", active);
+        tab.classList.toggle("btn-outline-warning", !active);
+        tab.setAttribute("aria-pressed", active ? "true" : "false");
+        if (active && label) label.textContent = tab.dataset.podiumLabel || "";
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.dataset.podiumPanel !== key;
+      });
+      if (pushUrl && window.history && window.history.replaceState) {
+        var url = new URL(window.location.href);
+        if (key === "etapa") {
+          url.searchParams.delete("podium");
+        } else {
+          url.searchParams.set("podium", key);
+        }
+        window.history.replaceState(null, "", url);
+      }
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        showPodium(tab.dataset.podiumTarget, true);
+      });
+    });
+  })();
+
   document.querySelectorAll(".js-copy-invite").forEach(function (button) {
     button.addEventListener("click", function () {
       var text = button.dataset.invite || "";

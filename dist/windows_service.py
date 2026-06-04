@@ -18,8 +18,8 @@ os.chdir(BASE_DIR)
 
 class BolaoWindowsService(win32serviceutil.ServiceFramework):
     _svc_name_ = "BolaoCopa2026"
-    _svc_display_name_ = "Bolao Copa 2026"
-    _svc_description_ = "Servidor web do sistema de bolao da Copa 2026."
+    _svc_display_name_ = "Bolao Futebol 2026"
+    _svc_description_ = "Servidor web do sistema de bolao de futebol 2026."
 
     def __init__(self, args):
         super().__init__(args)
@@ -34,9 +34,9 @@ class BolaoWindowsService(win32serviceutil.ServiceFramework):
         win32event.SetEvent(self.stop_event)
 
     def SvcDoRun(self):
-        servicemanager.LogInfoMsg("Bolao Copa 2026 service starting")
+        servicemanager.LogInfoMsg("Bolao Futebol 2026 service starting")
         self.main()
-        servicemanager.LogInfoMsg("Bolao Copa 2026 service stopped")
+        servicemanager.LogInfoMsg("Bolao Futebol 2026 service stopped")
 
     def main(self):
         app = create_app()

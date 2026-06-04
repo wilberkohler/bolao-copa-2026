@@ -11,6 +11,8 @@ struct DashboardView: View {
         switch podiumMode {
         case .etapa:
             return dashboard?.podiumEtapa ?? dashboard?.podium ?? []
+        case .destaque:
+            return dashboard?.podiumDestaque ?? []
         case .geral:
             return dashboard?.podiumGeral ?? dashboard?.podium ?? []
         }
@@ -20,6 +22,8 @@ struct DashboardView: View {
         switch podiumMode {
         case .etapa:
             return "Podium atual - \(dashboard?.podiumEtapaLabel ?? "Etapa")"
+        case .destaque:
+            return dashboard?.podiumDestaqueLabel ?? "Selecao em destaque"
         case .geral:
             return "Podium geral"
         }
@@ -55,15 +59,26 @@ struct DashboardView: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                        .transaction { transaction in
+                            transaction.animation = nil
+                        }
 
                         if podiumMode == .etapa {
-                            Text("A etapa muda automaticamente pela data da Competicao.")
+                            Text("A etapa muda automaticamente pelo calendario dos jogos.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if podiumMode == .destaque {
+                            Text("A selecao em destaque pode ser alterada na tela Conta.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
 
                         PodiumView(items: selectedPodium)
                             .listRowInsets(EdgeInsets(top: 14, leading: 12, bottom: 14, trailing: 12))
+                            .transaction { transaction in
+                                transaction.animation = nil
+                            }
                     }
                 }
 
@@ -81,7 +96,7 @@ struct DashboardView: View {
                     }
                 }
             }
-            .navigationTitle("Bolao 3")
+            .navigationTitle("Bolao Futebol")
             .toolbar {
                 Button("Sair") {
                     Task { await appState.logout() }
@@ -115,6 +130,7 @@ struct DashboardView: View {
 
 private enum PodiumMode: String, CaseIterable, Identifiable {
     case etapa
+    case destaque
     case geral
 
     var id: String { rawValue }
@@ -123,6 +139,8 @@ private enum PodiumMode: String, CaseIterable, Identifiable {
         switch self {
         case .etapa:
             return "Etapa"
+        case .destaque:
+            return "Destaque"
         case .geral:
             return "Geral"
         }

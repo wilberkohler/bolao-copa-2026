@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
 def load_runtime_config():
     config = DEFAULT_CONFIG.copy()
     if CONFIG_PATH.exists():
-        with CONFIG_PATH.open("r", encoding="utf-8") as file:
+        with CONFIG_PATH.open("r", encoding="utf-8-sig") as file:
             loaded = json.load(file)
         config.update({key: value for key, value in loaded.items() if value is not None})
     return config

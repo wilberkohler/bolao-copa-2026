@@ -412,6 +412,16 @@ body { background: #f4f6f9; }
 }
 
 /* Podio */
+.podium-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: .35rem;
+}
+.podium-tabs .btn {
+	min-width: 5.25rem;
+	white-space: nowrap;
+}
 .podium-wrap {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));

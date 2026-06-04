@@ -31,6 +31,29 @@ APP_STORE_CONNECT_ISSUER_ID
 APP_STORE_CONNECT_API_KEY_P8
 ```
 
+## Criacao automatizada pelo PowerShell
+
+Se tiver o GitHub CLI instalado e autenticado, rode:
+
+```powershell
+cd "C:\caminho\para\Bolao 2"
+.\scripts\set_github_ios_secrets.ps1
+```
+
+Se o comando `gh` nao existir, instale o GitHub CLI:
+
+```powershell
+winget install --id GitHub.cli
+```
+
+Depois autentique:
+
+```powershell
+gh auth login
+```
+
+O script pede os valores no PowerShell, converte os arquivos `.p12` e `.mobileprovision` para base64 e envia tudo como repository secrets.
+
 ## O que e cada secret
 
 `IOS_APP_URL`
@@ -148,4 +171,3 @@ br.com.kohler.bolao2026
 ```
 
 O Bundle ID deve existir na Apple Developer e o provisioning profile precisa apontar para ele.
-

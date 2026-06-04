@@ -1,4 +1,4 @@
-# Bolao 3
+# Bolao Futebol 2026
 
 Versao iOS nativa em SwiftUI, mantida em paralelo ao app web/Capacitor atual.
 

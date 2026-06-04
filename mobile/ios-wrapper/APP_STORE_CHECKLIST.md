@@ -20,8 +20,7 @@
 ## Metadados obrigatorios
 
 - Politica de privacidade publicada em uma URL publica.
-- Texto curto explicando que o app gerencia palpites da Copa 2026.
+- Texto curto explicando que o app gerencia palpites recreativos de futebol em 2026.
 - Screenshots para os tamanhos de iPhone exigidos pela Apple.
 - Informar se ha login obrigatorio.
 - Informar que o usuario pode solicitar exclusao de conta em `/solicitar-exclusao-dados`.
-

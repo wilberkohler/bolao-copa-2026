@@ -1,6 +1,6 @@
-# Bolao Copa 2026 Android
+# Bolao Futebol 2026 Android
 
-Wrapper Android com Capacitor para publicar o Bolao Copa 2026 usando o mesmo backend web:
+Wrapper Android com Capacitor para publicar o Bolao Futebol 2026 usando o mesmo backend web:
 
 `https://bolao2026-9jgh.onrender.com`
 

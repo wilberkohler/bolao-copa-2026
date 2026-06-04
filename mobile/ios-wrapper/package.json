@@ -2,7 +2,7 @@
   "name": "bolao-ios-wrapper",
   "version": "1.0.0",
   "private": true,
-  "description": "Wrapper iOS (Capacitor) para o Bolao Copa 2026",
+  "description": "Wrapper iOS (Capacitor) para o Bolao Futebol 2026",
   "scripts": {
     "cap:doctor": "npx cap doctor",
     "cap:sync": "npx cap sync",

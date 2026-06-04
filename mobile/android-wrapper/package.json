@@ -2,7 +2,7 @@
   "name": "bolao-android-wrapper",
   "version": "1.0.1",
   "private": true,
-  "description": "Wrapper Android (Capacitor) para o Bolao Copa 2026",
+  "description": "Wrapper Android (Capacitor) para o Bolao Futebol 2026",
   "scripts": {
     "cap:doctor": "cap doctor",
     "cap:sync": "cap sync",

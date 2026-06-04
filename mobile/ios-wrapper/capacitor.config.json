@@ -1,6 +1,6 @@
 {
   "appId": "br.com.kohler.bolao2026",
-  "appName": "Bolao Copa 2026",
+  "appName": "Bolao Futebol 2026",
   "webDir": "www",
   "server": {
     "url": "https://SEU_DOMINIO_AQUI",
@@ -8,7 +8,7 @@
   },
   "ios": {
     "contentInset": "automatic",
-    "scheme": "BolaoCopa2026"
+    "scheme": "BolaoFutebol2026"
   },
   "plugins": {
     "SplashScreen": {

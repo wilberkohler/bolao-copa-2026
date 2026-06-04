@@ -139,8 +139,10 @@ struct PalpitesView: View {
                     HStack(alignment: .top, spacing: 28) {
                         ForEach(Array(visiblePlayoffPhases.enumerated()), id: \.element) { offset, phase in
                             let absoluteIndex = (playoffStartIndex >= 4 ? 4 : playoffStartIndex) + offset
+                            let visibleStartIndex = playoffStartIndex >= 4 ? 4 : playoffStartIndex
                             KnockoutPhaseColumn(
                                 phaseIndex: absoluteIndex,
+                                topPadding: playoffTopPadding(for: absoluteIndex, visibleStartIndex: visibleStartIndex),
                                 isFirstVisible: offset == 0,
                                 isLastVisible: offset == visiblePlayoffPhases.count - 1,
                                 jogos: jogosDaAba.filter { $0.fase == phase },
@@ -422,6 +424,10 @@ struct PalpitesView: View {
             return "Terceiro Lugar & Final"
         }
     }
+
+    private func playoffTopPadding(for phaseIndex: Int, visibleStartIndex: Int) -> CGFloat {
+        max(0, KnockoutLayout.rawTopPadding(for: phaseIndex) - KnockoutLayout.rawTopPadding(for: visibleStartIndex))
+    }
 }
 
 private struct DraftPalpite {
@@ -435,40 +441,46 @@ private enum PalpiteField: Hashable {
     case golsB(Int)
 }
 
+private enum KnockoutLayout {
+    static let cardHeight: CGFloat = 258
+    static let cardWidth: CGFloat = 310
+    static let firstRoundGap: CGFloat = 16
+    static let connectorWidth: CGFloat = 28
+
+    static func multiplier(for phaseIndex: Int) -> CGFloat {
+        CGFloat(1 << max(0, min(phaseIndex, 4)))
+    }
+
+    static func centerSpacing(for phaseIndex: Int) -> CGFloat {
+        guard phaseIndex > 0 else {
+            return cardHeight + firstRoundGap
+        }
+        return (cardHeight + firstRoundGap) * multiplier(for: phaseIndex)
+    }
+
+    static func rowSpacing(for phaseIndex: Int) -> CGFloat {
+        max(firstRoundGap, centerSpacing(for: phaseIndex) - cardHeight)
+    }
+
+    static func rawTopPadding(for phaseIndex: Int) -> CGFloat {
+        guard phaseIndex > 0 else {
+            return 0
+        }
+        return ((cardHeight + firstRoundGap) * multiplier(for: phaseIndex - 1)) - (cardHeight / 2)
+    }
+}
+
 private struct KnockoutPhaseColumn: View {
     let phaseIndex: Int
+    let topPadding: CGFloat
     let isFirstVisible: Bool
     let isLastVisible: Bool
     let jogos: [Jogo]
     @Binding var drafts: [Int: DraftPalpite]
     let focusedField: FocusState<PalpiteField?>.Binding
 
-    private var topPadding: CGFloat {
-        switch phaseIndex {
-        case 0:
-            return 0
-        case 1:
-            return 64
-        case 2:
-            return 150
-        case 3:
-            return 238
-        default:
-            return 0
-        }
-    }
-
     private var spacing: CGFloat {
-        switch phaseIndex {
-        case 0:
-            return 14
-        case 1:
-            return 56
-        case 2:
-            return 128
-        default:
-            return 28
-        }
+        KnockoutLayout.rowSpacing(for: min(phaseIndex, 4))
     }
 
     var body: some View {
@@ -487,7 +499,7 @@ private struct KnockoutPhaseColumn: View {
             }
         }
         .padding(.top, topPadding)
-        .frame(width: 310, alignment: .top)
+        .frame(width: KnockoutLayout.cardWidth, alignment: .top)
     }
 }
 
@@ -592,6 +604,7 @@ private struct KnockoutMatchCard: View {
             }
         }
         .padding(14)
+        .frame(height: KnockoutLayout.cardHeight, alignment: .top)
         .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 8))
         .overlay(alignment: .leading) {
             Rectangle()
@@ -602,16 +615,16 @@ private struct KnockoutMatchCard: View {
             if !isFirstVisible {
                 Rectangle()
                     .fill(Color(.systemGray3))
-                    .frame(width: 28, height: 2)
-                    .offset(x: -28)
+                    .frame(width: KnockoutLayout.connectorWidth, height: 2)
+                    .offset(x: -KnockoutLayout.connectorWidth)
             }
         }
         .overlay(alignment: .trailing) {
             if !isLastVisible {
                 Rectangle()
                     .fill(Color(.systemGray3))
-                    .frame(width: 28, height: 2)
-                    .offset(x: 28)
+                    .frame(width: KnockoutLayout.connectorWidth, height: 2)
+                    .offset(x: KnockoutLayout.connectorWidth)
             }
         }
         .shadow(color: .black.opacity(0.12), radius: 7, y: 3)
