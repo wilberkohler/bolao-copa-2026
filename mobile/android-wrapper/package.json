@@ -1,6 +1,6 @@
 {
   "name": "bolao-android-wrapper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Wrapper Android (Capacitor) para o Bolao Futebol 2026",
   "scripts": {
