@@ -9,7 +9,7 @@ Sistema web de palpites para a Copa do Mundo FIFA 2026 com autenticação, grupo
 - ✅ **Autenticação**: Primeiro acesso com cadastro simples (nome, email, apelido, senha)
 - ✅ **Grupos**: Usuários se associam a grupos existentes ou criam novos (apenas admin)
 - ✅ **Compartilhamento**: Visualize palpites de todos do grupo, edite apenas o seu
-- ✅ **107 Jogos**: Pré-carregados com datas, horários convertidos para Brasília (BRT)
+- ✅ **104 Jogos**: Pré-carregados com datas, horários convertidos para Brasília (BRT)
 - ✅ **Pontuação Automática**: 10/7/5/5/2 pts por acerto de placar/vencedor
 - ✅ **Rankings**: Geral e por fase
 
@@ -211,7 +211,7 @@ Bolao-Copa-2026/
 ├── app.py                              # Aplicação Flask
 ├── models.py                           # Modelos SQL (User, Grupo, Jogo, Palpite, etc)
 ├── scoring.py                          # Lógica de pontuação e ranking
-├── seed_jogos_copa_2026.py            # 107 jogos pré-carregados
+├── seed_jogos_copa_2026.py            # 104 jogos pré-carregados
 ├── requirements.txt                    # Dependências
 ├── instance/
 │   └── bolao.db                       # Banco de dados SQLite (criado automaticamente)
@@ -272,6 +272,29 @@ py -c "from models import db, User; from app import app; app.app_context().push(
 ## 📞 Contato
 
 Para dúvidas sobre configuração, contact admnistrador do grupo.
+
+---
+
+## 📱 Aplicativo iOS
+
+Este projeto pode virar app iOS sem reescrever o backend, usando wrapper com Capacitor.
+
+- Guia completo: `IOS_APP_SETUP.md`
+- Estrutura pronta: `mobile/ios-wrapper/`
+
+Resumo rápido:
+
+1. Publique o sistema Flask em uma URL HTTPS.
+2. Edite `mobile/ios-wrapper/capacitor.config.json` com sua URL.
+3. No Mac com Xcode:
+
+```bash
+cd mobile/ios-wrapper
+npm install
+npm run cap:add:ios
+npm run cap:sync
+npm run cap:open:ios
+```
 
 ---
 

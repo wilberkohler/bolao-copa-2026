@@ -21,7 +21,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy.orm import selectinload
 from models import db, Competidor, Jogo, Palpite, Resultado, Pontuacao, HistoricoPalpite, User, Grupo, SolicitacaoExclusaoDados, RelatorioRodadaEnvio
 from runtime_config import load_runtime_config
-from seed_jogos_copa_2026 import JOGOS, seed_jogos
+from seed_jogos_copa_2026 import JOGOS, seed_jogos, sync_jogos_2026
 from result_sync import sync_finished_results_football_data
 from scoring import (calcular_pontos, calcular_pontuacao_jogo, get_ranking,
                      prazo_aberto, status_palpite_para_jogo, palpite_editavel)
@@ -2523,10 +2523,9 @@ def prazo_palpite_brasilia(jogo):
 
 REAL_TEAM_CODE_RE = re.compile(r"^[A-Z]{3}$")
 GROUP_RANK_SLOT_RE = re.compile(r"^([12])([A-L])$")
+THIRD_PLACE_SLOT_RE = re.compile(r"^3([A-L]+)$")
 WINNER_GAME_SLOT_RE = re.compile(r"^WJ(\d+)$")
-WINNER_ROUND_SLOT_RE = re.compile(r"^WQ(\d+)$")
-WINNER_SEED_SLOT_RE = re.compile(r"^WSF(\d+)$")
-LOSER_SEED_SLOT_RE = re.compile(r"^LSF(\d+)$")
+LOSER_GAME_SLOT_RE = re.compile(r"^LJ(\d+)$")
 
 
 def _is_real_team_code(code):
@@ -2666,29 +2665,21 @@ def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, th
         ranking = rankings.get(grupo) or []
         return ranking[posicao] if len(ranking) > posicao else None
 
-    if slot_code == "3X":
-        return third_slots.pop(0) if third_slots else None
+    match = THIRD_PLACE_SLOT_RE.match(slot_code)
+    if match:
+        grupos_permitidos = set(match.group(1))
+        for idx, terceiro in enumerate(third_slots):
+            if terceiro.get("grupo") in grupos_permitidos:
+                return third_slots.pop(idx)
+        return None
 
     match = WINNER_GAME_SLOT_RE.match(slot_code)
     if match:
         return _winner_identity(jogos_por_numero.get(int(match.group(1))))
 
-    match = WINNER_ROUND_SLOT_RE.match(slot_code)
+    match = LOSER_GAME_SLOT_RE.match(slot_code)
     if match:
-        numero = int(match.group(1))
-        return _winner_identity(jogos_por_numero.get(90 + numero))
-
-    match = WINNER_SEED_SLOT_RE.match(slot_code)
-    if match:
-        indice = int(match.group(1))
-        if target_num in {104, 105}:
-            return _winner_identity(jogos_por_numero.get(99 + indice))
-        if target_num == 107:
-            return _winner_identity(jogos_por_numero.get(103 + indice))
-
-    match = LOSER_SEED_SLOT_RE.match(slot_code)
-    if match and target_num == 106:
-        return _loser_identity(jogos_por_numero.get(103 + int(match.group(1))))
+        return _loser_identity(jogos_por_numero.get(int(match.group(1))))
 
     return None
 
@@ -3254,6 +3245,26 @@ def restore_knockout_seed_slots():
         if not original:
             continue
         jogo.time_a, jogo.time_b, jogo.sigla_time_a, jogo.sigla_time_b = original
+
+
+def remover_jogos_obsoletos_do_calendario():
+    numeros_atuais = {row[0] for row in JOGOS}
+    obsoletos = Jogo.query.filter(
+        Jogo.numero_partida.isnot(None),
+        ~Jogo.numero_partida.in_(numeros_atuais),
+    ).all()
+    if not obsoletos:
+        return 0
+
+    jogo_ids = [jogo.id for jogo in obsoletos]
+    HistoricoPalpite.query.filter(HistoricoPalpite.jogo_id.in_(jogo_ids)).delete(synchronize_session=False)
+    Pontuacao.query.filter(Pontuacao.jogo_id.in_(jogo_ids)).delete(synchronize_session=False)
+    Resultado.query.filter(Resultado.jogo_id.in_(jogo_ids)).delete(synchronize_session=False)
+    Palpite.query.filter(Palpite.jogo_id.in_(jogo_ids)).delete(synchronize_session=False)
+    for jogo in obsoletos:
+        db.session.delete(jogo)
+    db.session.commit()
+    return len(obsoletos)
 
 
 def calcular_pontuacao_jogo_sem_commit(jogo):
@@ -5454,6 +5465,12 @@ def create_app():
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
+        updated_games = sync_jogos_2026(db, Jogo)
+        if updated_games:
+            print(f"[setup] Calendario de jogos atualizado ({updated_games} alteracoes).")
+        removed_games = remover_jogos_obsoletos_do_calendario()
+        if removed_games:
+            print(f"[setup] {removed_games} jogo(s) obsoleto(s) removido(s) do calendario.")
         if recalcular_prazos_palpite(force=True):
             print("[setup] Prazos de palpite recalculados para 30 minutos antes dos jogos.")
         updated_knockout = sync_knockout_teams()

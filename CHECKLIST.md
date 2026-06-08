@@ -62,7 +62,7 @@
 
 ## Dados
 
-- [ ] 107 jogos pré-carregados na primeira execução
+- [ ] 104 jogos pré-carregados na primeira execução
 - [ ] Horários convertidos ET → Brasília
 - [ ] Prazo = 23h59 BRT dia anterior
 - [ ] Todas as 12 fases incluídas (grupos A-L + mata-mata)
