@@ -3302,7 +3302,6 @@ def calcular_pontuacao_jogo_sem_commit(jogo):
 
 
 def group_items_by_world_cup_group(items, item_to_jogo):
-    grupos_ordenados = []
     grupos_map = {}
 
     for item in items:
@@ -3310,12 +3309,19 @@ def group_items_by_world_cup_group(items, item_to_jogo):
         grupo = jogo.grupo if jogo and jogo.grupo else "Outros"
         if grupo not in grupos_map:
             grupos_map[grupo] = []
-            grupos_ordenados.append(grupo)
         grupos_map[grupo].append(item)
 
     priorizar_outros = "Outros" in grupos_map
+    ordem_grupos = [chr(code) for code in range(ord("A"), ord("L") + 1)]
+    grupos_ordenados = [grupo for grupo in ordem_grupos if grupo in grupos_map]
+    grupos_ordenados.extend(
+        sorted(
+            grupo for grupo in grupos_map
+            if grupo not in ordem_grupos and grupo != "Outros"
+        )
+    )
     if priorizar_outros:
-        grupos_ordenados = ["Outros"] + [grupo for grupo in grupos_ordenados if grupo != "Outros"]
+        grupos_ordenados = ["Outros"] + grupos_ordenados
 
     return [
         {
@@ -5030,6 +5036,20 @@ def listar_jogos():
     return render_template("jogos/lista.html",
                            jogos=jogos,
                            jogos_por_grupo=jogos_por_grupo)
+
+
+@app.route("/admin/sincronizar-jogos-2026")
+@admin_required
+def admin_sincronizar_jogos_2026():
+    atualizados = sync_jogos_2026(db, Jogo)
+    removidos = remover_jogos_obsoletos_do_calendario()
+    recalcular_prazos_palpite(force=True)
+    sync_knockout_teams()
+    flash(
+        f"Calendario sincronizado: {atualizados} alteracao(oes), {removidos} jogo(s) obsoleto(s) removido(s).",
+        "success",
+    )
+    return redirect(url_for("listar_jogos"))
 
 
 @app.route("/jogos/<int:jid>/editar", methods=["GET", "POST"])
