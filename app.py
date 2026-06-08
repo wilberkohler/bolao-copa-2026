@@ -2943,6 +2943,16 @@ def ensure_user_email_columns():
             conn.execute(text(statement))
 
 
+def ensure_jogo_code_columns_width():
+    """Widens team/slot code columns for official knockout third-place slots."""
+    if db.engine.dialect.name == "sqlite":
+        return
+
+    with db.engine.begin() as conn:
+        conn.execute(text("ALTER TABLE jogos ALTER COLUMN sigla_time_a TYPE VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE jogos ALTER COLUMN sigla_time_b TYPE VARCHAR(20)"))
+
+
 def grupo_publico_payload(grupo):
     return {
         "id": grupo.id,
@@ -5482,6 +5492,7 @@ def create_app():
         db.create_all()
         ensure_group_publication_columns()
         ensure_user_email_columns()
+        ensure_jogo_code_columns_width()
         count = seed_jogos(db, Jogo)
         if count:
             print(f"[seed] {count} jogos carregados.")
