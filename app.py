@@ -4147,6 +4147,11 @@ def api_palpites():
                 continue
 
             classificado = (item.get("classificado") or "").strip() or None
+            if classificado and jogo.mata_mata:
+                opcoes = [jogo.time_a.lower(), jogo.time_b.lower()]
+                if classificado.lower() not in opcoes:
+                    errors.append({"jogo_id": jogo_id, "error": "Classificado invalido."})
+                    continue
             palpite = Palpite.query.filter_by(
                 competidor_id=competidor.id,
                 jogo_id=jogo.id,
@@ -5153,10 +5158,6 @@ def palpites():
                     raise ValueError
             except ValueError:
                 erros.append(f"Gols inválidos para o jogo #{jid}.")
-                continue
-
-            if jogo.mata_mata and gols_a == gols_b and not classificado:
-                erros.append(f"Classificado obrigatório no mata-mata jogo #{jid} (empate).")
                 continue
 
             if classificado and jogo.mata_mata:

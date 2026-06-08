@@ -307,11 +307,6 @@ struct PalpitesView: View {
             if draft.golsB.trimmingCharacters(in: .whitespaces).isEmpty {
                 draft.golsB = String(Int.random(in: 0...4))
             }
-            if jogo.mataMata && draft.classificado.trimmingCharacters(in: .whitespaces).isEmpty {
-                let golsA = Int(draft.golsA) ?? 0
-                let golsB = Int(draft.golsB) ?? 0
-                draft.classificado = golsB > golsA ? (jogo.timeB ?? "") : (jogo.timeA ?? "")
-            }
             drafts[jogo.id] = draft
         }
         message = "Campos vazios preenchidos para a aba ativa."
@@ -350,10 +345,6 @@ struct PalpitesView: View {
                 continue
             }
             guard let golsA = Int(aText), let golsB = Int(bText), golsA >= 0, golsB >= 0 else {
-                invalidos += 1
-                continue
-            }
-            if jogo.mataMata && classificado.isEmpty {
                 invalidos += 1
                 continue
             }
