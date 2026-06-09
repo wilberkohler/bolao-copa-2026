@@ -43,6 +43,11 @@
       {{ tr('private_group_capacity_note', limit=limite_participantes) }}
     </div>
 
+    <div class="alert alert-success border">
+      <i class="bi bi-shield-check"></i>
+      {{ tr('private_group_no_gambling') }}
+    </div>
+
     {% if user %}
       <div class="d-flex gap-2">
         <a href="{{ url_for('meus_grupos_privados') }}" class="btn btn-success">

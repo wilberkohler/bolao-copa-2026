@@ -90,18 +90,12 @@ struct AccountView: View {
                         ProgressView("Carregando informacoes...")
                     } else if let privateConfig {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Crie um grupo privado para administrar seus participantes.")
+                            Text("Crie um grupo privado para administrar participantes e rankings entre amigos.")
                                 .font(.subheadline)
-                            HStack {
-                                Label(privateConfig.priceDisplay.usd, systemImage: "dollarsign.circle")
-                                Spacer()
-                                Text(privateConfig.priceDisplay.local)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Text("Moeda aproximada: \(privateConfig.priceDisplay.localCurrency) - \(privateConfig.priceDisplay.teamName)")
+                            Text("Limite tecnico inicial: \(privateConfig.participantLimit) participantes.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text("Limite tecnico inicial: \(privateConfig.participantLimit) participantes.")
+                            Text("Nao ha apostas, premios em dinheiro, carteira, deposito, saque ou odds. Os palpites servem apenas para ranking recreativo.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             if let storePrice = storeKit.displayPrice {
@@ -124,7 +118,7 @@ struct AccountView: View {
                         Button {
                             Task { await buyPrivateGroup() }
                         } label: {
-                            Label(storeKit.isPurchasing ? "Processando compra..." : "Comprar grupo privado", systemImage: "cart")
+                            Label(storeKit.isPurchasing ? "Processando compra..." : "Ativar grupo privado", systemImage: "cart")
                         }
                         .disabled(storeKit.product == nil || storeKit.isPurchasing)
 
@@ -144,7 +138,7 @@ struct AccountView: View {
                 } header: {
                     Text("Grupo privado")
                 } footer: {
-                    Text("O preco final sera exibido pela Apple ou Google Play no momento da compra.")
+                    Text("O preco final sera exibido pela Apple ou Google Play. A compra libera apenas ferramentas administrativas do grupo privado.")
                 }
 
                 if let activatedGroup {
