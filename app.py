@@ -2521,6 +2521,47 @@ def prazo_palpite_brasilia(jogo):
     return (origem.astimezone(BR_TZ) - timedelta(minutes=30)).replace(tzinfo=None)
 
 
+def _jogo_inicio_brasilia(jogo):
+    origem = _jogo_datetime_origem(jogo)
+    if not origem:
+        return None
+    return origem.astimezone(BR_TZ)
+
+
+def proximos_jogos_ordenados(limit=10, data_referencia=None, incluir_status=None):
+    data_base = data_referencia or data_referencia_app()
+    data_minima = data_base - timedelta(days=1)
+    status_validos = incluir_status or ["Agendado", "Aberto para palpites"]
+    candidatos = (
+        Jogo.query
+        .filter(Jogo.data_jogo >= data_minima)
+        .filter(Jogo.status.in_(status_validos))
+        .order_by(Jogo.data_jogo, Jogo.hora_et, Jogo.numero_partida)
+        .limit(max(limit * 4, limit))
+        .all()
+    )
+    agora = agora_br()
+    futuros = []
+    for jogo in candidatos:
+        inicio = _jogo_inicio_brasilia(jogo)
+        if inicio and inicio >= agora:
+            futuros.append((inicio, jogo.numero_partida or 0, jogo))
+    futuros.sort(key=lambda item: (item[0], item[1]))
+    return [item[2] for item in futuros[:limit]]
+
+
+def proximo_prazo_aberto():
+    agora_naive = agora_br().replace(tzinfo=None)
+    return (
+        Jogo.query
+        .filter(Jogo.status.in_(["Agendado", "Aberto para palpites"]))
+        .filter(Jogo.prazo_palpite.isnot(None))
+        .filter(Jogo.prazo_palpite >= agora_naive)
+        .order_by(Jogo.prazo_palpite, Jogo.data_jogo, Jogo.hora_et, Jogo.numero_partida)
+        .first()
+    )
+
+
 REAL_TEAM_CODE_RE = re.compile(r"^[A-Z]{3}$")
 GROUP_RANK_SLOT_RE = re.compile(r"^([12])([A-L])$")
 THIRD_PLACE_SLOT_RE = re.compile(r"^3([A-L]+)$")
@@ -4036,10 +4077,7 @@ def api_dashboard():
     podium_destaque = podium_payload(ranking_destaque)
     total_jogos = Jogo.query.count()
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
-    proximos = (Jogo.query
-                .filter(Jogo.data_jogo >= date.today())
-                .order_by(Jogo.data_jogo, Jogo.hora_brasilia)
-                .limit(6).all())
+    proximos = proximos_jogos_ordenados(limit=6, data_referencia=date.today())
     return jsonify({
         "ok": True,
         "summary": {
@@ -4764,19 +4802,14 @@ def dashboard():
 
     # Próximos jogos (não iniciados, próximos 10)
     hoje = data_referencia_app()
-    proximos = (Jogo.query
-                .filter(Jogo.data_jogo >= hoje)
-                .filter(Jogo.status.in_(["Agendado", "Aberto para palpites"]))
-                .order_by(Jogo.data_jogo, Jogo.hora_et)
-                .limit(10).all())
+    proximos = proximos_jogos_ordenados(limit=10, data_referencia=hoje)
 
     # Próximo jogo
     proximo_jogo = proximos[0] if proximos else None
 
     # Próximo prazo
-    proximo_prazo = None
-    if proximo_jogo:
-        proximo_prazo = proximo_jogo.prazo_palpite
+    proximo_prazo_jogo = proximo_prazo_aberto()
+    proximo_prazo = proximo_prazo_jogo.prazo_palpite if proximo_prazo_jogo else None
 
     # Pódio atual
     podium_view = request.args.get("podium", "etapa").strip()
@@ -4882,6 +4915,7 @@ def dashboard():
                            podium_destaque_nome=nome_time_por_sigla(codigo_time_destacado(g.user)),
                            proximo_jogo=proximo_jogo,
                            proximo_prazo=proximo_prazo,
+                           proximo_prazo_jogo=proximo_prazo_jogo,
                            proximos_com_status=proximos_com_status,
                            invite_url=invite_url,
                            invite_text=invite_text)
