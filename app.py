@@ -35,6 +35,8 @@ PRIVATE_GROUP_PRICE_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_CENTS", "499
 PRIVATE_GROUP_PRICE_USD_CENTS = int(os.environ.get("PRIVATE_GROUP_PRICE_USD_CENTS", "999"))
 PRIVATE_GROUP_PARTICIPANT_LIMIT = int(os.environ.get("PRIVATE_GROUP_PARTICIPANT_LIMIT", "150"))
 PRIVATE_GROUP_PRODUCT_ID = os.environ.get("PRIVATE_GROUP_PRODUCT_ID", "private_group_2026")
+RANKING_CACHE_TTL_SECONDS = 20
+_ranking_cache = {}
 RANKING_ETAPAS = {
     "geral": "Geral",
     "grupos": "Fase de Grupos",
@@ -3199,6 +3201,24 @@ def ranking_kwargs_por_etapa(etapa, user=None):
     return {"etapa": etapa}
 
 
+def get_ranking_cached(etapa="geral", user=None):
+    kwargs = ranking_kwargs_por_etapa(etapa, user)
+    cache_key = (
+        etapa,
+        kwargs.get("team_code"),
+        Pontuacao.query.count(),
+        Palpite.query.count(),
+        Resultado.query.count(),
+    )
+    now = datetime.utcnow()
+    cached = _ranking_cache.get(cache_key)
+    if cached and (now - cached["created_at"]).total_seconds() < RANKING_CACHE_TTL_SECONDS:
+        return cached["ranking"]
+    ranking = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **kwargs)
+    _ranking_cache[cache_key] = {"created_at": now, "ranking": ranking}
+    return ranking
+
+
 def etapa_label_ranking(etapa, user=None):
     if etapa == "destaque":
         codigo = codigo_time_destacado(user)
@@ -3230,7 +3250,7 @@ def etapa_atual_ranking(data_referencia=None):
                           .filter_by(mata_mata=True)
                           .order_by(Jogo.data_jogo)
                           .first())
-    data_referencia = data_referencia or data_referencia_app()
+    data_referencia = data_referencia or date.today()
     if primeiro_mata_mata and data_referencia >= primeiro_mata_mata.data_jogo:
         return "mata_mata"
     return "grupos"
@@ -3635,6 +3655,12 @@ def load_current_language():
     idioma = idioma_atual()
     session["idioma"] = idioma
     g.idioma = idioma
+
+
+@app.before_request
+def clear_simulated_date_outside_admin_simulation():
+    if request.endpoint != "simulacao":
+        session.pop("data_simulada", None)
 
 
 def login_required(f):
@@ -4069,9 +4095,9 @@ def api_me():
 def api_dashboard():
     competidor = ensure_competidor_profile(g.user)
     etapa_podium = etapa_atual_ranking()
-    ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    ranking_etapa = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa(etapa_podium))
-    ranking_destaque = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, **ranking_kwargs_por_etapa("destaque", g.user))
+    ranking_geral = get_ranking_cached("geral", g.user)
+    ranking_etapa = get_ranking_cached(etapa_podium, g.user)
+    ranking_destaque = get_ranking_cached("destaque", g.user)
     podium_geral = podium_payload(ranking_geral)
     podium_etapa = podium_payload(ranking_etapa)
     podium_destaque = podium_payload(ranking_destaque)
@@ -4801,7 +4827,7 @@ def dashboard():
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
 
     # Próximos jogos (não iniciados, próximos 10)
-    hoje = data_referencia_app()
+    hoje = date.today()
     proximos = proximos_jogos_ordenados(limit=10, data_referencia=hoje)
 
     # Próximo jogo
@@ -4816,23 +4842,9 @@ def dashboard():
     if podium_view not in {"etapa", "destaque", "geral"}:
         podium_view = "etapa"
     etapa_podium = etapa_atual_ranking()
-    ranking_geral = get_ranking(db, Competidor, Pontuacao, Palpite, Jogo)
-    ranking_etapa = get_ranking(
-        db,
-        Competidor,
-        Pontuacao,
-        Palpite,
-        Jogo,
-        **ranking_kwargs_por_etapa(etapa_podium),
-    )
-    ranking_destaque = get_ranking(
-        db,
-        Competidor,
-        Pontuacao,
-        Palpite,
-        Jogo,
-        **ranking_kwargs_por_etapa("destaque", g.user),
-    )
+    ranking_geral = get_ranking_cached("geral", g.user)
+    ranking_etapa = get_ranking_cached(etapa_podium, g.user)
+    ranking_destaque = get_ranking_cached("destaque", g.user)
     podium_geral = ranking_geral[:3]
     podium_etapa = ranking_etapa[:3]
     podium_destaque = ranking_destaque[:3]
