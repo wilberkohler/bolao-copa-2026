@@ -133,6 +133,8 @@ def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None,
     Retorna lista ordenada de dicts com o ranking dos competidores.
     Se fase for informado, filtra por fase.
     """
+    return _get_ranking_bulk(db, Competidor, Pontuacao, Palpite, Jogo, fase=fase, etapa=etapa, team_code=team_code)
+
     competidores = Competidor.query.all()
     ranking = []
     jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase, team_code=team_code)
@@ -194,6 +196,121 @@ def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None,
         })
 
     # Ordenação pelos critérios de desempate
+    ranking.sort(key=lambda x: (
+        -x["pontos"],
+        -x["placares_exatos"],
+        -x["vencedores_corretos"],
+        -x["saldos_corretos"],
+        -x["classificados_corretos"],
+        -x["palpites_enviados"],
+        x["palpites_nao_enviados"],
+        x["competidor"].apelido.lower(),
+    ))
+
+    for i, r in enumerate(ranking):
+        r["posicao"] = i + 1
+
+    return ranking
+
+
+def _status_conta_como_encerrado(status):
+    status = status or ""
+    return status in {"Encerrado", "Pontuado"} or status.startswith("Resultado")
+
+
+def _novo_resumo_ranking():
+    return {
+        "pontos": 0,
+        "placares_exatos": 0,
+        "vencedores_corretos": 0,
+        "saldos_corretos": 0,
+        "classificados_corretos": 0,
+        "palpites_enviados": 0,
+        "palpites_ids": set(),
+        "pts_max": 0,
+        "ultima_pontuacao": 0,
+        "ultima_data": None,
+    }
+
+
+def _get_ranking_bulk(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None, team_code=None):
+    competidores = Competidor.query.all()
+    ranking = []
+    jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase, team_code=team_code)
+    jogo_ids_set = set(jogo_ids_filtrados) if jogo_ids_filtrados is not None else None
+
+    jogos_query = Jogo.query.with_entities(Jogo.id, Jogo.mata_mata, Jogo.status)
+    if jogo_ids_set is not None:
+        jogos_query = jogos_query.filter(Jogo.id.in_(jogo_ids_set))
+    jogos_info = {
+        row.id: {"mata_mata": row.mata_mata, "status": row.status}
+        for row in jogos_query.all()
+    }
+    jogos_ids_encerrados = {
+        jogo_id
+        for jogo_id, info in jogos_info.items()
+        if _status_conta_como_encerrado(info["status"])
+    }
+
+    resumos = {c.id: _novo_resumo_ranking() for c in competidores}
+
+    pontuacoes_query = Pontuacao.query
+    if jogo_ids_set is not None:
+        pontuacoes_query = pontuacoes_query.filter(Pontuacao.jogo_id.in_(jogo_ids_set))
+
+    for pontuacao in pontuacoes_query.all():
+        resumo = resumos.get(pontuacao.competidor_id)
+        if resumo is None:
+            continue
+
+        resumo["pontos"] += pontuacao.pontos or 0
+        resumo["placares_exatos"] += 1 if pontuacao.placar_exato else 0
+        resumo["vencedores_corretos"] += 1 if pontuacao.vencedor_correto else 0
+        resumo["saldos_corretos"] += 1 if pontuacao.saldo_correto else 0
+        resumo["classificados_corretos"] += 1 if pontuacao.classificado_correto else 0
+
+        data_ref = pontuacao.updated_at or pontuacao.created_at
+        if resumo["ultima_data"] is None or (data_ref and data_ref > resumo["ultima_data"]):
+            resumo["ultima_data"] = data_ref
+            resumo["ultima_pontuacao"] = pontuacao.pontos or 0
+
+    palpites_query = Palpite.query.filter_by(valido=True)
+    if jogo_ids_set is not None:
+        palpites_query = palpites_query.filter(Palpite.jogo_id.in_(jogo_ids_set))
+
+    for palpite in palpites_query.all():
+        resumo = resumos.get(palpite.competidor_id)
+        if resumo is None:
+            continue
+
+        resumo["palpites_enviados"] += 1
+        resumo["palpites_ids"].add(palpite.jogo_id)
+        jogo_info = jogos_info.get(palpite.jogo_id)
+        if jogo_info:
+            resumo["pts_max"] += 13 if jogo_info["mata_mata"] else 10
+
+    for c in competidores:
+        resumo = resumos[c.id]
+        palpites_nao_enviados = len(jogos_ids_encerrados - resumo["palpites_ids"])
+        aproveitamento = (
+            round((resumo["pontos"] / resumo["pts_max"] * 100), 1)
+            if resumo["pts_max"] > 0
+            else 0.0
+        )
+
+        ranking.append({
+            "competidor": c,
+            "pontos": resumo["pontos"],
+            "placares_exatos": resumo["placares_exatos"],
+            "vencedores_corretos": resumo["vencedores_corretos"],
+            "saldos_corretos": resumo["saldos_corretos"],
+            "classificados_corretos": resumo["classificados_corretos"],
+            "palpites_enviados": resumo["palpites_enviados"],
+            "palpites_nao_enviados": palpites_nao_enviados,
+            "aproveitamento": aproveitamento,
+            "ultima_pontuacao": resumo["ultima_pontuacao"],
+        })
+
     ranking.sort(key=lambda x: (
         -x["pontos"],
         -x["placares_exatos"],
