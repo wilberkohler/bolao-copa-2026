@@ -28,7 +28,7 @@ struct RegrasView: View {
 
                 Section("Prazos") {
                     RuleBullet(text: "Todos os horarios exibidos estao em Brasilia.")
-                    RuleBullet(text: "O prazo do palpite encerra as 23:59 do dia anterior ao jogo.")
+                    RuleBullet(text: "O prazo do palpite encerra 30 minutos antes do inicio do jogo.")
                     RuleBullet(text: "Depois do prazo, o palpite fica bloqueado para edicao.")
                     RuleBullet(text: "Jogos sem palpite dentro do prazo contam como nao enviados.")
                 }
