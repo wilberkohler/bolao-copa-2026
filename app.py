@@ -2920,6 +2920,13 @@ def sync_admin_flags():
         db.session.commit()
 
 
+def env_flag(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def ensure_group_publication_columns():
     """Adds group publication columns for existing Render databases."""
     inspector = inspect(db.engine)
@@ -2995,6 +3002,19 @@ def ensure_user_email_columns():
 def ensure_jogo_code_columns_width():
     """Widens team/slot code columns for official knockout third-place slots."""
     if db.engine.dialect.name == "sqlite":
+        return
+
+    inspector = inspect(db.engine)
+    existing = {column["name"]: column for column in inspector.get_columns("jogos")}
+    needs_update = False
+    for column_name in ("sigla_time_a", "sigla_time_b"):
+        column_type = existing.get(column_name, {}).get("type")
+        length = getattr(column_type, "length", None)
+        if length is not None and length < 20:
+            needs_update = True
+            break
+
+    if not needs_update:
         return
 
     with db.engine.begin() as conn:
@@ -5546,22 +5566,27 @@ def create_app():
         ensure_group_publication_columns()
         ensure_user_email_columns()
         ensure_jogo_code_columns_width()
-        count = seed_jogos(db, Jogo)
-        if count:
-            print(f"[seed] {count} jogos carregados.")
-        updated_games = sync_jogos_2026(db, Jogo)
-        if updated_games:
-            print(f"[setup] Calendario de jogos atualizado ({updated_games} alteracoes).")
-        removed_games = remover_jogos_obsoletos_do_calendario()
-        if removed_games:
-            print(f"[setup] {removed_games} jogo(s) obsoleto(s) removido(s) do calendario.")
-        if recalcular_prazos_palpite(force=True):
-            print("[setup] Prazos de palpite recalculados para 30 minutos antes dos jogos.")
-        updated_knockout = sync_knockout_teams()
-        if updated_knockout:
-            print(f"[setup] {updated_knockout} vagas do mata-mata atualizadas.")
-        seed_public_groups()
-        sync_admin_flags()
+        run_maintenance = env_flag("BOLAO_RUN_STARTUP_MAINTENANCE", False)
+        if Jogo.query.count() == 0 or run_maintenance:
+            count = seed_jogos(db, Jogo)
+            if count:
+                print(f"[seed] {count} jogos carregados.")
+            if recalcular_prazos_palpite(force=True):
+                print("[setup] Prazos de palpite recalculados para 30 minutos antes dos jogos.")
+        if run_maintenance:
+            updated_games = sync_jogos_2026(db, Jogo)
+            if updated_games:
+                print(f"[setup] Calendario de jogos atualizado ({updated_games} alteracoes).")
+            removed_games = remover_jogos_obsoletos_do_calendario()
+            if removed_games:
+                print(f"[setup] {removed_games} jogo(s) obsoleto(s) removido(s) do calendario.")
+            updated_knockout = sync_knockout_teams()
+            if updated_knockout:
+                print(f"[setup] {updated_knockout} vagas do mata-mata atualizadas.")
+        if Grupo.query.count() == 0 or run_maintenance:
+            seed_public_groups()
+        if run_maintenance:
+            sync_admin_flags()
         # Cria admin automático via variáveis de ambiente (útil em cloud)
         admin_email = ADMIN_EMAIL
         admin_senha = os.environ.get("ADMIN_PASSWORD")
