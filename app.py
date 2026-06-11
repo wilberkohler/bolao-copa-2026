@@ -636,7 +636,7 @@ TRANSLATIONS = {
         "winner_margin_rule": "Vencedor correto + saldo correto",
         "winner_rule": "Vencedor correto",
         "draw_rule": "Empate correto com placar diferente",
-        "one_team_goals_rule": "Acerto de gols de um dos times",
+        "one_team_goals_rule": "Errou vencedor, mas acertou os gols de uma das seleções",
         "no_relevant_hits": "Sem acertos relevantes",
         "knockout_bonus_rule": "Bônus por classificado correto no mata-mata",
         "tie_breakers": "Critérios de Desempate",

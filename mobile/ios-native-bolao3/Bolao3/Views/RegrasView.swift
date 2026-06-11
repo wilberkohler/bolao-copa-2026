@@ -21,7 +21,7 @@ struct RegrasView: View {
                     RuleScoreRow(title: "Vencedor correto + saldo correto", points: "7 pts", color: .blue)
                     RuleScoreRow(title: "Vencedor correto", points: "5 pts", color: .cyan)
                     RuleScoreRow(title: "Empate correto com placar diferente", points: "5 pts", color: .cyan)
-                    RuleScoreRow(title: "Gols corretos de um dos times", points: "2 pts", color: .orange)
+                    RuleScoreRow(title: "Errou vencedor, mas acertou os gols de uma das seleções", points: "2 pts", color: .orange)
                     RuleScoreRow(title: "Classificado correto no mata-mata", points: "+3 pts", color: .purple)
                     RuleScoreRow(title: "Sem acertos relevantes", points: "0 pts", color: .red)
                 }
