@@ -905,7 +905,7 @@ TRANSLATIONS = {
         "winner_margin_rule": "Correct winner + correct margin",
         "winner_rule": "Correct winner",
         "draw_rule": "Correct draw with different score",
-        "one_team_goals_rule": "Correct goals for one team",
+        "one_team_goals_rule": "Wrong winner, but correct goals for one team",
         "no_relevant_hits": "No relevant hits",
         "knockout_bonus_rule": "Bonus for correct qualifier in knockout games",
         "tie_breakers": "Tie-Breakers",
@@ -1133,7 +1133,7 @@ TRANSLATIONS = {
         "winner_margin_rule": "Ganador correcto + diferencia correcta",
         "winner_rule": "Ganador correcto",
         "draw_rule": "Empate correcto con marcador diferente",
-        "one_team_goals_rule": "Acierto de goles de uno de los equipos",
+        "one_team_goals_rule": "Falló el ganador, pero acertó los goles de una selección",
         "no_relevant_hits": "Sin aciertos relevantes",
         "knockout_bonus_rule": "Bono por clasificado correcto en eliminatorias",
         "tie_breakers": "Criterios de Desempate",
@@ -1346,7 +1346,7 @@ TRANSLATIONS["fr"] = {**TRANSLATIONS["en"], **{
     "winner_margin_rule": "Bon vainqueur + bon Ã©cart",
     "winner_rule": "Bon vainqueur",
     "draw_rule": "Match nul correct avec score diffÃ©rent",
-    "one_team_goals_rule": "Buts corrects pour une Ã©quipe",
+    "one_team_goals_rule": "Mauvais vainqueur, mais buts corrects pour une Ã©quipe",
     "no_relevant_hits": "Aucun bon Ã©lÃ©ment",
     "knockout_bonus_rule": "Bonus pour qualifiÃ© correct en phase Ã  Ã©limination",
     "tie_breakers": "CritÃ¨res de dÃ©partage",
@@ -1570,7 +1570,7 @@ TRANSLATIONS["de"] = {**TRANSLATIONS["en"], **{
     "winner_margin_rule": "Richtiger Sieger + richtige Differenz",
     "winner_rule": "Richtiger Sieger",
     "draw_rule": "Richtiges Unentschieden mit anderem Ergebnis",
-    "one_team_goals_rule": "Richtige Tore eines Teams",
+    "one_team_goals_rule": "Falscher Sieger, aber Tore eines Teams richtig",
     "no_relevant_hits": "Keine relevanten Treffer",
     "knockout_bonus_rule": "Bonus fÃ¼r richtig qualifiziertes Team in KO-Spielen",
     "tie_breakers": "Tie-Breaker",
@@ -2240,6 +2240,48 @@ TRANSLATIONS["ja"].update({
     "knockout_bracket": "\u30c8\u30fc\u30ca\u30e1\u30f3\u30c8\u8868",
     "knockout_bracket_hint": "\u9032\u51fa\u30c1\u30fc\u30e0\u304c\u6c7a\u307e\u308a\u6b21\u7b2c\u66f4\u65b0\u3055\u308c\u307e\u3059\u3002",
     "classified": "\u9032\u51fa",
+})
+
+TRANSLATIONS["pt-BR"].update({
+    "one_team_goals_rule": "Errou vencedor, mas acertou os gols de uma das seleções",
+    "deadline_2": "O prazo do palpite encerra 30 minutos antes do início do jogo.",
+})
+TRANSLATIONS["en"].update({
+    "one_team_goals_rule": "Wrong winner, but correct goals for one team",
+    "deadline_2": "Prediction deadline closes 30 minutes before kickoff.",
+})
+TRANSLATIONS["es"].update({
+    "one_team_goals_rule": "Falló el ganador, pero acertó los goles de una selección",
+    "deadline_2": "El plazo del pronóstico termina 30 minutos antes del inicio del partido.",
+    "highlight_podium_tab": "Destacado",
+})
+TRANSLATIONS["fr"].update({
+    "one_team_goals_rule": "Mauvais vainqueur, mais buts corrects pour une équipe",
+    "deadline_2": "La limite de pronostic ferme 30 minutes avant le coup d'envoi.",
+})
+TRANSLATIONS["de"].update({
+    "one_team_goals_rule": "Falscher Sieger, aber Tore eines Teams richtig",
+    "deadline_2": "Die Tippfrist endet 30 Minuten vor Spielbeginn.",
+})
+TRANSLATIONS["it"].update({
+    "one_team_goals_rule": "Vincitore errato, ma gol corretti di una squadra",
+    "deadline_2": "Il termine per il pronostico chiude 30 minuti prima dell'inizio della partita.",
+})
+TRANSLATIONS["ar"].update({
+    "one_team_goals_rule": "\u0623\u062e\u0637\u0623 \u0627\u0644\u0641\u0627\u0626\u0632\u060c \u0644\u0643\u0646\u0647 \u0623\u0635\u0627\u0628 \u0623\u0647\u062f\u0627\u0641 \u0623\u062d\u062f \u0627\u0644\u0645\u0646\u062a\u062e\u0628\u064a\u0646",
+    "deadline_2": "\u064a\u063a\u0644\u0642 \u0645\u0648\u0639\u062f \u0627\u0644\u062a\u0648\u0642\u0639 \u0642\u0628\u0644 30 \u062f\u0642\u064a\u0642\u0629 \u0645\u0646 \u0628\u062f\u0621 \u0627\u0644\u0645\u0628\u0627\u0631\u0627\u0629.",
+})
+TRANSLATIONS["zh"].update({
+    "one_team_goals_rule": "\u731c\u9519\u80dc\u8005\uff0c\u4f46\u731c\u5bf9\u4e86\u4e00\u652f\u7403\u961f\u7684\u8fdb\u7403\u6570",
+    "deadline_2": "\u9884\u6d4b\u622a\u6b62\u65f6\u95f4\u4e3a\u6bd4\u8d5b\u5f00\u59cb\u524d 30 \u5206\u949f\u3002",
+})
+TRANSLATIONS["ru"].update({
+    "one_team_goals_rule": "\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043f\u043e\u0431\u0435\u0434\u0438\u0442\u0435\u043b\u044c, \u043d\u043e \u0432\u0435\u0440\u043d\u043e \u0443\u0433\u0430\u0434\u0430\u043d\u044b \u0433\u043e\u043b\u044b \u043e\u0434\u043d\u043e\u0439 \u0441\u0431\u043e\u0440\u043d\u043e\u0439",
+    "deadline_2": "\u041f\u0440\u043e\u0433\u043d\u043e\u0437\u044b \u0437\u0430\u043a\u0440\u044b\u0432\u0430\u044e\u0442\u0441\u044f \u0437\u0430 30 \u043c\u0438\u043d\u0443\u0442 \u0434\u043e \u043d\u0430\u0447\u0430\u043b\u0430 \u043c\u0430\u0442\u0447\u0430.",
+})
+TRANSLATIONS["ja"].update({
+    "one_team_goals_rule": "\u52dd\u8005\u306f\u5916\u3057\u305f\u304c\u3001\u4e00\u65b9\u306e\u30c1\u30fc\u30e0\u306e\u5f97\u70b9\u3092\u7684\u4e2d",
+    "deadline_2": "\u4e88\u60f3\u306e\u7de0\u5207\u306f\u8a66\u5408\u958b\u59cb\u306e 30 \u5206\u524d\u3067\u3059\u3002",
 })
 
 
