@@ -95,7 +95,7 @@ struct AccountView: View {
                             Text("Limite tecnico inicial: \(privateConfig.participantLimit) participantes.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text("Nao ha apostas, premios em dinheiro, carteira, deposito, saque ou odds. Os palpites servem apenas para ranking recreativo.")
+                            Text("O recurso pago libera apenas a criacao e administracao de um grupo privado, com convite, participantes e ranking proprio.")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             if let storePrice = storeKit.displayPrice {
