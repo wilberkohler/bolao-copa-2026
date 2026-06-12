@@ -134,7 +134,7 @@ def get_ranking(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None,
     """
     return _get_ranking_bulk(db, Competidor, Pontuacao, Palpite, Jogo, fase=fase, etapa=etapa, team_code=team_code)
 
-    competidores = Competidor.query.all()
+    competidores = Competidor.query.filter_by(ativo=True).all()
     ranking = []
     jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase, team_code=team_code)
 
@@ -233,7 +233,7 @@ def _novo_resumo_ranking():
 
 
 def _get_ranking_bulk(db, Competidor, Pontuacao, Palpite, Jogo, fase=None, etapa=None, team_code=None):
-    competidores = Competidor.query.all()
+    competidores = Competidor.query.filter_by(ativo=True).all()
     ranking = []
     jogo_ids_filtrados = _jogo_ids_por_etapa(Jogo, etapa=etapa, fase=fase, team_code=team_code)
     jogo_ids_set = set(jogo_ids_filtrados) if jogo_ids_filtrados is not None else None

@@ -5277,6 +5277,7 @@ def inativar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     c.ativo = False
     c.updated_at = datetime.utcnow()
+    invalidate_ranking_cache()
     db.session.commit()
     flash(f"{c.apelido} inativado.", "warning")
     return redirect(url_for("listar_competidores"))
@@ -5288,6 +5289,7 @@ def reativar_competidor(cid):
     c = Competidor.query.get_or_404(cid)
     c.ativo = True
     c.updated_at = datetime.utcnow()
+    invalidate_ranking_cache()
     db.session.commit()
     flash(f"{c.apelido} reativado.", "success")
     return redirect(url_for("listar_competidores"))
@@ -5301,6 +5303,7 @@ def excluir_competidor(cid):
         flash("Não é possível excluir competidor com palpites vinculados. Use Inativar.", "danger")
         return redirect(url_for("listar_competidores"))
     db.session.delete(c)
+    invalidate_ranking_cache()
     db.session.commit()
     flash("Competidor excluído.", "success")
     return redirect(url_for("listar_competidores"))
