@@ -2284,6 +2284,37 @@ TRANSLATIONS["ja"].update({
     "deadline_2": "\u4e88\u60f3\u306e\u7de0\u5207\u306f\u8a66\u5408\u958b\u59cb\u306e 30 \u5206\u524d\u3067\u3059\u3002",
 })
 
+TRANSLATIONS["pt-BR"].update({
+    "round_hits_summary": "Resumo de acertos da rodada por competidor",
+})
+TRANSLATIONS["en"].update({
+    "round_hits_summary": "Round hit summary by competitor",
+})
+TRANSLATIONS["es"].update({
+    "round_hits_summary": "Resumen de aciertos de la ronda por competidor",
+})
+TRANSLATIONS["fr"].update({
+    "round_hits_summary": "RÃ©sumÃ© des rÃ©ussites de la manche par participant",
+})
+TRANSLATIONS["de"].update({
+    "round_hits_summary": "TrefferÃ¼bersicht der Runde pro Teilnehmer",
+})
+TRANSLATIONS["it"].update({
+    "round_hits_summary": "Riepilogo dei risultati della giornata per partecipante",
+})
+TRANSLATIONS["ar"].update({
+    "round_hits_summary": "\u0645\u0644\u062e\u0635 \u0627\u0644\u0625\u0635\u0627\u0628\u0627\u062a \u0641\u064a \u0627\u0644\u062c\u0648\u0644\u0629 \u0644\u0643\u0644 \u0645\u062a\u0646\u0627\u0641\u0633",
+})
+TRANSLATIONS["zh"].update({
+    "round_hits_summary": "\u6bcf\u4f4d\u53c2\u8d5b\u8005\u7684\u672c\u8f6e\u547d\u4e2d\u6458\u8981",
+})
+TRANSLATIONS["ru"].update({
+    "round_hits_summary": "\u0421\u0432\u043e\u0434\u043a\u0430 \u0443\u0433\u0430\u0434\u044b\u0432\u0430\u043d\u0438\u0439 \u0442\u0443\u0440\u0430 \u043f\u043e \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c",
+})
+TRANSLATIONS["ja"].update({
+    "round_hits_summary": "\u53c2\u52a0\u8005\u5225\u306e\u30e9\u30a6\u30f3\u30c9\u7684\u4e2d\u30b5\u30de\u30ea\u30fc",
+})
+
 
 def _repair_mojibake(value):
     if not isinstance(value, str):
@@ -3581,6 +3612,98 @@ def etapa_ranking_para_rodada(rodada):
     return "grupos"
 
 
+ROUND_HIT_CATEGORIES = [
+    ("placar_exato", "exact_score_rule"),
+    ("vencedor_saldo", "winner_margin_rule"),
+    ("vencedor", "winner_rule"),
+    ("empate", "draw_rule"),
+    ("gols_um_time", "one_team_goals_rule"),
+    ("sem_acertos", "no_relevant_hits"),
+    ("bonus_classificado", "knockout_bonus_rule"),
+]
+
+
+def _vencedor_resultado(a, b):
+    if a > b:
+        return "a"
+    if b > a:
+        return "b"
+    return "empate"
+
+
+def _categoria_acerto_rodada(jogo, palpite, pontuacao):
+    if not pontuacao or not palpite or palpite.palpite_gols_a is None or palpite.palpite_gols_b is None:
+        return "sem_acertos"
+
+    if pontuacao.placar_exato:
+        return "placar_exato"
+
+    resultado = jogo.resultado
+    if not resultado:
+        return "sem_acertos"
+
+    vencedor_real = _vencedor_resultado(resultado.gols_a, resultado.gols_b)
+    vencedor_palpite = _vencedor_resultado(palpite.palpite_gols_a, palpite.palpite_gols_b)
+
+    if vencedor_real == "empate" and vencedor_palpite == "empate":
+        return "empate"
+    if pontuacao.vencedor_correto and pontuacao.saldo_correto:
+        return "vencedor_saldo"
+    if pontuacao.vencedor_correto:
+        return "vencedor"
+    if pontuacao.gols_time_a_correto or pontuacao.gols_time_b_correto:
+        return "gols_um_time"
+    return "sem_acertos"
+
+
+def resumo_acertos_rodada(rodada):
+    jogos = rodada.get("jogos") or []
+    jogo_ids = [j.id for j in jogos]
+    if not jogo_ids:
+        return []
+
+    competidores = Competidor.query.filter_by(ativo=True).order_by(Competidor.apelido).all()
+    pontuacoes = Pontuacao.query.filter(Pontuacao.jogo_id.in_(jogo_ids)).all()
+    palpites = Palpite.query.filter(
+        Palpite.jogo_id.in_(jogo_ids),
+        Palpite.valido.is_(True),
+    ).all()
+    pontuacoes_por_competidor_jogo = {
+        (pont.competidor_id, pont.jogo_id): pont
+        for pont in pontuacoes
+    }
+    palpites_por_competidor_jogo = {
+        (palpite.competidor_id, palpite.jogo_id): palpite
+        for palpite in palpites
+    }
+    rows = []
+
+    for competidor in competidores:
+        counts = {key: 0 for key, _ in ROUND_HIT_CATEGORIES}
+        pontos = 0
+
+        for jogo in jogos:
+            chave = (competidor.id, jogo.id)
+            pontuacao = pontuacoes_por_competidor_jogo.get(chave)
+            palpite = palpites_por_competidor_jogo.get(chave)
+            categoria = _categoria_acerto_rodada(jogo, palpite, pontuacao)
+            counts[categoria] += 1
+
+            if pontuacao:
+                pontos += pontuacao.pontos or 0
+                if pontuacao.classificado_correto:
+                    counts["bonus_classificado"] += 1
+
+        rows.append({
+            "competidor": competidor,
+            "pontos": pontos,
+            "counts": counts,
+        })
+
+    rows.sort(key=lambda row: (-row["pontos"], row["competidor"].apelido.lower()))
+    return rows
+
+
 def montar_relatorio_rodada(user, competidor, rodada):
     jogo_ids = [j.id for j in rodada["jogos"]]
     pontuacoes = Pontuacao.query.filter(
@@ -3600,6 +3723,11 @@ def montar_relatorio_rodada(user, competidor, rodada):
     jogos_linhas = []
     rodada_label = rodada_label_traduzida(rodada, user.idioma)
     points_label = tr("points", user.idioma)
+    resumo_acertos = resumo_acertos_rodada(rodada)
+    acerto_labels = [
+        (key, tr(label_key, user.idioma))
+        for key, label_key in ROUND_HIT_CATEGORIES
+    ]
 
     for jogo in rodada["jogos"]:
         resultado = jogo.resultado
@@ -3619,6 +3747,34 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"{item['posicao']}. {item['competidor'].apelido} - {item['pontos']} {points_label}"
         for item in top5_geral
     ]
+    resumo_acertos_linhas = [
+        f"{row['competidor'].apelido} - {row['pontos']} {points_label}: "
+        + "; ".join(
+            f"{label}: {row['counts'].get(key, 0)}"
+            for key, label in acerto_labels
+        )
+        for row in resumo_acertos
+    ]
+    resumo_acertos_html = (
+        f"<h3>{escape(tr('round_hits_summary', user.idioma))}</h3>"
+        "<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse;width:100%;font-size:13px\">"
+        f"<thead><tr><th align=\"left\">{escape(tr('competitors', user.idioma))}</th>"
+        f"<th align=\"right\">{escape(points_label)}</th>"
+        + "".join(f"<th align=\"right\">{escape(label)}</th>" for _, label in acerto_labels)
+        + "</tr></thead><tbody>"
+        + "".join(
+            "<tr>"
+            f"<td>{escape(row['competidor'].apelido)}</td>"
+            f"<td align=\"right\">{row['pontos']}</td>"
+            + "".join(
+                f"<td align=\"right\">{row['counts'].get(key, 0)}</td>"
+                for key, _ in acerto_labels
+            )
+            + "</tr>"
+            for row in resumo_acertos
+        )
+        + "</tbody></table>"
+    )
     invite_url = convite_url(user)
     subject = tr("round_report_subject", user.idioma, round_label=rodada_label)
     text = (
@@ -3637,6 +3793,10 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + tr("round_games", user.idioma)
         + "\n"
         + "\n".join(jogos_linhas)
+        + "\n\n"
+        + tr("round_hits_summary", user.idioma)
+        + "\n"
+        + "\n".join(resumo_acertos_linhas)
         + "\n\n"
         + tr("top5_stage", user.idioma, stage_label=etapa_label)
         + "\n"
@@ -3660,7 +3820,9 @@ def montar_relatorio_rodada(user, competidor, rodada):
         f"<p>{escape(tr('your_overall_position', user.idioma, position=posicao_geral or '-'))}</p>"
         f"<h3>{escape(tr('round_games', user.idioma))}</h3><ul>"
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
-        + f"</ul><h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3><ol>"
+        + "</ul>"
+        + resumo_acertos_html
+        + f"<h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3><ol>"
         + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_etapa)
         + f"</ol><h3>{escape(tr('top5_overall', user.idioma))}</h3><ol>"
         + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_geral)

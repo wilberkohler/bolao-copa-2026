@@ -53,13 +53,12 @@ def calcular_pontos(palpite_a, palpite_b, palpite_classificado,
         result["saldo_correto"] = saldo_real == saldo_palpite
 
         if vencedor_real == vencedor_palpite:
-            if saldo_real == saldo_palpite:
+            if vencedor_real == "empate":
+                result["pontos"] = 5  # Empate mas placar diferente
+            elif saldo_real == saldo_palpite:
                 result["pontos"] = 7  # Acertou vencedor + saldo
             else:
-                if vencedor_real == "empate":
-                    result["pontos"] = 5  # Empate mas placar diferente
-                else:
-                    result["pontos"] = 5  # Acertou vencedor
+                result["pontos"] = 5  # Acertou vencedor
         else:
             # Errou vencedor — checa gols individuais
             if result["gols_time_a_correto"] or result["gols_time_b_correto"]:
