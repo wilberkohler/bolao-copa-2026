@@ -3287,6 +3287,10 @@ def get_ranking_cached(etapa="geral", user=None):
     return ranking
 
 
+def total_jogos_com_resultado():
+    return db.session.query(func.count(Resultado.id)).scalar() or 0
+
+
 def invalidate_ranking_cache():
     _ranking_cache.clear()
 
@@ -4181,12 +4185,15 @@ def api_dashboard():
     podium_etapa = podium_payload(ranking_etapa)
     podium_destaque = podium_payload(ranking_destaque)
     total_jogos = Jogo.query.count()
+    jogos_realizados = total_jogos_com_resultado()
     palpites_enviados = Palpite.query.filter_by(competidor_id=competidor.id, valido=True).count()
     proximos = proximos_jogos_ordenados(limit=6, data_referencia=date.today())
     return jsonify({
         "ok": True,
         "summary": {
             "total_jogos": total_jogos,
+            "jogos_realizados": jogos_realizados,
+            "jogos_pendentes": total_jogos - jogos_realizados,
             "palpites_enviados": palpites_enviados,
             "total_competidores": Competidor.query.filter_by(ativo=True).count(),
         },
@@ -4899,7 +4906,7 @@ def dashboard():
     competidor = ensure_competidor_profile(g.user)
     total_competidores = Competidor.query.count()
     total_jogos = Jogo.query.count()
-    jogos_realizados = Jogo.query.filter(Jogo.status.in_(["Encerrado", "Resultado Lançado", "Pontuado"])).count()
+    jogos_realizados = total_jogos_com_resultado()
     jogos_pendentes = total_jogos - jogos_realizados
     
     # Palpites do usuário logado
