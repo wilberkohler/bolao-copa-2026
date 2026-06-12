@@ -3704,6 +3704,82 @@ def resumo_acertos_rodada(rodada):
     return rows
 
 
+def ranking_podium_html(items, points_label):
+    podium_order = [1, 0, 2]
+    podium_styles = [
+        {
+            "rank": "#2",
+            "bg": "#eef2f7",
+            "border": "#cbd5e1",
+            "height": "92px",
+            "top": "34px",
+        },
+        {
+            "rank": "#1",
+            "bg": "#fff4bf",
+            "border": "#f4c542",
+            "height": "122px",
+            "top": "4px",
+        },
+        {
+            "rank": "#3",
+            "bg": "#f6dfc9",
+            "border": "#d99a5b",
+            "height": "82px",
+            "top": "44px",
+        },
+    ]
+    podium_cells = []
+    for position, style in zip(podium_order, podium_styles):
+        item = items[position] if len(items) > position else None
+        if item:
+            name = escape(item["competidor"].apelido)
+            points = item["pontos"]
+        else:
+            name = "-"
+            points = 0
+        podium_cells.append(
+            "<td align=\"center\" valign=\"bottom\" style=\"width:33%;padding:4px;\">"
+            f"<div style=\"height:{style['top']};line-height:{style['top']};font-size:1px\">&nbsp;</div>"
+            f"<div style=\"min-height:{style['height']};border:1px solid {style['border']};"
+            f"background:{style['bg']};padding:10px 6px;border-radius:8px;\">"
+            f"<div style=\"font-size:26px;font-weight:700;color:#111827;\">{style['rank']}</div>"
+            f"<div style=\"font-size:15px;font-weight:700;color:#111827;margin-top:6px;\">{name}</div>"
+            f"<div style=\"font-size:13px;color:#4b5563;margin-top:4px;\">{points} {escape(points_label)}</div>"
+            "</div>"
+            "</td>"
+        )
+
+    remaining_rows = []
+    for item in items[3:5]:
+        remaining_rows.append(
+            "<tr>"
+            f"<td style=\"padding:7px 8px;border-top:1px solid #e5e7eb;font-weight:700;\">#{item['posicao']}</td>"
+            f"<td style=\"padding:7px 8px;border-top:1px solid #e5e7eb;\">{escape(item['competidor'].apelido)}</td>"
+            f"<td align=\"right\" style=\"padding:7px 8px;border-top:1px solid #e5e7eb;\">{item['pontos']} {escape(points_label)}</td>"
+            "</tr>"
+        )
+
+    remaining_html = ""
+    if remaining_rows:
+        remaining_html = (
+            "<table cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;border-collapse:collapse;"
+            "font-size:13px;margin-top:8px;\">"
+            + "".join(remaining_rows)
+            + "</table>"
+        )
+
+    return (
+        "<div style=\"max-width:620px;margin:8px 0 18px 0;\">"
+        "<table cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;border-collapse:collapse;\">"
+        "<tr>"
+        + "".join(podium_cells)
+        + "</tr></table>"
+        + remaining_html
+        + "</div>"
+    )
+
+
 def montar_relatorio_rodada(user, competidor, rodada):
     jogo_ids = [j.id for j in rodada["jogos"]]
     pontuacoes = Pontuacao.query.filter(
@@ -3775,6 +3851,8 @@ def montar_relatorio_rodada(user, competidor, rodada):
         )
         + "</tbody></table>"
     )
+    top_etapa_html = ranking_podium_html(top5_etapa, points_label)
+    top_geral_html = ranking_podium_html(top5_geral, points_label)
     invite_url = convite_url(user)
     subject = tr("round_report_subject", user.idioma, round_label=rodada_label)
     text = (
@@ -3822,11 +3900,11 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
         + "</ul>"
         + resumo_acertos_html
-        + f"<h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3><ol>"
-        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_etapa)
-        + f"</ol><h3>{escape(tr('top5_overall', user.idioma))}</h3><ol>"
-        + "".join(f"<li>{escape(item['competidor'].apelido)} - {item['pontos']} {escape(points_label)}</li>" for item in top5_geral)
-        + f"</ol><p>{escape(tr('access_app_details', user.idioma))}</p>"
+        + f"<h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3>"
+        + top_etapa_html
+        + f"<h3>{escape(tr('top5_overall', user.idioma))}</h3>"
+        + top_geral_html
+        + f"<p>{escape(tr('access_app_details', user.idioma))}</p>"
         + f"<p>{escape(tr('invite_friend_line', user.idioma))}<br><a href=\"{invite_url}\">{invite_url}</a></p>"
     )
     return subject, text, html
