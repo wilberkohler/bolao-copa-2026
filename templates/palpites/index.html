@@ -77,7 +77,7 @@
         <td>
           {% if j.resultado %}
             <div class="fw-bold">{{ j.resultado.gols_a }} x {{ j.resultado.gols_b }}</div>
-            {% if j.resultado.classificado %}
+            {% if j.mata_mata and j.resultado.classificado %}
               <small class="text-muted">{{ tr('qualified_correct') }}: {{ time_nome_traduzido(j.resultado.classificado) }}</small>
             {% endif %}
           {% else %}

@@ -168,7 +168,7 @@ def sync_finished_results_football_data(
             continue
 
         classificado = None
-        if external.classified_team:
+        if jogo.mata_mata and external.classified_team:
             # Keep internal naming where possible.
             if external.home_goals > external.away_goals:
                 classificado = jogo.time_a

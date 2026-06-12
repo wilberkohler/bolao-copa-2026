@@ -83,11 +83,11 @@
             <strong>{{ p.palpite_gols_a }} x {{ p.palpite_gols_b }}</strong>
           {% else %}<span class="text-muted">-</span>{% endif %}
         </td>
-        <td>{{ p.palpite_classificado or '-' }}</td>
+        <td>{{ p.palpite_classificado if j.mata_mata and p.palpite_classificado else '-' }}</td>
         <td>
           {% if res %}
             {{ res.gols_a }} x {{ res.gols_b }}
-            {% if res.classificado %} ({{ res.classificado }}){% endif %}
+            {% if j.mata_mata and res.classificado %} ({{ res.classificado }}){% endif %}
           {% else %}<span class="text-muted">Pendente</span>{% endif %}
         </td>
         <td>

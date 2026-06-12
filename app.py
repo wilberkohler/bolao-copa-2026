@@ -3906,7 +3906,7 @@ def _jogo_payload(jogo, palpite=None, pontuacao=None):
         "resultado": {
             "gols_a": resultado.gols_a,
             "gols_b": resultado.gols_b,
-            "classificado": resultado.classificado,
+            "classificado": resultado.classificado if jogo.mata_mata else None,
         } if resultado else None,
         "palpite": {
             "gols_a": palpite.palpite_gols_a,
