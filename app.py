@@ -3287,6 +3287,16 @@ def get_ranking_cached(etapa="geral", user=None):
     return ranking
 
 
+def invalidate_ranking_cache():
+    _ranking_cache.clear()
+
+
+def calcular_pontuacao_jogo_atualizando_ranking(db_arg, Palpite_arg, Pontuacao_arg, Resultado_arg, jogo):
+    resultado = calcular_pontuacao_jogo(db_arg, Palpite_arg, Pontuacao_arg, Resultado_arg, jogo)
+    invalidate_ranking_cache()
+    return resultado
+
+
 def etapa_label_ranking(etapa, user=None):
     if etapa == "destaque":
         codigo = codigo_time_destacado(user)
@@ -3365,6 +3375,7 @@ def clear_simulated_results():
             calcular_pontuacao_jogo_sem_commit(jogo)
 
     db.session.commit()
+    invalidate_ranking_cache()
     return len(jogo_ids)
 
 
@@ -5446,7 +5457,7 @@ def lancar_resultado(jid):
         db.session.commit()
 
         # Recalcular pontuação
-        calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+        calcular_pontuacao_jogo_atualizando_ranking(db, Palpite, Pontuacao, Resultado, jogo)
         sync_knockout_teams()
         report_stats = send_pending_round_reports()
         flash("Resultado lançado e pontuação calculada!", "success")
@@ -5464,7 +5475,7 @@ def lancar_resultado(jid):
 @admin_required
 def recalcular_resultado(jid):
     jogo = Jogo.query.get_or_404(jid)
-    calcular_pontuacao_jogo(db, Palpite, Pontuacao, Resultado, jogo)
+    calcular_pontuacao_jogo_atualizando_ranking(db, Palpite, Pontuacao, Resultado, jogo)
     flash("Pontuação recalculada.", "success")
     return redirect(url_for("listar_resultados"))
 
@@ -5484,7 +5495,7 @@ def _run_auto_result_sync(launched_by: str):
         Resultado,
         Palpite,
         Pontuacao,
-        calcular_pontuacao_jogo,
+        calcular_pontuacao_jogo_atualizando_ranking,
         api_key=api_key,
         base_url=base_url,
         days_back=days_back,
@@ -5745,6 +5756,7 @@ def simulacao():
                     calcular_pontuacao_jogo_sem_commit(jogo)
 
                 db.session.commit()
+                invalidate_ranking_cache()
 
                 flash(f"Simulacao refeita: {removidos} resultado(s) simulado(s) anterior(es) apagado(s), {len(jogos_gerados)} novo(s) resultado(s) gerado(s) ate {data_str}. Resultados reais foram preservados.", "success")
 
