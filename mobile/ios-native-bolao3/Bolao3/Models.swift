@@ -314,6 +314,7 @@ struct Jogo: Decodable, Identifiable {
     let resultado: Resultado?
     let palpite: Palpite?
     let pontuacao: Pontuacao?
+    let palpitesGrupo: [PalpiteGrupo]?
 
     enum CodingKeys: String, CodingKey {
         case id, fase, grupo, status, editavel, resultado, palpite, pontuacao
@@ -330,6 +331,7 @@ struct Jogo: Decodable, Identifiable {
         case estadio, cidade
         case mataMata = "mata_mata"
         case prazoPalpiteExibicao = "prazo_palpite_exibicao"
+        case palpitesGrupo = "palpites_grupo"
     }
 }
 
@@ -359,6 +361,22 @@ struct Palpite: Decodable {
 
 struct Pontuacao: Decodable {
     let pontos: Int
+}
+
+struct PalpiteGrupo: Decodable, Identifiable {
+    let competidorId: Int
+    let apelido: String
+    let isCurrent: Bool
+    let palpite: Palpite?
+
+    var id: Int { competidorId }
+
+    enum CodingKeys: String, CodingKey {
+        case competidorId = "competidor_id"
+        case apelido
+        case isCurrent = "is_current"
+        case palpite
+    }
 }
 
 struct SavePalpite: Encodable {

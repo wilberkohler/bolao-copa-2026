@@ -78,6 +78,25 @@ body { background: #f4f6f9; }
 
 /* Tabelas */
 .table-jogos td, .table-jogos th { vertical-align: middle; font-size: .875rem; }
+
+.group-predictions {
+  border: 1px solid #d8e2dc;
+  border-radius: 6px;
+  background: #f8fbf9;
+  padding: .45rem .6rem;
+}
+
+.group-predictions summary {
+  cursor: pointer;
+  color: #166534;
+  font-weight: 700;
+  list-style-position: inside;
+}
+
+.group-predictions-row > td {
+  background: #f5f8f6;
+  padding: .55rem .75rem;
+}
 .nav-tabs .nav-link.tab-destaque {
 	border-color: #198754 #198754 #fff;
 	color: #0b6b34;

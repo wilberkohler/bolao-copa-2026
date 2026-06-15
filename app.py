@@ -2315,6 +2315,57 @@ TRANSLATIONS["ja"].update({
     "round_hits_summary": "\u53c2\u52a0\u8005\u5225\u306e\u30e9\u30a6\u30f3\u30c9\u7684\u4e2d\u30b5\u30de\u30ea\u30fc",
 })
 
+TRANSLATIONS["pt-BR"].update({
+    "group_predictions": "Palpites do grupo",
+    "no_group_predictions": "Nenhum palpite enviado no grupo.",
+    "you_label": "você",
+})
+TRANSLATIONS["en"].update({
+    "group_predictions": "Group predictions",
+    "no_group_predictions": "No group predictions submitted.",
+    "you_label": "you",
+})
+TRANSLATIONS["es"].update({
+    "group_predictions": "Pronósticos del grupo",
+    "no_group_predictions": "No hay pronósticos enviados en el grupo.",
+    "you_label": "tú",
+})
+TRANSLATIONS["fr"].update({
+    "group_predictions": "Pronostics du groupe",
+    "no_group_predictions": "Aucun pronostic envoyÃ© dans le groupe.",
+    "you_label": "vous",
+})
+TRANSLATIONS["de"].update({
+    "group_predictions": "Tipps der Gruppe",
+    "no_group_predictions": "Keine Tipps in der Gruppe abgegeben.",
+    "you_label": "du",
+})
+TRANSLATIONS["it"].update({
+    "group_predictions": "Pronostici del gruppo",
+    "no_group_predictions": "Nessun pronostico inviato nel gruppo.",
+    "you_label": "tu",
+})
+TRANSLATIONS["ar"].update({
+    "group_predictions": "\u062a\u0648\u0642\u0639\u0627\u062a \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629",
+    "no_group_predictions": "\u0644\u0627 \u062a\u0648\u062c\u062f \u062a\u0648\u0642\u0639\u0627\u062a \u0645\u0631\u0633\u0644\u0629 \u0641\u064a \u0627\u0644\u0645\u062c\u0645\u0648\u0639\u0629.",
+    "you_label": "\u0623\u0646\u062a",
+})
+TRANSLATIONS["zh"].update({
+    "group_predictions": "\u5c0f\u7ec4\u9884\u6d4b",
+    "no_group_predictions": "\u5c0f\u7ec4\u5c1a\u672a\u63d0\u4ea4\u9884\u6d4b\u3002",
+    "you_label": "\u4f60",
+})
+TRANSLATIONS["ru"].update({
+    "group_predictions": "\u041f\u0440\u043e\u0433\u043d\u043e\u0437\u044b \u0433\u0440\u0443\u043f\u043f\u044b",
+    "no_group_predictions": "\u0412 \u0433\u0440\u0443\u043f\u043f\u0435 \u043d\u0435\u0442 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0445 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u043e\u0432.",
+    "you_label": "\u0432\u044b",
+})
+TRANSLATIONS["ja"].update({
+    "group_predictions": "\u30b0\u30eb\u30fc\u30d7\u306e\u4e88\u60f3",
+    "no_group_predictions": "\u30b0\u30eb\u30fc\u30d7\u306b\u9001\u4fe1\u6e08\u307f\u306e\u4e88\u60f3\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    "you_label": "\u3042\u306a\u305f",
+})
+
 
 def _repair_mojibake(value):
     if not isinstance(value, str):
@@ -4118,8 +4169,74 @@ def _highlight_team_options_payload(user=None):
     }
 
 
-def _jogo_payload(jogo, palpite=None, pontuacao=None):
+def montar_palpites_grupo_map(jogos, user, competidor_atual=None):
+    if not user or not user.grupo_id:
+        return {}
+
+    jogos_bloqueados = [j for j in jogos if not prazo_aberto(j)]
+    if not jogos_bloqueados:
+        return {}
+
+    competidores = (
+        Competidor.query
+        .join(User, Competidor.user_id == User.id)
+        .filter(
+            User.grupo_id == user.grupo_id,
+            User.ativo.is_(True),
+            Competidor.ativo.is_(True),
+        )
+        .order_by(Competidor.apelido)
+        .all()
+    )
+    if not competidores:
+        return {}
+
+    jogo_ids = [j.id for j in jogos_bloqueados]
+    competidor_ids = [c.id for c in competidores]
+    palpites = Palpite.query.filter(
+        Palpite.jogo_id.in_(jogo_ids),
+        Palpite.competidor_id.in_(competidor_ids),
+        Palpite.valido.is_(True),
+    ).all()
+    palpites_por_chave = {
+        (p.jogo_id, p.competidor_id): p
+        for p in palpites
+    }
+
+    atual_id = competidor_atual.id if competidor_atual else None
+    por_jogo = {}
+    for jogo in jogos_bloqueados:
+        itens = []
+        for competidor in competidores:
+            palpite = palpites_por_chave.get((jogo.id, competidor.id))
+            itens.append({
+                "competidor": competidor,
+                "palpite": palpite,
+                "is_current": competidor.id == atual_id,
+            })
+        por_jogo[jogo.id] = itens
+    return por_jogo
+
+
+def palpites_grupo_payload(itens, jogo):
+    return [
+        {
+            "competidor_id": item["competidor"].id,
+            "apelido": item["competidor"].apelido,
+            "is_current": bool(item.get("is_current")),
+            "palpite": {
+                "gols_a": item["palpite"].palpite_gols_a,
+                "gols_b": item["palpite"].palpite_gols_b,
+                "classificado": item["palpite"].palpite_classificado if jogo.mata_mata else None,
+            } if item.get("palpite") else None,
+        }
+        for item in itens
+    ]
+
+
+def _jogo_payload(jogo, palpite=None, pontuacao=None, palpites_grupo=None):
     resultado = jogo.resultado
+    palpites_grupo = palpites_grupo or []
     return {
         "id": jogo.id,
         "numero_partida": jogo.numero_partida,
@@ -4153,6 +4270,8 @@ def _jogo_payload(jogo, palpite=None, pontuacao=None):
             "gols_b": palpite.palpite_gols_b,
             "classificado": palpite.palpite_classificado,
         } if palpite else None,
+        "palpites_grupo_disponiveis": not prazo_aberto(jogo),
+        "palpites_grupo": palpites_grupo_payload(palpites_grupo, jogo),
         "pontuacao": {
             "pontos": pontuacao.pontos,
             "placar_exato": pontuacao.placar_exato,
@@ -4476,6 +4595,7 @@ def api_alterar_time_destaque():
 @app.route("/api/v1/jogos")
 @api_login_required
 def api_jogos():
+    competidor = ensure_competidor_profile(g.user)
     fase = request.args.get("fase", "").strip()
     grupo = request.args.get("grupo", "").strip()
     query = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_brasilia)
@@ -4484,7 +4604,14 @@ def api_jogos():
     if grupo:
         query = query.filter_by(grupo=grupo)
     jogos = query.all()
-    return jsonify({"ok": True, "jogos": [_jogo_payload(jogo) for jogo in jogos]})
+    palpites_grupo_map = montar_palpites_grupo_map(jogos, g.user, competidor)
+    return jsonify({
+        "ok": True,
+        "jogos": [
+            _jogo_payload(jogo, palpites_grupo=palpites_grupo_map.get(jogo.id))
+            for jogo in jogos
+        ],
+    })
 
 
 @app.route("/api/v1/palpites", methods=["GET", "POST"])
@@ -4598,9 +4725,18 @@ def api_palpites():
             Pontuacao.jogo_id.in_(jogo_ids)
         ).all()
     }
+    palpites_grupo_map = montar_palpites_grupo_map(jogos, g.user, competidor)
     return jsonify({
         "ok": True,
-        "jogos": [_jogo_payload(j, palpites_map.get(j.id), pontuacoes_map.get(j.id)) for j in jogos],
+        "jogos": [
+            _jogo_payload(
+                j,
+                palpites_map.get(j.id),
+                pontuacoes_map.get(j.id),
+                palpites_grupo_map.get(j.id),
+            )
+            for j in jogos
+        ],
     })
 
 
@@ -5605,6 +5741,7 @@ def palpites():
             ).all()
         }
 
+    palpites_grupo_map = montar_palpites_grupo_map(todos_jogos, user, competidor)
     jogos_com_status = []
     for j in todos_jogos:
         p = palpites_map.get(j.id)
@@ -5622,6 +5759,7 @@ def palpites():
             "jogo": j,
             "palpite": p,
             "palpites_todos": {},
+            "palpites_grupo": palpites_grupo_map.get(j.id, []),
             "prazo_aberto": aberto,
             "editavel": editavel,
             "status": st,

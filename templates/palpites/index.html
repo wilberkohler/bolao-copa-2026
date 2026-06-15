@@ -1,6 +1,50 @@
 {% extends "base.html" %}
 {% block title %}{{ tr('predictions_title') }} - {{ competidor.apelido }}{% endblock %}
 
+{% macro group_predictions_panel(item) %}
+{% if item.palpites_grupo %}
+  {% set submitted = namespace(count=0) %}
+  {% for entry in item.palpites_grupo %}
+    {% if entry.palpite %}{% set submitted.count = submitted.count + 1 %}{% endif %}
+  {% endfor %}
+  <details class="group-predictions mt-2">
+    <summary>
+      <i class="bi bi-people"></i> {{ tr('group_predictions') }}
+      <span class="badge bg-secondary ms-1">{{ submitted.count }}</span>
+    </summary>
+    {% if submitted.count %}
+      <div class="table-responsive mt-2">
+        <table class="table table-sm table-bordered mb-0 align-middle bg-white">
+          <thead class="table-light">
+            <tr>
+              <th>{{ tr('competitors') }}</th>
+              <th>{{ tr('my_prediction') }}</th>
+              {% if item.jogo.mata_mata %}<th>{{ tr('qualified_knockout') }}</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in item.palpites_grupo if entry.palpite %}
+              <tr class="{% if entry.is_current %}table-success{% endif %}">
+                <td>
+                  <strong>{{ entry.competidor.apelido }}</strong>
+                  {% if entry.is_current %}<small class="text-muted">({{ tr('you_label') }})</small>{% endif %}
+                </td>
+                <td class="fw-bold">{{ entry.palpite.palpite_gols_a }} x {{ entry.palpite.palpite_gols_b }}</td>
+                {% if item.jogo.mata_mata %}
+                  <td>{{ time_nome_traduzido(entry.palpite.palpite_classificado) if entry.palpite.palpite_classificado else '-' }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-muted small mt-2">{{ tr('no_group_predictions') }}</div>
+    {% endif %}
+  </details>
+{% endif %}
+{% endmacro %}
+
 {% macro palpites_table(items) %}
 {% set ns = namespace(has_mata_mata=false) %}
 {% for item in items %}
@@ -139,6 +183,13 @@
           {% endif %}
         </td>
       </tr>
+      {% if item.palpites_grupo %}
+      <tr class="group-predictions-row">
+        <td colspan="{{ 13 + (1 if ns.has_mata_mata else 0) }}">
+          {{ group_predictions_panel(item) }}
+        </td>
+      </tr>
+      {% endif %}
       {% endfor %}
     </tbody>
   </table>
@@ -234,6 +285,8 @@
                 <span class="badge bg-secondary">{{ item.status }}</span>
               {% endif %}
             </div>
+
+            {{ group_predictions_panel(item) }}
           </article>
         {% endfor %}
       </div>

@@ -793,8 +793,52 @@ private struct PalpiteGameRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            GroupPredictionsList(jogo: jogo)
         }
         .padding(.vertical, 6)
         .listRowBackground(isBrazilGame ? Color.yellow.opacity(0.12) : Color.clear)
+    }
+}
+
+private struct GroupPredictionsList: View {
+    let jogo: Jogo
+
+    private var submitted: [PalpiteGrupo] {
+        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+    }
+
+    var body: some View {
+        if !submitted.isEmpty {
+            DisclosureGroup {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(submitted) { item in
+                        HStack {
+                            Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
+                                .font(.caption.weight(item.isCurrent ? .bold : .regular))
+                            Spacer()
+                            if let palpite = item.palpite {
+                                Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
+                                    .font(.caption.weight(.bold))
+                                if jogo.mataMata, let classificado = palpite.classificado {
+                                    Text(classificado)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.top, 6)
+            } label: {
+                Label("Palpites do grupo (\(submitted.count))", systemImage: "person.2")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.green)
+            }
+        }
+    }
+
+    private func scoreText(_ value: Int?) -> String {
+        value.map(String.init) ?? "-"
     }
 }
