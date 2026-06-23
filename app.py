@@ -5,6 +5,7 @@ import hmac
 import re
 import secrets
 import smtplib
+from io import BytesIO
 from datetime import datetime, date, timedelta
 from email.message import EmailMessage
 from functools import wraps
@@ -2315,6 +2316,17 @@ TRANSLATIONS["ja"].update({
     "round_hits_summary": "\u53c2\u52a0\u8005\u5225\u306e\u30e9\u30a6\u30f3\u30c9\u7684\u4e2d\u30b5\u30de\u30ea\u30fc",
 })
 
+TRANSLATIONS["pt-BR"].update({"ranking_evolution_title": "Evolu\u00e7\u00e3o di\u00e1ria do ranking"})
+TRANSLATIONS["en"].update({"ranking_evolution_title": "Daily ranking evolution"})
+TRANSLATIONS["es"].update({"ranking_evolution_title": "Evoluci\u00f3n diaria del ranking"})
+TRANSLATIONS["fr"].update({"ranking_evolution_title": "Evolution quotidienne du classement"})
+TRANSLATIONS["de"].update({"ranking_evolution_title": "T\u00e4gliche Entwicklung der Rangliste"})
+TRANSLATIONS["it"].update({"ranking_evolution_title": "Evoluzione giornaliera della classifica"})
+TRANSLATIONS["ar"].update({"ranking_evolution_title": "\u0627\u0644\u062a\u0637\u0648\u0631 \u0627\u0644\u064a\u0648\u0645\u064a \u0644\u0644\u062a\u0631\u062a\u064a\u0628"})
+TRANSLATIONS["zh"].update({"ranking_evolution_title": "\u6bcf\u65e5\u6392\u540d\u8d8b\u52bf"})
+TRANSLATIONS["ru"].update({"ranking_evolution_title": "\u0415\u0436\u0435\u0434\u043d\u0435\u0432\u043d\u0430\u044f \u0434\u0438\u043d\u0430\u043c\u0438\u043a\u0430 \u0440\u0435\u0439\u0442\u0438\u043d\u0433\u0430"})
+TRANSLATIONS["ja"].update({"ranking_evolution_title": "\u65e5\u6b21\u30e9\u30f3\u30ad\u30f3\u30b0\u63a8\u79fb"})
+
 TRANSLATIONS["pt-BR"].update({
     "group_predictions": "Palpites do grupo",
     "no_group_predictions": "Nenhum palpite enviado no grupo.",
@@ -2979,7 +2991,7 @@ def make_password_reset_token(user):
     })
 
 
-def send_email_message(to_email, subject, text_body, html_body=None):
+def send_email_message(to_email, subject, text_body, html_body=None, inline_images=None):
     host = os.environ.get("SMTP_HOST", "").strip()
     if not host:
         app.logger.warning("SMTP_HOST não configurado; e-mail não enviado para %s", to_email)
@@ -2999,6 +3011,15 @@ def send_email_message(to_email, subject, text_body, html_body=None):
     message.set_content(text_body, charset="utf-8")
     if html_body:
         message.add_alternative(html_body, subtype="html", charset="utf-8")
+        html_part = message.get_payload()[-1]
+        for cid, image in (inline_images or {}).items():
+            html_part.add_related(
+                image["data"],
+                maintype=image.get("maintype", "image"),
+                subtype=image.get("subtype", "png"),
+                cid=f"<{cid}>",
+                filename=image.get("filename", f"{cid}.png"),
+            )
 
     smtp_cls = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
     with smtp_cls(host, port, timeout=30) as smtp:
@@ -3831,6 +3852,139 @@ def ranking_podium_html(items, points_label):
     )
 
 
+def gerar_grafico_evolucao_ranking(rodada, idioma=None):
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception:
+        app.logger.warning("Pillow nao disponivel; grafico de evolucao nao sera gerado.")
+        return None
+
+    jogos_rodada = rodada.get("jogos") or []
+    if not jogos_rodada:
+        return None
+
+    data_limite = max((jogo.data_jogo for jogo in jogos_rodada if jogo.data_jogo), default=None)
+    if not data_limite:
+        return None
+
+    jogos = (
+        Jogo.query.join(Resultado)
+        .filter(Jogo.data_jogo <= data_limite)
+        .order_by(Jogo.data_jogo, Jogo.hora_et, Jogo.numero_partida)
+        .all()
+    )
+    if not jogos:
+        return None
+
+    datas = sorted({jogo.data_jogo for jogo in jogos})
+    jogo_ids = [jogo.id for jogo in jogos]
+    competidores = Competidor.query.filter_by(ativo=True).order_by(Competidor.apelido).all()
+    if not competidores:
+        return None
+
+    pontuacoes = Pontuacao.query.filter(Pontuacao.jogo_id.in_(jogo_ids)).all()
+    data_por_jogo = {jogo.id: jogo.data_jogo for jogo in jogos}
+    pontos_por_competidor_data = {}
+    for pontuacao in pontuacoes:
+        data_jogo = data_por_jogo.get(pontuacao.jogo_id)
+        if not data_jogo:
+            continue
+        por_data = pontos_por_competidor_data.setdefault(pontuacao.competidor_id, {})
+        por_data[data_jogo] = por_data.get(data_jogo, 0) + (pontuacao.pontos or 0)
+
+    series = []
+    for competidor in competidores:
+        acumulado = 0
+        valores = []
+        pontos_por_data = pontos_por_competidor_data.get(competidor.id, {})
+        for data_ref in datas:
+            acumulado += pontos_por_data.get(data_ref, 0)
+            valores.append(acumulado)
+        series.append((competidor.apelido, valores))
+
+    if not series:
+        return None
+
+    width = 960
+    height = 560
+    left = 76
+    right = 28
+    top = 72
+    bottom = 150
+    plot_w = width - left - right
+    plot_h = height - top - bottom
+    max_pontos = max(max(valores) for _, valores in series) or 1
+    y_step = max(1, ((max_pontos + 4) // 5))
+    y_max = max_pontos if max_pontos % y_step == 0 else ((max_pontos // y_step) + 1) * y_step
+    colors = [
+        "#0ea5e9", "#f97316", "#22c55e", "#a855f7", "#ef4444", "#14b8a6",
+        "#eab308", "#6366f1", "#ec4899", "#84cc16", "#f59e0b", "#06b6d4",
+        "#8b5cf6", "#10b981", "#fb7185", "#64748b", "#b45309", "#2563eb",
+    ]
+
+    image = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(image)
+    try:
+        title_font = ImageFont.truetype("arialbd.ttf", 30)
+        small_font = ImageFont.truetype("arial.ttf", 16)
+    except Exception:
+        title_font = small_font = ImageFont.load_default()
+
+    draw.text((left, 22), tr("ranking_evolution_title", idioma), fill="#111827", font=title_font)
+    draw.rectangle([left, top, width - right, height - bottom], outline="#cbd5e1", width=1)
+
+    for i in range(6):
+        valor = round(y_max * i / 5)
+        y = top + plot_h - (plot_h * i / 5)
+        draw.line([(left, y), (width - right, y)], fill="#e5e7eb", width=1)
+        draw.text((18, y - 10), str(valor), fill="#64748b", font=small_font)
+
+    if len(datas) == 1:
+        x_positions = [left + plot_w / 2]
+    else:
+        x_positions = [left + plot_w * idx / (len(datas) - 1) for idx in range(len(datas))]
+
+    label_interval = max(1, len(datas) // 6)
+    for idx, data_ref in enumerate(datas):
+        if len(datas) <= 8 or idx in {0, len(datas) - 1} or idx % label_interval == 0:
+            x = x_positions[idx]
+            label = data_ref.strftime("%d/%m")
+            draw.text((x - 22, height - bottom + 14), label, fill="#64748b", font=small_font)
+            draw.line([(x, top), (x, height - bottom)], fill="#f1f5f9", width=1)
+
+    for idx, (_apelido, valores) in enumerate(series):
+        color = colors[idx % len(colors)]
+        points = []
+        for x, valor in zip(x_positions, valores):
+            y = top + plot_h - (plot_h * valor / y_max)
+            points.append((x, y))
+        if len(points) == 1:
+            x, y = points[0]
+            draw.ellipse([x - 4, y - 4, x + 4, y + 4], fill=color)
+        else:
+            draw.line(points, fill=color, width=3)
+            for x, y in points:
+                draw.ellipse([x - 3, y - 3, x + 3, y + 3], fill=color)
+
+    legend_x = left
+    legend_y = height - 110
+    col_w = 230
+    row_h = 24
+    for idx, (apelido, _valores) in enumerate(series[:18]):
+        col = idx % 4
+        row = idx // 4
+        x = legend_x + col * col_w
+        y = legend_y + row * row_h
+        color = colors[idx % len(colors)]
+        draw.line([(x, y + 10), (x + 28, y + 10)], fill=color, width=4)
+        nome = apelido if len(apelido) <= 18 else apelido[:17] + "..."
+        draw.text((x + 36, y), nome, fill="#334155", font=small_font)
+
+    output = BytesIO()
+    image.save(output, format="PNG")
+    return output.getvalue()
+
+
 def montar_relatorio_rodada(user, competidor, rodada):
     jogo_ids = [j.id for j in rodada["jogos"]]
     pontuacoes = Pontuacao.query.filter(
@@ -3904,6 +4058,20 @@ def montar_relatorio_rodada(user, competidor, rodada):
     )
     top_etapa_html = ranking_podium_html(top5_etapa, points_label)
     top_geral_html = ranking_podium_html(top5_geral, points_label)
+    grafico_evolucao = gerar_grafico_evolucao_ranking(rodada, user.idioma)
+    grafico_evolucao_html = ""
+    inline_images = {}
+    if grafico_evolucao:
+        inline_images["ranking_evolution_chart"] = {
+            "data": grafico_evolucao,
+            "subtype": "png",
+            "filename": "evolucao-ranking.png",
+        }
+        grafico_evolucao_html = (
+            f"<h3>{escape(tr('ranking_evolution_title', user.idioma))}</h3>"
+            "<p><img src=\"cid:ranking_evolution_chart\" alt=\"Ranking\" "
+            "style=\"max-width:100%;height:auto;border:1px solid #e5e7eb;border-radius:8px;\"></p>"
+        )
     invite_url = convite_url(user)
     subject = tr("round_report_subject", user.idioma, round_label=rodada_label)
     text = (
@@ -3951,6 +4119,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + "".join(f"<li>{escape(linha[2:])}</li>" for linha in jogos_linhas)
         + "</ul>"
         + resumo_acertos_html
+        + grafico_evolucao_html
         + f"<h3>{escape(tr('top5_stage', user.idioma, stage_label=etapa_label))}</h3>"
         + top_etapa_html
         + f"<h3>{escape(tr('top5_overall', user.idioma))}</h3>"
@@ -3958,7 +4127,7 @@ def montar_relatorio_rodada(user, competidor, rodada):
         + f"<p>{escape(tr('access_app_details', user.idioma))}</p>"
         + f"<p>{escape(tr('invite_friend_line', user.idioma))}<br><a href=\"{invite_url}\">{invite_url}</a></p>"
     )
-    return subject, text, html
+    return subject, text, html, inline_images
 
 
 def send_pending_round_reports():
@@ -3982,7 +4151,7 @@ def send_pending_round_reports():
                 skipped += 1
                 continue
 
-            subject, text_body, html_body = montar_relatorio_rodada(user, competidor, rodada)
+            subject, text_body, html_body, inline_images = montar_relatorio_rodada(user, competidor, rodada)
             if not envio:
                 envio = RelatorioRodadaEnvio(user_id=user.id, rodada_key=rodada["key"])
             envio.rodada_label = rodada["label"]
@@ -3990,7 +4159,7 @@ def send_pending_round_reports():
             envio.enviado_em = datetime.utcnow()
             envio.erro = None
             try:
-                send_email_message(user.email, subject, text_body, html_body)
+                send_email_message(user.email, subject, text_body, html_body, inline_images)
                 envio.status = "enviado"
                 sent += 1
             except Exception as exc:
