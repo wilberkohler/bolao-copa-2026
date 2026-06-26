@@ -2316,16 +2316,16 @@ TRANSLATIONS["ja"].update({
     "round_hits_summary": "\u53c2\u52a0\u8005\u5225\u306e\u30e9\u30a6\u30f3\u30c9\u7684\u4e2d\u30b5\u30de\u30ea\u30fc",
 })
 
-TRANSLATIONS["pt-BR"].update({"ranking_evolution_title": "Evolu\u00e7\u00e3o di\u00e1ria do ranking"})
-TRANSLATIONS["en"].update({"ranking_evolution_title": "Daily ranking evolution"})
-TRANSLATIONS["es"].update({"ranking_evolution_title": "Evoluci\u00f3n diaria del ranking"})
-TRANSLATIONS["fr"].update({"ranking_evolution_title": "Evolution quotidienne du classement"})
-TRANSLATIONS["de"].update({"ranking_evolution_title": "T\u00e4gliche Entwicklung der Rangliste"})
-TRANSLATIONS["it"].update({"ranking_evolution_title": "Evoluzione giornaliera della classifica"})
-TRANSLATIONS["ar"].update({"ranking_evolution_title": "\u0627\u0644\u062a\u0637\u0648\u0631 \u0627\u0644\u064a\u0648\u0645\u064a \u0644\u0644\u062a\u0631\u062a\u064a\u0628"})
-TRANSLATIONS["zh"].update({"ranking_evolution_title": "\u6bcf\u65e5\u6392\u540d\u8d8b\u52bf"})
-TRANSLATIONS["ru"].update({"ranking_evolution_title": "\u0415\u0436\u0435\u0434\u043d\u0435\u0432\u043d\u0430\u044f \u0434\u0438\u043d\u0430\u043c\u0438\u043a\u0430 \u0440\u0435\u0439\u0442\u0438\u043d\u0433\u0430"})
-TRANSLATIONS["ja"].update({"ranking_evolution_title": "\u65e5\u6b21\u30e9\u30f3\u30ad\u30f3\u30b0\u63a8\u79fb"})
+TRANSLATIONS["pt-BR"].update({"ranking_evolution_title": "Evolu\u00e7\u00e3o di\u00e1ria da posi\u00e7\u00e3o no ranking"})
+TRANSLATIONS["en"].update({"ranking_evolution_title": "Daily ranking position evolution"})
+TRANSLATIONS["es"].update({"ranking_evolution_title": "Evoluci\u00f3n diaria de la posici\u00f3n en el ranking"})
+TRANSLATIONS["fr"].update({"ranking_evolution_title": "Evolution quotidienne de la position au classement"})
+TRANSLATIONS["de"].update({"ranking_evolution_title": "T\u00e4gliche Entwicklung der Ranglistenposition"})
+TRANSLATIONS["it"].update({"ranking_evolution_title": "Evoluzione giornaliera della posizione in classifica"})
+TRANSLATIONS["ar"].update({"ranking_evolution_title": "\u0627\u0644\u062a\u0637\u0648\u0631 \u0627\u0644\u064a\u0648\u0645\u064a \u0644\u0645\u0631\u0643\u0632 \u0627\u0644\u062a\u0631\u062a\u064a\u0628"})
+TRANSLATIONS["zh"].update({"ranking_evolution_title": "\u6bcf\u65e5\u6392\u540d\u4f4d\u7f6e\u8d8b\u52bf"})
+TRANSLATIONS["ru"].update({"ranking_evolution_title": "\u0415\u0436\u0435\u0434\u043d\u0435\u0432\u043d\u0430\u044f \u0434\u0438\u043d\u0430\u043c\u0438\u043a\u0430 \u043c\u0435\u0441\u0442\u0430 \u0432 \u0440\u0435\u0439\u0442\u0438\u043d\u0433\u0435"})
+TRANSLATIONS["ja"].update({"ranking_evolution_title": "\u65e5\u6b21\u30e9\u30f3\u30ad\u30f3\u30b0\u9806\u4f4d\u63a8\u79fb"})
 
 TRANSLATIONS["pt-BR"].update({
     "group_predictions": "Palpites do grupo",
@@ -3884,23 +3884,66 @@ def gerar_grafico_evolucao_ranking(rodada, idioma=None):
 
     pontuacoes = Pontuacao.query.filter(Pontuacao.jogo_id.in_(jogo_ids)).all()
     data_por_jogo = {jogo.id: jogo.data_jogo for jogo in jogos}
-    pontos_por_competidor_data = {}
+    resumo_por_competidor_data = {}
     for pontuacao in pontuacoes:
         data_jogo = data_por_jogo.get(pontuacao.jogo_id)
         if not data_jogo:
             continue
-        por_data = pontos_por_competidor_data.setdefault(pontuacao.competidor_id, {})
-        por_data[data_jogo] = por_data.get(data_jogo, 0) + (pontuacao.pontos or 0)
+        por_data = resumo_por_competidor_data.setdefault(pontuacao.competidor_id, {})
+        resumo = por_data.setdefault(
+            data_jogo,
+            {
+                "pontos": 0,
+                "placares_exatos": 0,
+                "vencedores_corretos": 0,
+                "saldos_corretos": 0,
+                "classificados_corretos": 0,
+            },
+        )
+        resumo["pontos"] += pontuacao.pontos or 0
+        resumo["placares_exatos"] += 1 if pontuacao.placar_exato else 0
+        resumo["vencedores_corretos"] += 1 if pontuacao.vencedor_correto else 0
+        resumo["saldos_corretos"] += 1 if pontuacao.saldo_correto else 0
+        resumo["classificados_corretos"] += 1 if pontuacao.classificado_correto else 0
 
-    series = []
-    for competidor in competidores:
-        acumulado = 0
-        valores = []
-        pontos_por_data = pontos_por_competidor_data.get(competidor.id, {})
-        for data_ref in datas:
-            acumulado += pontos_por_data.get(data_ref, 0)
-            valores.append(acumulado)
-        series.append((competidor.apelido, valores))
+    acumulados = {
+        competidor.id: {
+            "competidor": competidor,
+            "pontos": 0,
+            "placares_exatos": 0,
+            "vencedores_corretos": 0,
+            "saldos_corretos": 0,
+            "classificados_corretos": 0,
+        }
+        for competidor in competidores
+    }
+    posicoes_por_competidor = {competidor.id: [] for competidor in competidores}
+    for data_ref in datas:
+        for competidor in competidores:
+            resumo_dia = resumo_por_competidor_data.get(competidor.id, {}).get(data_ref)
+            if resumo_dia:
+                for chave, valor in resumo_dia.items():
+                    acumulados[competidor.id][chave] += valor
+
+        ranking_dia = sorted(
+            acumulados.values(),
+            key=lambda item: (
+                -item["pontos"],
+                -item["placares_exatos"],
+                -item["vencedores_corretos"],
+                -item["saldos_corretos"],
+                -item["classificados_corretos"],
+                item["competidor"].apelido.lower(),
+            ),
+        )
+        for posicao, item in enumerate(ranking_dia, start=1):
+            posicoes_por_competidor[item["competidor"].id].append(posicao)
+
+    series = [
+        (competidor.apelido, posicoes_por_competidor[competidor.id])
+        for competidor in competidores
+    ]
+    series.sort(key=lambda item: (item[1][-1] if item[1] else len(competidores), item[0].lower()))
 
     if not series:
         return None
@@ -3913,9 +3956,7 @@ def gerar_grafico_evolucao_ranking(rodada, idioma=None):
     bottom = 150
     plot_w = width - left - right
     plot_h = height - top - bottom
-    max_pontos = max(max(valores) for _, valores in series) or 1
-    y_step = max(1, ((max_pontos + 4) // 5))
-    y_max = max_pontos if max_pontos % y_step == 0 else ((max_pontos // y_step) + 1) * y_step
+    max_posicao = max(1, len(competidores))
     colors = [
         "#0ea5e9", "#f97316", "#22c55e", "#a855f7", "#ef4444", "#14b8a6",
         "#eab308", "#6366f1", "#ec4899", "#84cc16", "#f59e0b", "#06b6d4",
@@ -3934,10 +3975,10 @@ def gerar_grafico_evolucao_ranking(rodada, idioma=None):
     draw.rectangle([left, top, width - right, height - bottom], outline="#cbd5e1", width=1)
 
     for i in range(6):
-        valor = round(y_max * i / 5)
-        y = top + plot_h - (plot_h * i / 5)
+        valor = 1 if max_posicao == 1 else round(1 + (max_posicao - 1) * i / 5)
+        y = top if max_posicao == 1 else top + plot_h * (valor - 1) / (max_posicao - 1)
         draw.line([(left, y), (width - right, y)], fill="#e5e7eb", width=1)
-        draw.text((18, y - 10), str(valor), fill="#64748b", font=small_font)
+        draw.text((18, y - 10), f"#{valor}", fill="#64748b", font=small_font)
 
     if len(datas) == 1:
         x_positions = [left + plot_w / 2]
@@ -3956,7 +3997,7 @@ def gerar_grafico_evolucao_ranking(rodada, idioma=None):
         color = colors[idx % len(colors)]
         points = []
         for x, valor in zip(x_positions, valores):
-            y = top + plot_h - (plot_h * valor / y_max)
+            y = top + plot_h / 2 if max_posicao == 1 else top + plot_h * (valor - 1) / (max_posicao - 1)
             points.append((x, y))
         if len(points) == 1:
             x, y = points[0]
