@@ -12,27 +12,17 @@ services:
         generateValue: true
       - key: DATABASE_URL
         sync: false
+      - key: RESULT_SYNC_KNOCKOUT_ONLY
+        value: "true"
   - type: cron
-    name: bolao2026-sync-resultados-mata-mata
+    name: bolao-copa-2026
     runtime: python
     plan: starter
     buildCommand: pip install -r requirements.txt
-    startCommand: python sync_results_job.py
-    schedule: "0 * * * *"
+    startCommand: >-
+      python -c "import os,requests; u='https://bolao2026-9jgh.onrender.com/internal/sync-resultados'; h={'X-Sync-Token':os.environ['RESULT_SYNC_TOKEN']}; r=requests.post(u,headers=h,timeout=120); print(r.status_code); print(r.text); r.raise_for_status()"
+    schedule: "0 * * 6,7 *"
     autoDeploy: true
     envVars:
-      - key: DATABASE_URL
-        fromService:
-          name: bolao2026
-          type: web
-          envVarKey: DATABASE_URL
-      - key: FOOTBALL_DATA_API_KEY
+      - key: RESULT_SYNC_TOKEN
         sync: false
-      - key: FOOTBALL_DATA_BASE_URL
-        value: https://api.football-data.org/v4
-      - key: RESULT_SYNC_DAYS_BACK
-        value: "1"
-      - key: RESULT_SYNC_DAYS_FORWARD
-        value: "0"
-      - key: RESULT_SYNC_KNOCKOUT_ONLY
-        value: "true"
