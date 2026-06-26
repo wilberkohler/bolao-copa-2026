@@ -6078,7 +6078,24 @@ def recalcular_resultado(jid):
     return redirect(url_for("listar_resultados"))
 
 
-def _run_auto_result_sync(launched_by: str):
+def _run_auto_result_sync(launched_by: str, knockout_only: bool = False):
+    if knockout_only:
+        knockout_games = Jogo.query.filter_by(mata_mata=True).all()
+        if knockout_games and all(jogo.resultado for jogo in knockout_games):
+            return {
+                "date_from": None,
+                "date_to": None,
+                "knockout_only": True,
+                "finished": True,
+                "fetched": 0,
+                "created": 0,
+                "updated": 0,
+                "unchanged": 0,
+                "unmatched": [],
+                "recalculated": 0,
+                "knockout_teams_updated": 0,
+            }
+
     api_key = os.environ.get("FOOTBALL_DATA_API_KEY", "").strip()
     if not api_key:
         raise ValueError("FOOTBALL_DATA_API_KEY não configurada.")
@@ -6099,9 +6116,20 @@ def _run_auto_result_sync(launched_by: str):
         days_back=days_back,
         days_forward=days_forward,
         launched_by=launched_by,
+        knockout_only=knockout_only,
     )
     stats["knockout_teams_updated"] = sync_knockout_teams()
     return stats
+
+
+def run_result_sync_job(launched_by: str, knockout_only: bool = False, send_reports: bool = True):
+    stats = _run_auto_result_sync(launched_by=launched_by, knockout_only=knockout_only)
+    report_stats = (
+        send_pending_round_reports()
+        if send_reports
+        else {"sent": 0, "skipped": 0, "errors": []}
+    )
+    return {"stats": stats, "email_reports": report_stats}
 
 
 @app.route("/admin/sincronizar-resultados", methods=["POST"])
@@ -6150,9 +6178,12 @@ def sincronizar_resultados_cron():
         return jsonify({"ok": False, "error": "unauthorized"}), 401
 
     try:
-        stats = _run_auto_result_sync(launched_by="sync-cron")
-        report_stats = send_pending_round_reports()
-        return jsonify({"ok": True, "stats": stats, "email_reports": report_stats})
+        result = run_result_sync_job(
+            launched_by="sync-cron",
+            knockout_only=env_flag("RESULT_SYNC_KNOCKOUT_ONLY", False),
+            send_reports=True,
+        )
+        return jsonify({"ok": True, **result})
     except Exception as exc:
         db.session.rollback()
         return jsonify({"ok": False, "error": str(exc)}), 500

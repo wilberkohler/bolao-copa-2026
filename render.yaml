@@ -12,3 +12,27 @@ services:
         generateValue: true
       - key: DATABASE_URL
         sync: false
+  - type: cron
+    name: bolao2026-sync-resultados-mata-mata
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python sync_results_job.py
+    schedule: "0 * * * *"
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: bolao2026
+          type: web
+          envVarKey: DATABASE_URL
+      - key: FOOTBALL_DATA_API_KEY
+        sync: false
+      - key: FOOTBALL_DATA_BASE_URL
+        value: https://api.football-data.org/v4
+      - key: RESULT_SYNC_DAYS_BACK
+        value: "1"
+      - key: RESULT_SYNC_DAYS_FORWARD
+        value: "0"
+      - key: RESULT_SYNC_KNOCKOUT_ONLY
+        value: "true"
