@@ -134,23 +134,39 @@ def sync_finished_results_football_data(
     days_back: int,
     days_forward: int,
     launched_by: str,
+    knockout_only: bool = False,
 ) -> Dict[str, object]:
     today = date.today()
     date_from = today - timedelta(days=max(days_back, 0))
     date_to = today + timedelta(days=max(days_forward, 0))
+
+    internal_query = (
+        Jogo.query
+        .filter(Jogo.data_jogo >= date_from - timedelta(days=1))
+        .filter(Jogo.data_jogo <= date_to + timedelta(days=1))
+    )
+    if knockout_only:
+        internal_query = internal_query.filter_by(mata_mata=True)
+    internal_matches = internal_query.all()
+
+    if knockout_only and not internal_matches:
+        return {
+            "date_from": date_from.isoformat(),
+            "date_to": date_to.isoformat(),
+            "knockout_only": knockout_only,
+            "fetched": 0,
+            "created": 0,
+            "updated": 0,
+            "unchanged": 0,
+            "unmatched": [],
+            "recalculated": 0,
+        }
 
     external_results = fetch_finished_matches_football_data(
         api_key=api_key,
         date_from=date_from,
         date_to=date_to,
         base_url=base_url,
-    )
-
-    internal_matches = (
-        Jogo.query
-        .filter(Jogo.data_jogo >= date_from - timedelta(days=1))
-        .filter(Jogo.data_jogo <= date_to + timedelta(days=1))
-        .all()
     )
 
     created = 0
@@ -229,6 +245,7 @@ def sync_finished_results_football_data(
     return {
         "date_from": date_from.isoformat(),
         "date_to": date_to.isoformat(),
+        "knockout_only": knockout_only,
         "fetched": len(external_results),
         "created": created,
         "updated": updated,
