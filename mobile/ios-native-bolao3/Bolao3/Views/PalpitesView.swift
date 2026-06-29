@@ -843,13 +843,12 @@ private struct GroupPredictionsList: View {
     var body: some View {
         if !groupPredictions.isEmpty {
             DisclosureGroup {
-                if submitted.isEmpty {
-                    Text("Nenhum palpite enviado pelo grupo.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 6)
-                } else {
-                    VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if submitted.isEmpty {
+                        Text("Nenhum palpite enviado pelo grupo.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
                         ForEach(submitted) { item in
                             HStack {
                                 Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
