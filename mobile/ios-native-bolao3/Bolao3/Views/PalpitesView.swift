@@ -552,8 +552,11 @@ private struct KnockoutMatchCard: View {
 
     private var teamA: String { jogo.timeA ?? "-" }
     private var teamB: String { jogo.timeB ?? "-" }
+    private var groupPredictions: [PalpiteGrupo] {
+        jogo.palpitesGrupo ?? []
+    }
     private var submittedGroupPredictions: [PalpiteGrupo] {
-        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+        groupPredictions.filter { $0.palpite != nil }
     }
 
     var body: some View {
@@ -567,6 +570,20 @@ private struct KnockoutMatchCard: View {
                     Text("#\(numero)")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(.secondary)
+                }
+                if !groupPredictions.isEmpty {
+                    Button {
+                        showGroupPredictions = true
+                    } label: {
+                        Label("Grupo \(submittedGroupPredictions.count)", systemImage: "person.2")
+                            .labelStyle(.titleAndIcon)
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.14), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.green)
                 }
             }
 
@@ -630,16 +647,6 @@ private struct KnockoutMatchCard: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
 
-                    if !submittedGroupPredictions.isEmpty {
-                        Button {
-                            showGroupPredictions = true
-                        } label: {
-                            Label("Grupo (\(submittedGroupPredictions.count))", systemImage: "person.2")
-                                .font(.caption.weight(.semibold))
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.green)
-                    }
                 }
                 Spacer()
                 if let pontuacao = jogo.pontuacao {
@@ -825,26 +832,37 @@ private struct PalpiteGameRow: View {
 private struct GroupPredictionsList: View {
     let jogo: Jogo
 
+    private var groupPredictions: [PalpiteGrupo] {
+        jogo.palpitesGrupo ?? []
+    }
+
     private var submitted: [PalpiteGrupo] {
-        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+        groupPredictions.filter { $0.palpite != nil }
     }
 
     var body: some View {
-        if !submitted.isEmpty {
+        if !groupPredictions.isEmpty {
             DisclosureGroup {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(submitted) { item in
-                        HStack {
-                            Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
-                                .font(.caption.weight(item.isCurrent ? .bold : .regular))
-                            Spacer()
-                            if let palpite = item.palpite {
-                                Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
-                                    .font(.caption.weight(.bold))
-                                if jogo.mataMata, let classificado = palpite.classificado {
-                                    Text(classificado)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                if submitted.isEmpty {
+                    Text("Nenhum palpite enviado pelo grupo.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 6)
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(submitted) { item in
+                            HStack {
+                                Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
+                                    .font(.caption.weight(item.isCurrent ? .bold : .regular))
+                                Spacer()
+                                if let palpite = item.palpite {
+                                    Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
+                                        .font(.caption.weight(.bold))
+                                    if jogo.mataMata, let classificado = palpite.classificado {
+                                        Text(classificado)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                             }
                         }
@@ -868,33 +886,42 @@ private struct GroupPredictionsSheet: View {
     let jogo: Jogo
     @Environment(\.dismiss) private var dismiss
 
+    private var groupPredictions: [PalpiteGrupo] {
+        jogo.palpitesGrupo ?? []
+    }
+
     private var submitted: [PalpiteGrupo] {
-        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+        groupPredictions.filter { $0.palpite != nil }
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(submitted) { item in
-                        HStack(alignment: .top, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
-                                    .font(.subheadline.weight(item.isCurrent ? .bold : .semibold))
-                                if jogo.mataMata, let classificado = item.palpite?.classificado, !classificado.isEmpty {
-                                    Text("Classificado: \(classificado)")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                    if submitted.isEmpty {
+                        Text("Nenhum palpite enviado pelo grupo.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(submitted) { item in
+                            HStack(alignment: .top, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
+                                        .font(.subheadline.weight(item.isCurrent ? .bold : .semibold))
+                                    if jogo.mataMata, let classificado = item.palpite?.classificado, !classificado.isEmpty {
+                                        Text("Classificado: \(classificado)")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                if let palpite = item.palpite {
+                                    Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
+                                        .font(.headline.weight(.bold))
+                                        .monospacedDigit()
                                 }
                             }
-                            Spacer()
-                            if let palpite = item.palpite {
-                                Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
-                                    .font(.headline.weight(.bold))
-                                    .monospacedDigit()
-                            }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 4)
                     }
                 } header: {
                     Text(matchTitle)
