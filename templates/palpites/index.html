@@ -857,6 +857,26 @@
       board.addEventListener("scroll", function () {
         window.requestAnimationFrame(drawConnectors);
       });
+      Array.prototype.slice.call(board.querySelectorAll(".prediction-match .group-predictions")).forEach(function (details) {
+        details.addEventListener("toggle", function () {
+          var card = details.closest(".prediction-match");
+          if (!card) {
+            return;
+          }
+          card.classList.toggle("has-open-group-predictions", details.open);
+          if (details.open) {
+            Array.prototype.slice.call(board.querySelectorAll(".prediction-match .group-predictions[open]")).forEach(function (other) {
+              if (other !== details) {
+                other.open = false;
+                var otherCard = other.closest(".prediction-match");
+                if (otherCard) {
+                  otherCard.classList.remove("has-open-group-predictions");
+                }
+              }
+            });
+          }
+        });
+      });
       window.addEventListener("resize", function () {
         window.requestAnimationFrame(function () {
           var activeTab = tabs.find(function (tab) { return tab.classList.contains("active"); });

@@ -509,7 +509,7 @@ private struct KnockoutPhaseLayout: Identifiable, Hashable {
 }
 
 private enum KnockoutLayout {
-    static let cardHeight: CGFloat = 258
+    static let cardHeight: CGFloat = 286
     static let cardWidth: CGFloat = 310
     static let cardGap: CGFloat = 16
     static let connectorWidth: CGFloat = 28
@@ -548,9 +548,13 @@ private struct KnockoutMatchCard: View {
     let isLastVisible: Bool
     @Binding var draft: DraftPalpite
     let focusedField: FocusState<PalpiteField?>.Binding
+    @State private var showGroupPredictions = false
 
     private var teamA: String { jogo.timeA ?? "-" }
     private var teamB: String { jogo.timeB ?? "-" }
+    private var submittedGroupPredictions: [PalpiteGrupo] {
+        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -620,10 +624,23 @@ private struct KnockoutMatchCard: View {
             Divider()
 
             HStack {
-                Text(deadlineText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(deadlineText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+
+                    if !submittedGroupPredictions.isEmpty {
+                        Button {
+                            showGroupPredictions = true
+                        } label: {
+                            Label("Grupo (\(submittedGroupPredictions.count))", systemImage: "person.2")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.green)
+                    }
+                }
                 Spacer()
                 if let pontuacao = jogo.pontuacao {
                     Text("\(pontuacao.pontos) pts")
@@ -667,6 +684,10 @@ private struct KnockoutMatchCard: View {
             }
         }
         .shadow(color: .black.opacity(0.12), radius: 7, y: 3)
+        .sheet(isPresented: $showGroupPredictions) {
+            GroupPredictionsSheet(jogo: jogo)
+                .presentationDetents([.medium, .large])
+        }
     }
 
     private var matchDate: String {
@@ -836,6 +857,63 @@ private struct GroupPredictionsList: View {
                     .foregroundStyle(.green)
             }
         }
+    }
+
+    private func scoreText(_ value: Int?) -> String {
+        value.map(String.init) ?? "-"
+    }
+}
+
+private struct GroupPredictionsSheet: View {
+    let jogo: Jogo
+    @Environment(\.dismiss) private var dismiss
+
+    private var submitted: [PalpiteGrupo] {
+        (jogo.palpitesGrupo ?? []).filter { $0.palpite != nil }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(submitted) { item in
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(item.apelido + (item.isCurrent ? " (voce)" : ""))
+                                    .font(.subheadline.weight(item.isCurrent ? .bold : .semibold))
+                                if jogo.mataMata, let classificado = item.palpite?.classificado, !classificado.isEmpty {
+                                    Text("Classificado: \(classificado)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            if let palpite = item.palpite {
+                                Text("\(scoreText(palpite.golsA)) x \(scoreText(palpite.golsB))")
+                                    .font(.headline.weight(.bold))
+                                    .monospacedDigit()
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                } header: {
+                    Text(matchTitle)
+                }
+            }
+            .navigationTitle("Palpites do grupo")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Fechar") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private var matchTitle: String {
+        "\(jogo.timeA ?? "-") x \(jogo.timeB ?? "-")"
     }
 
     private func scoreText(_ value: Int?) -> String {
