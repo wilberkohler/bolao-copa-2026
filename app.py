@@ -6231,7 +6231,7 @@ def sincronizar_resultados_cron():
     try:
         result = run_result_sync_job(
             launched_by="sync-cron",
-            knockout_only=env_flag("RESULT_SYNC_KNOCKOUT_ONLY", False),
+            knockout_only=False,
             send_reports=True,
         )
         return jsonify({"ok": True, **result})
