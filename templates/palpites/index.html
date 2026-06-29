@@ -440,7 +440,7 @@
     var pendingNavigation = null;
     var allowImmediateLeave = false;
     var isSubmitting = false;
-    var initialState = serializeTrackedFields();
+    var initialState = "";
 
     var pendingRedirect = sessionStorage.getItem(redirectStorageKey);
     if (pendingRedirect) {
@@ -501,6 +501,7 @@
             classificado.selectedIndex = a > b ? 1 : (b > a ? 2 : (Math.random() < 0.5 ? 1 : 2));
           }
         }
+        syncKnockoutQualifiedByGame(gameId);
       });
     }
 
@@ -530,12 +531,7 @@
       form.submit();
     }
 
-    function syncKnockoutQualified(field) {
-      var match = field.name.match(/^gols_([ab])_(\d+)$/);
-      if (!match) {
-        return;
-      }
-      var gameId = match[2];
+    function syncKnockoutQualifiedByGame(gameId) {
       var goalsA = form.querySelector("input[name='gols_a_" + gameId + "']");
       var goalsB = form.querySelector("input[name='gols_b_" + gameId + "']");
       var classificado = form.querySelector("select[name='classificado_" + gameId + "']");
@@ -548,6 +544,20 @@
         return;
       }
       classificado.selectedIndex = a > b ? 1 : 2;
+    }
+
+    function syncKnockoutQualified(field) {
+      var match = field.name.match(/^(?:gols_[ab]|classificado)_(\d+)$/);
+      if (!match) {
+        return;
+      }
+      syncKnockoutQualifiedByGame(match[1]);
+    }
+
+    function syncAllKnockoutQualified() {
+      tabGameInputs(form).forEach(function (gameInput) {
+        syncKnockoutQualifiedByGame(gameInput.value);
+      });
     }
 
     function buildFormTargetUrl(targetForm) {
@@ -603,6 +613,7 @@
     }
 
     form.addEventListener("submit", function () {
+      syncAllKnockoutQualified();
       if (actionField) {
         actionField.value = "salvar";
       }
@@ -643,12 +654,15 @@
     });
 
     trackedFields.forEach(function (field) {
-      if (field.name.indexOf("gols_") === 0) {
+      if (field.name.indexOf("gols_") === 0 || field.name.indexOf("classificado_") === 0) {
         field.addEventListener("change", function () {
           syncKnockoutQualified(field);
         });
       }
     });
+
+    syncAllKnockoutQualified();
+    initialState = serializeTrackedFields();
 
     document.querySelectorAll(".prediction-bracket").forEach(function (board) {
       var tabContainer = board.previousElementSibling;

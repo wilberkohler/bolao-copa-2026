@@ -2838,6 +2838,24 @@ def _group_standings():
     return rankings, grupos_completos
 
 
+def _third_slots_from_rankings(rankings, allowed_groups=None):
+    allowed_groups = set(allowed_groups or rankings.keys())
+    return sorted(
+        [
+            ranking[2]
+            for grupo, ranking in rankings.items()
+            if grupo in allowed_groups and len(ranking) >= 3
+        ],
+        key=lambda item: (
+            -item["pontos"],
+            -item["saldo"],
+            -item["gols_pro"],
+            -item["vitorias"],
+            item["nome"],
+        ),
+    )
+
+
 def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, third_slots):
     slot_code = (slot_code or "").strip().upper()
     if not slot_code or _is_real_team_code(slot_code):
@@ -2853,9 +2871,8 @@ def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, th
     match = THIRD_PLACE_SLOT_RE.match(slot_code)
     if match:
         grupos_permitidos = set(match.group(1))
-        for idx, terceiro in enumerate(third_slots):
-            if terceiro.get("grupo") in grupos_permitidos:
-                return third_slots.pop(idx)
+        candidatos = _third_slots_from_rankings(rankings, grupos_permitidos)
+        return candidatos[0] if candidatos else None
         return None
 
     match = WINNER_GAME_SLOT_RE.match(slot_code)
@@ -2874,18 +2891,7 @@ def sync_knockout_teams(commit=True):
     jogos_por_numero = {jogo.numero_partida: jogo for jogo in jogos if jogo.numero_partida}
     nomes_por_codigo = _team_name_by_code(jogos)
     rankings, grupos_completos = _group_standings()
-    terceiros = []
-    if grupos_completos:
-        terceiros = sorted(
-            [ranking[2] for ranking in rankings.values() if len(ranking) >= 3],
-            key=lambda item: (
-                -item["pontos"],
-                -item["saldo"],
-                -item["gols_pro"],
-                -item["vitorias"],
-                item["nome"],
-            ),
-        )
+    terceiros = _third_slots_from_rankings(rankings) if grupos_completos else []
 
     atualizados = 0
     for jogo in [j for j in jogos if j.mata_mata]:
@@ -2913,6 +2919,43 @@ def sync_knockout_teams(commit=True):
                 setattr(jogo, nome_attr, novo_nome)
                 atualizados += 1
 
+    if atualizados and commit:
+        db.session.commit()
+    return atualizados
+
+
+def classificado_do_palpite(jogo, gols_a, gols_b, classificado=None):
+    if not jogo.mata_mata:
+        return None
+    if gols_a > gols_b:
+        return jogo.time_a
+    if gols_b > gols_a:
+        return jogo.time_b
+    return classificado
+
+
+def normalize_knockout_prediction_classificados(commit=True):
+    palpites = (
+        Palpite.query
+        .join(Jogo, Palpite.jogo_id == Jogo.id)
+        .filter(Palpite.valido == True, Jogo.mata_mata == True)
+        .all()
+    )
+    atualizados = 0
+    for palpite in palpites:
+        jogo = palpite.jogo
+        if palpite.palpite_gols_a is None or palpite.palpite_gols_b is None:
+            continue
+        correto = classificado_do_palpite(
+            jogo,
+            palpite.palpite_gols_a,
+            palpite.palpite_gols_b,
+            palpite.palpite_classificado,
+        )
+        if correto and palpite.palpite_classificado != correto:
+            palpite.palpite_classificado = correto
+            palpite.data_ultima_alteracao = datetime.now(BR_TZ)
+            atualizados += 1
     if atualizados and commit:
         db.session.commit()
     return atualizados
@@ -4806,6 +4849,7 @@ def api_alterar_time_destaque():
 @api_login_required
 def api_jogos():
     competidor = ensure_competidor_profile(g.user)
+    sync_knockout_teams()
     fase = request.args.get("fase", "").strip()
     grupo = request.args.get("grupo", "").strip()
     query = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_brasilia)
@@ -4874,6 +4918,7 @@ def api_palpites():
                 continue
 
             classificado = (item.get("classificado") or "").strip() or None
+            classificado = classificado_do_palpite(jogo, gols_a, gols_b, classificado)
             if classificado and jogo.mata_mata:
                 opcoes = [jogo.time_a.lower(), jogo.time_b.lower()]
                 if classificado.lower() not in opcoes:
@@ -4918,6 +4963,8 @@ def api_palpites():
         db.session.commit()
         return jsonify({"ok": not errors, "saved": saved, "errors": errors})
 
+    sync_knockout_teams()
+    normalize_knockout_prediction_classificados()
     jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_brasilia).all()
     jogo_ids = [j.id for j in jogos]
     palpites_map = {
@@ -5767,6 +5814,7 @@ def historico_competidor(cid):
 # ---------------------------------------------------------------------------
 @app.route("/jogos")
 def listar_jogos():
+    sync_knockout_teams()
     jogos = Jogo.query.options(selectinload(Jogo.resultado)).order_by(Jogo.data_jogo, Jogo.hora_et).all()
     jogos_por_grupo = group_items_by_world_cup_group(jogos, lambda jogo: jogo)
     return render_template("jogos/lista.html",
@@ -5881,6 +5929,7 @@ def palpites():
                 erros.append(f"Gols inválidos para o jogo #{jid}.")
                 continue
 
+            classificado = classificado_do_palpite(jogo, gols_a, gols_b, classificado)
             if classificado and jogo.mata_mata:
                 opcoes = [jogo.time_a.lower(), jogo.time_b.lower()]
                 if classificado.lower() not in opcoes:
@@ -5928,6 +5977,8 @@ def palpites():
             flash(e, "danger")
         return redirect(url_for("palpites"))
 
+    sync_knockout_teams()
+    normalize_knockout_prediction_classificados()
     todos_jogos = (Jogo.query
                    .options(selectinload(Jogo.resultado))
                    .order_by(Jogo.data_jogo, Jogo.hora_et)
