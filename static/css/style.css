@@ -305,6 +305,10 @@ body { background: #f4f6f9; }
 .prediction-bracket .bracket-round-title {
 	display: none;
 }
+.prediction-bracket .bracket-round.has-open-group-predictions {
+	position: relative;
+	z-index: 1000;
+}
 .playoff-phase-tabs {
 	display: flex;
 	flex-wrap: wrap;
@@ -332,7 +336,7 @@ body { background: #f4f6f9; }
 }
 .prediction-match:has(.group-predictions[open]),
 .prediction-match.has-open-group-predictions {
-	z-index: 30;
+	z-index: 1000;
 }
 .prediction-match::before {
 	display: none;

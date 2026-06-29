@@ -857,23 +857,46 @@
       board.addEventListener("scroll", function () {
         window.requestAnimationFrame(drawConnectors);
       });
+
+      function resetGroupPredictionLayers() {
+        Array.prototype.slice.call(board.querySelectorAll(".prediction-match")).forEach(function (card) {
+          card.classList.remove("has-open-group-predictions");
+          card.style.zIndex = "";
+        });
+        Array.prototype.slice.call(board.querySelectorAll(".bracket-round")).forEach(function (round) {
+          round.classList.remove("has-open-group-predictions");
+          round.style.zIndex = "";
+        });
+      }
+
       Array.prototype.slice.call(board.querySelectorAll(".prediction-match .group-predictions")).forEach(function (details) {
         details.addEventListener("toggle", function () {
           var card = details.closest(".prediction-match");
           if (!card) {
             return;
           }
-          card.classList.toggle("has-open-group-predictions", details.open);
           if (details.open) {
             Array.prototype.slice.call(board.querySelectorAll(".prediction-match .group-predictions[open]")).forEach(function (other) {
               if (other !== details) {
                 other.open = false;
-                var otherCard = other.closest(".prediction-match");
-                if (otherCard) {
-                  otherCard.classList.remove("has-open-group-predictions");
-                }
               }
             });
+            resetGroupPredictionLayers();
+            card.classList.add("has-open-group-predictions");
+            card.style.zIndex = "1000";
+            var round = card.closest(".bracket-round");
+            if (round) {
+              round.classList.add("has-open-group-predictions");
+              round.style.zIndex = "1000";
+            }
+          } else {
+            card.classList.remove("has-open-group-predictions");
+            card.style.zIndex = "";
+            var parentRound = card.closest(".bracket-round");
+            if (parentRound && !parentRound.querySelector(".group-predictions[open]")) {
+              parentRound.classList.remove("has-open-group-predictions");
+              parentRound.style.zIndex = "";
+            }
           }
         });
       });
