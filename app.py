@@ -2712,6 +2712,35 @@ THIRD_PLACE_SLOT_RE = re.compile(r"^3([A-L]+)$")
 WINNER_GAME_SLOT_RE = re.compile(r"^WJ(\d+)$")
 LOSER_GAME_SLOT_RE = re.compile(r"^LJ(\d+)$")
 
+KNOCKOUT_SEED_SLOT_CODES = {
+    (row[0], "a"): (row[8] or "").strip().upper()
+    for row in JOGOS
+    if row[13]
+}
+KNOCKOUT_SEED_SLOT_CODES.update(
+    {
+        (row[0], "b"): (row[9] or "").strip().upper()
+        for row in JOGOS
+        if row[13]
+    }
+)
+
+# Official 2026 allocation for the third-placed teams that advanced.
+# The key is the set of advancing third-place groups; values map match numbers
+# to the third-place group assigned to that specific round-of-32 slot.
+THIRD_PLACE_ASSIGNMENT_BY_GROUPS = {
+    "BDEFIJKL": {
+        79: "E",
+        85: "J",
+        81: "B",
+        74: "D",
+        82: "I",
+        77: "F",
+        87: "L",
+        80: "K",
+    },
+}
+
 
 def _is_real_team_code(code):
     return bool(REAL_TEAM_CODE_RE.match((code or "").strip().upper()))
@@ -2856,7 +2885,24 @@ def _third_slots_from_rankings(rankings, allowed_groups=None):
     )
 
 
-def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, third_slots):
+def _third_place_assignment_for_groups(qualified_third_groups):
+    key = "".join(sorted(qualified_third_groups or []))
+    return THIRD_PLACE_ASSIGNMENT_BY_GROUPS.get(key, {})
+
+
+def _third_place_candidate_by_group(rankings, grupo):
+    ranking = rankings.get(grupo) or []
+    return ranking[2] if len(ranking) >= 3 else None
+
+
+def _resolve_knockout_slot(
+    slot_code,
+    target_num,
+    jogos_por_numero,
+    rankings,
+    qualified_third_groups=None,
+    third_place_assignment=None,
+):
     slot_code = (slot_code or "").strip().upper()
     if not slot_code or _is_real_team_code(slot_code):
         return None
@@ -2871,9 +2917,14 @@ def _resolve_knockout_slot(slot_code, target_num, jogos_por_numero, rankings, th
     match = THIRD_PLACE_SLOT_RE.match(slot_code)
     if match:
         grupos_permitidos = set(match.group(1))
-        candidatos = _third_slots_from_rankings(rankings, grupos_permitidos)
+        grupo_designado = (third_place_assignment or {}).get(target_num)
+        if grupo_designado and grupo_designado in grupos_permitidos:
+            return _third_place_candidate_by_group(rankings, grupo_designado)
+
+        grupos_classificados = set(qualified_third_groups or [])
+        grupos_validos = grupos_permitidos & grupos_classificados
+        candidatos = _third_slots_from_rankings(rankings, grupos_validos or grupos_permitidos)
         return candidatos[0] if candidatos else None
-        return None
 
     match = WINNER_GAME_SLOT_RE.match(slot_code)
     if match:
@@ -2892,6 +2943,8 @@ def sync_knockout_teams(commit=True):
     nomes_por_codigo = _team_name_by_code(jogos)
     rankings, grupos_completos = _group_standings()
     terceiros = _third_slots_from_rankings(rankings) if grupos_completos else []
+    terceiros_classificados = {item["grupo"] for item in terceiros[:8]} if grupos_completos else set()
+    terceiros_designados = _third_place_assignment_for_groups(terceiros_classificados)
 
     atualizados = 0
     for jogo in [j for j in jogos if j.mata_mata]:
@@ -2899,15 +2952,17 @@ def sync_knockout_teams(commit=True):
             sigla_attr = f"sigla_time_{lado}"
             nome_attr = f"time_{lado}"
             sigla_atual = (getattr(jogo, sigla_attr) or "").strip().upper()
-            if _is_real_team_code(sigla_atual):
+            slot_original = KNOCKOUT_SEED_SLOT_CODES.get((jogo.numero_partida, lado), sigla_atual)
+            if _is_real_team_code(slot_original):
                 continue
 
             resolvido = _resolve_knockout_slot(
-                sigla_atual,
+                slot_original,
                 jogo.numero_partida,
                 jogos_por_numero,
                 rankings,
-                terceiros,
+                terceiros_classificados,
+                terceiros_designados,
             )
             if not resolvido or not resolvido.get("sigla"):
                 continue
