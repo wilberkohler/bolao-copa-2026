@@ -3,7 +3,7 @@ import SwiftUI
 struct RankingView: View {
     @EnvironmentObject private var appState: AppState
     @State private var ranking: [RankingItem] = []
-    @State private var etapa: RankingEtapa = .geral
+    @State private var etapa: RankingEtapa = .mataMata
     @State private var errorMessage: String?
 
     var body: some View {

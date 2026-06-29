@@ -3403,7 +3403,7 @@ def seed_public_groups():
 
 
 def normalizar_etapa_ranking(etapa):
-    etapa = (etapa or "geral").strip()
+    etapa = (etapa or "mata_mata").strip()
     return etapa if etapa in RANKING_ETAPAS else "geral"
 
 
