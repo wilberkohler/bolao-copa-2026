@@ -4913,11 +4913,32 @@ def api_jogos():
     if grupo:
         query = query.filter_by(grupo=grupo)
     jogos = query.all()
+    jogo_ids = [j.id for j in jogos]
+    palpites_map = {
+        p.jogo_id: p
+        for p in Palpite.query.filter(
+            Palpite.competidor_id == competidor.id,
+            Palpite.valido == True,
+            Palpite.jogo_id.in_(jogo_ids)
+        ).all()
+    } if jogo_ids else {}
+    pontuacoes_map = {
+        p.jogo_id: p
+        for p in Pontuacao.query.filter(
+            Pontuacao.competidor_id == competidor.id,
+            Pontuacao.jogo_id.in_(jogo_ids)
+        ).all()
+    } if jogo_ids else {}
     palpites_grupo_map = montar_palpites_grupo_map(jogos, g.user, competidor)
     return jsonify({
         "ok": True,
         "jogos": [
-            _jogo_payload(jogo, palpites_grupo=palpites_grupo_map.get(jogo.id))
+            _jogo_payload(
+                jogo,
+                palpites_map.get(jogo.id),
+                pontuacoes_map.get(jogo.id),
+                palpites_grupo_map.get(jogo.id),
+            )
             for jogo in jogos
         ],
     })
