@@ -4545,6 +4545,7 @@ def palpites_grupo_payload(itens, jogo):
 def _jogo_payload(jogo, palpite=None, pontuacao=None, palpites_grupo=None):
     resultado = jogo.resultado
     palpites_grupo = palpites_grupo or []
+    status_api = "Pontuado" if pontuacao else ("Resultado" if resultado else jogo.status)
     return {
         "id": jogo.id,
         "numero_partida": jogo.numero_partida,
@@ -4566,7 +4567,7 @@ def _jogo_payload(jogo, palpite=None, pontuacao=None, palpites_grupo=None):
         "mata_mata": bool(jogo.mata_mata),
         "prazo_palpite": _dt_iso(jogo.prazo_palpite),
         "prazo_palpite_exibicao": prazo_palpite_exibicao(jogo, g.user),
-        "status": jogo.status,
+        "status": status_api,
         "editavel": palpite_editavel(jogo) and resultado is None,
         "resultado": {
             "gols_a": resultado.gols_a,
