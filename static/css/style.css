@@ -395,6 +395,36 @@ body { background: #f4f6f9; }
 	color: #6b7280;
 	font-weight: 700;
 }
+.prediction-result-official {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: .2rem .6rem;
+	margin-top: .55rem;
+	padding: .45rem .55rem;
+	border: 1px solid #d8e2dc;
+	border-radius: .45rem;
+	background: #f3f8f5;
+	color: #374151;
+	font-size: .78rem;
+	line-height: 1.15;
+}
+.prediction-result-official span {
+	color: #6b7280;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .02em;
+}
+.prediction-result-official strong {
+	color: #111827;
+	font-size: .9rem;
+	white-space: nowrap;
+}
+.prediction-result-official small {
+	grid-column: 1 / -1;
+	color: #4b5563;
+	font-weight: 700;
+}
 .prediction-match-footer {
 	display: flex;
 	align-items: center;

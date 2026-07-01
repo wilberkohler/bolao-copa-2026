@@ -275,6 +275,16 @@
               {% endif %}
             </div>
 
+            {% if j.resultado %}
+              <div class="prediction-result-official">
+                <span>{{ tr('result') }}</span>
+                <strong>{{ j.resultado.gols_a }} x {{ j.resultado.gols_b }}</strong>
+                {% if j.resultado.classificado %}
+                  <small>{{ tr('classified') }}: {{ time_nome_traduzido(j.resultado.classificado) }}</small>
+                {% endif %}
+              </div>
+            {% endif %}
+
             <div class="prediction-match-footer">
               <span class="small text-muted">
                 {% if j.prazo_palpite %}{{ tr('deadline') }}: {{ prazo_palpite_exibicao(j) }}{% endif %}
