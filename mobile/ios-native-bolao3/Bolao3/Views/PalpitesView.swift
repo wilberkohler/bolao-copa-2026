@@ -532,7 +532,7 @@ private struct KnockoutPhaseLayout: Identifiable, Hashable {
 }
 
 private enum KnockoutLayout {
-    static let cardHeight: CGFloat = 286
+    static let cardHeight: CGFloat = 318
     static let cardWidth: CGFloat = 310
     static let cardGap: CGFloat = 16
     static let connectorWidth: CGFloat = 28
@@ -593,20 +593,6 @@ private struct KnockoutMatchCard: View {
                     Text("#\(numero)")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(.secondary)
-                }
-                if !groupPredictions.isEmpty {
-                    Button {
-                        showGroupPredictions = true
-                    } label: {
-                        Label("Grupo \(submittedGroupPredictions.count)", systemImage: "person.2")
-                            .labelStyle(.titleAndIcon)
-                            .font(.caption2.weight(.bold))
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 4)
-                            .background(Color.green.opacity(0.14), in: Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.green)
                 }
             }
 
@@ -670,6 +656,26 @@ private struct KnockoutMatchCard: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
 
+                    if !groupPredictions.isEmpty {
+                        Button {
+                            showGroupPredictions = true
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "person.2")
+                                Text("Palpites do grupo")
+                                Text("\(groupPredictions.count)")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.gray, in: Capsule())
+                            }
+                            .font(.caption.weight(.semibold))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.green)
+                        .accessibilityLabel("Palpites do grupo, \(submittedGroupPredictions.count) enviados")
+                    }
                 }
                 Spacer()
                 if let pontuacao = jogo.pontuacao {
@@ -892,7 +898,7 @@ private struct GroupPredictionsList: View {
                 }
                 .padding(.top, 6)
             } label: {
-                Label("Palpites do grupo (\(submitted.count))", systemImage: "person.2")
+                Label("Palpites do grupo (\(groupPredictions.count))", systemImage: "person.2")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.green)
             }
