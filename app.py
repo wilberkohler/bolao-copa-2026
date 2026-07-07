@@ -2712,6 +2712,16 @@ THIRD_PLACE_SLOT_RE = re.compile(r"^3([A-L]+)$")
 WINNER_GAME_SLOT_RE = re.compile(r"^WJ(\d+)$")
 LOSER_GAME_SLOT_RE = re.compile(r"^LJ(\d+)$")
 
+KNOCKOUT_PHASES = [
+    "Rodada de 32",
+    "Oitavas de Final",
+    "Quartas de Final",
+    "Semifinal",
+    "Terceiro Lugar",
+    "Final",
+]
+KNOCKOUT_PHASE_INDEX = {fase: idx for idx, fase in enumerate(KNOCKOUT_PHASES)}
+
 KNOCKOUT_SEED_SLOT_CODES = {
     (row[0], "a"): (row[8] or "").strip().upper()
     for row in JOGOS
@@ -2740,6 +2750,61 @@ THIRD_PLACE_ASSIGNMENT_BY_GROUPS = {
         80: "K",
     },
 }
+
+
+def _slot_source_match_number(slot_code):
+    slot_code = (slot_code or "").strip().upper()
+    match = WINNER_GAME_SLOT_RE.match(slot_code) or LOSER_GAME_SLOT_RE.match(slot_code)
+    return int(match.group(1)) if match else None
+
+
+def _knockout_source_numbers(numero_partida):
+    sources = []
+    for lado in ("a", "b"):
+        source = _slot_source_match_number(KNOCKOUT_SEED_SLOT_CODES.get((numero_partida, lado)))
+        if source:
+            sources.append(source)
+    return sources
+
+
+def knockout_visual_order_map():
+    """Order knockout matches by bracket dependency, not by kickoff time."""
+    by_num = {
+        row[0]: {"fase": row[1], "numero": row[0]}
+        for row in JOGOS
+        if row[13]
+    }
+    referenced = set()
+    for num in by_num:
+        referenced.update(source for source in _knockout_source_numbers(num) if source in by_num)
+
+    roots = sorted(
+        [num for num in by_num if num not in referenced],
+        key=lambda num: (KNOCKOUT_PHASE_INDEX.get(by_num[num]["fase"], 99), num),
+    )
+    order = []
+    visited = set()
+
+    def visit(num):
+        if num not in by_num or num in visited:
+            return
+        visited.add(num)
+        for source in _knockout_source_numbers(num):
+            visit(source)
+        order.append(num)
+
+    for root in roots:
+        visit(root)
+
+    for num in sorted(by_num, key=lambda n: (KNOCKOUT_PHASE_INDEX.get(by_num[n]["fase"], 99), n)):
+        visit(num)
+
+    return {num: idx for idx, num in enumerate(order)}
+
+
+def knockout_visual_order_key(jogo):
+    num = getattr(jogo, "numero_partida", None) or 0
+    return (knockout_visual_order_map().get(num, 9999), num)
 
 
 def _is_real_team_code(code):
@@ -3666,6 +3731,10 @@ def group_items_by_world_cup_group(items, item_to_jogo):
             grupos_map[grupo] = []
         grupos_map[grupo].append(item)
 
+    for grupo, itens in grupos_map.items():
+        if grupo == "Outros":
+            itens.sort(key=lambda item: knockout_visual_order_key(item_to_jogo(item)))
+
     priorizar_outros = "Outros" in grupos_map
     ordem_grupos = [chr(code) for code in range(ord("A"), ord("L") + 1)]
     grupos_ordenados = [grupo for grupo in ordem_grupos if grupo in grupos_map]
@@ -3692,22 +3761,14 @@ def group_items_by_world_cup_group(items, item_to_jogo):
 
 
 def knockout_bracket_data():
-    fases = [
-        "Rodada de 32",
-        "Oitavas de Final",
-        "Quartas de Final",
-        "Semifinal",
-        "Terceiro Lugar",
-        "Final",
-    ]
     jogos = (
         Jogo.query.options(selectinload(Jogo.resultado))
         .filter_by(mata_mata=True)
         .order_by(Jogo.data_jogo, Jogo.hora_et, Jogo.numero_partida)
         .all()
     )
-    por_fase = {fase: [] for fase in fases}
-    for jogo in jogos:
+    por_fase = {fase: [] for fase in KNOCKOUT_PHASES}
+    for jogo in sorted(jogos, key=knockout_visual_order_key):
         resultado = jogo.resultado
         score = None
         classificado = None
@@ -3735,7 +3796,7 @@ def knockout_bracket_data():
             "label": fase_label_traduzida(fase),
             "jogos": por_fase.get(fase, []),
         }
-        for fase in fases
+        for fase in KNOCKOUT_PHASES
         if por_fase.get(fase)
     ]
 

@@ -11,6 +11,21 @@ struct PalpitesView: View {
     @State private var errorMessage: String?
     @FocusState private var focusedField: PalpiteField?
 
+    private let knockoutVisualOrder: [Int: Int] = [
+        74: 0, 77: 1, 89: 2,
+        73: 3, 75: 4, 90: 5,
+        97: 6,
+        83: 7, 84: 8, 93: 9,
+        81: 10, 82: 11, 94: 12,
+        98: 13, 101: 14,
+        76: 15, 78: 16, 91: 17,
+        79: 18, 80: 19, 92: 20,
+        99: 21,
+        86: 22, 88: 23, 95: 24,
+        85: 25, 87: 26, 96: 27,
+        100: 28, 102: 29, 103: 30, 104: 31
+    ]
+
     private var grupos: [String] {
         let values = Array(Set(jogos.map { groupKey(for: $0) }))
         return values.sorted { lhs, rhs in
@@ -392,6 +407,14 @@ struct PalpitesView: View {
     }
 
     private func sortByDateAndNumber(_ lhs: Jogo, _ rhs: Jogo) -> Bool {
+        if lhs.mataMata || rhs.mataMata {
+            let leftOrder = lhs.numeroPartida.flatMap { knockoutVisualOrder[$0] } ?? Int.max
+            let rightOrder = rhs.numeroPartida.flatMap { knockoutVisualOrder[$0] } ?? Int.max
+            if leftOrder != rightOrder {
+                return leftOrder < rightOrder
+            }
+        }
+
         if let leftNumber = lhs.numeroPartida, let rightNumber = rhs.numeroPartida, leftNumber != rightNumber {
             return leftNumber < rightNumber
         }
