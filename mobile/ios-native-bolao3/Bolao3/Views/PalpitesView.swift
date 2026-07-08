@@ -581,6 +581,9 @@ private struct KnockoutMatchCard: View {
     private var submittedGroupPredictions: [PalpiteGrupo] {
         groupPredictions.filter { $0.palpite != nil }
     }
+    private var groupPredictionsAvailable: Bool {
+        jogo.palpitesGrupoDisponiveis == true || !groupPredictions.isEmpty
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -656,14 +659,14 @@ private struct KnockoutMatchCard: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
 
-                    if !groupPredictions.isEmpty {
+                    if groupPredictionsAvailable {
                         Button {
                             showGroupPredictions = true
                         } label: {
                             HStack(spacing: 5) {
                                 Image(systemName: "person.2")
                                 Text("Palpites do grupo")
-                                Text("\(groupPredictions.count)")
+                                Text("\(submittedGroupPredictions.count)")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 6)
@@ -868,9 +871,12 @@ private struct GroupPredictionsList: View {
     private var submitted: [PalpiteGrupo] {
         groupPredictions.filter { $0.palpite != nil }
     }
+    private var groupPredictionsAvailable: Bool {
+        jogo.palpitesGrupoDisponiveis == true || !groupPredictions.isEmpty
+    }
 
     var body: some View {
-        if !groupPredictions.isEmpty {
+        if groupPredictionsAvailable {
             DisclosureGroup {
                 VStack(alignment: .leading, spacing: 8) {
                     if submitted.isEmpty {
@@ -898,7 +904,7 @@ private struct GroupPredictionsList: View {
                 }
                 .padding(.top, 6)
             } label: {
-                Label("Palpites do grupo (\(groupPredictions.count))", systemImage: "person.2")
+                Label("Palpites do grupo (\(submitted.count))", systemImage: "person.2")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.green)
             }
